@@ -29,10 +29,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import org.openecard.android.R;
 import org.openecard.android.activities.BindingActivity;
+import org.openecard.gui.android.eac.types.BoxItem;
 import org.openecard.gui.android.eac.types.ServerData;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -45,6 +50,8 @@ public class ServerDataFragment extends Fragment {
 		final View view = inflater.inflate(R.layout.fragment_server_data, container, false);
 
 		final ServerData serverData = getArguments().getParcelable(BindingActivity.BUNDLE_SERVER_DATA);
+
+		final LinearLayout layout = view.findViewById(R.id.linearLayout);
 
 		TextView issuerTxtView = view.findViewById(R.id.issuer);
 		issuerTxtView.setText(serverData.getIssuer());
@@ -61,6 +68,19 @@ public class ServerDataFragment extends Fragment {
 		TextView validityTxtView = view.findViewById(R.id.validity);
 		validityTxtView.setText(serverData.getValidity());
 
+		Map<CheckBox, BoxItem> readAccessAttributes = new HashMap<>();
+		for (BoxItem boxItem : serverData.getReadAccessAttributes()) {
+			String readableValue = mapBoxItemNameToReadableValue(boxItem.getName());
+			if (readableValue != null) {
+				CheckBox checkBox = new CheckBox(getActivity().getApplicationContext());
+				checkBox.setText(readableValue);
+				checkBox.setSelected(boxItem.isSelected());
+				checkBox.setEnabled(! boxItem.isDisabled());
+				readAccessAttributes.put(checkBox, boxItem);
+				layout.addView(checkBox);
+			}
+		}
+
 		Button button = view.findViewById(R.id.btnContinue);
 		button.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -74,6 +94,23 @@ public class ServerDataFragment extends Fragment {
 		});
 
 		return view;
+	}
+
+	private String mapBoxItemNameToReadableValue(String boxItemName) {
+		switch (boxItemName) {
+			case "DG04":
+				return "Given Names";
+			case "DG05":
+				return "Family Names";
+			case "DG07":
+				return "Academic Title";
+			case "DG08":
+				return "Date of Birth";
+			case "DG17":
+				return "Normal Place of Residence (multiple)";
+			default:
+				return null;
+		}
 	}
 
 }
