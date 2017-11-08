@@ -22,15 +22,17 @@
 
 package org.openecard.android.activities;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import org.openecard.android.R;
-import org.openecard.android.lib.AppResponse;
-import org.openecard.android.lib.AppResponseStatusCodes;
-import org.openecard.android.lib.activities.NfcActivity;
+import org.openecard.android.lib.ServiceErrorResponse;
+import org.openecard.android.lib.ServiceResponseStatusCodes;
+import org.openecard.android.lib.ServiceWarningResponse;
+import org.openecard.android.lib.services.OpeneCardConnectionHandler;
 import org.openecard.android.lib.services.OpeneCardServiceConnection;
-import org.openecard.android.lib.services.ServiceConnectionResponseHandler;
 import org.openecard.android.lib.utils.NfcUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,25 +41,32 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Mike Prechtl
  */
-public class MainActivity extends NfcActivity implements ServiceConnectionResponseHandler {
+public class MainActivity extends Activity implements OpeneCardConnectionHandler {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainActivity.class);
 
 	private OpeneCardServiceConnection mConnection;
+
+	private TextView txtView;
+	private Button startBtn;
 
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		// initialize connection to Open eCard App
-		mConnection = new OpeneCardServiceConnection(this, getApplicationContext());
+		// set up gui components
+		txtView = findViewById(R.id.textView2);
+		txtView.setVisibility(View.INVISIBLE);
 
-		Button startBtn = findViewById(R.id.btnStart);
+		// initialize connection to Open eCard App
+		mConnection = OpeneCardServiceConnection.createConnection(this, getApplicationContext());
+
+		startBtn = findViewById(R.id.btnStart);
 		startBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				if (! mConnection.isServiceAlreadyStarted()) {
+				if (! mConnection.isConnected()) {
 					// or start immediately
 					mConnection.startService();
 				}
@@ -67,21 +76,47 @@ public class MainActivity extends NfcActivity implements ServiceConnectionRespon
 
 	@Override
 	protected void onDestroy() {
-		if (mConnection.isServiceAlreadyStarted()) {
+		if (mConnection.isConnected()) {
 			mConnection.stopService();
 		}
 		super.onDestroy();
 	}
 
 	@Override
-	public void handleServiceConnectionResponse(AppResponse response) {
-		LOG.info("Status: " + response.getStatusCode() + " - Message: " + response.getMessage());
-		if (response.getStatusCode() == AppResponseStatusCodes.NFC_NOT_ENABLED) {
+	public void onConnectionSuccess() {
+		String msg = "Successful connected to Open eCard Service.";
+		startBtn.setEnabled(false);
+		txtView.setText(msg);
+		txtView.setVisibility(View.VISIBLE);
+	}
+
+	@Override
+	public void onConnectionFailure(ServiceErrorResponse serviceErrorResponse) {
+		txtView.setText(serviceErrorResponse.getMessage());
+		txtView.setVisibility(View.VISIBLE);
+	}
+
+	@Override
+	public void onConnectionFailure(ServiceWarningResponse serviceWarningResponse) {
+		if (serviceWarningResponse.getStatusCode() == ServiceResponseStatusCodes.NFC_NOT_ENABLED) {
+			// maybe go to nfc settings
 			NfcUtils.getInstance().goToNFCSettings(this);
-		} else if (response.getStatusCode() == AppResponseStatusCodes.INIT_SUCCESS) {
-			// After successful initialization enable NFC
-			NfcUtils.getInstance().enableNFCDispatch(this);
 		}
+	}
+
+	@Override
+	public void onDisconnectionSuccess() {
+
+	}
+
+	@Override
+	public void onDisconnectionFailure(ServiceErrorResponse serviceErrorResponse) {
+
+	}
+
+	@Override
+	public void onDisconnectionFailure(ServiceWarningResponse serviceWarningResponse) {
+
 	}
 
 }
