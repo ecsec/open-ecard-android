@@ -230,8 +230,8 @@ public class BindingActivity extends Activity implements EacServiceConnectionHan
 		mEacGuiConnection.selectAttributes(readAttributes, writeAttributes);
 	}
 
-	public void enterPIN(String pin) {
-		mEacGuiConnection.enterPIN(pin);
+	public void enterPIN(String can, String pin) {
+		mEacGuiConnection.enterPIN(can, pin);
 	}
 
 }
