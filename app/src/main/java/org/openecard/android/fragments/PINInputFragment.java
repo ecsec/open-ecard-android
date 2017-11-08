@@ -30,6 +30,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import org.openecard.android.R;
 import org.openecard.android.activities.BindingActivity;
 
@@ -39,19 +40,43 @@ import org.openecard.android.activities.BindingActivity;
  */
 public class PINInputFragment extends Fragment {
 
+	private static final String PERFORM_PIN_INPUT = "Please wait a moment...";
+	
+	private static final String PROVIDE_PIN = "Please provide the PIN to the corresponding identity card.";
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		final View view = inflater.inflate(R.layout.fragment_pin_input, container, false);
 
-		final EditText editText = view.findViewById(R.id.pinInput);
+		final TextView logLabel = view.findViewById(R.id.txtLog);
+		logLabel.setVisibility(View.INVISIBLE);
 
-		Button buttonContinue = view.findViewById(R.id.btnPINInput);
+		final EditText editText = view.findViewById(R.id.pinInput);
+		editText.setEnabled(true);
+		editText.setFocusable(true);
+
+		final Button buttonContinue = view.findViewById(R.id.btnPINInput);
+		buttonContinue.setEnabled(true);
 		buttonContinue.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				Activity activity = getActivity();
+				final Activity activity = getActivity();
 				if (activity instanceof BindingActivity) {
-					((BindingActivity) activity).enterPIN(editText.getText().toString());
+					final String pin = editText.getText().toString();
+					logLabel.setVisibility(View.VISIBLE);
+					if (pin.length() == 6) {
+						buttonContinue.setEnabled(false);
+						editText.setEnabled(false);
+						editText.setFocusable(false);
+						logLabel.setText(PERFORM_PIN_INPUT);
+						new Thread(new Runnable() {
+							public void run() {
+								((BindingActivity) activity).enterPIN(null, pin);
+							}
+						}).start();
+					} else {
+						logLabel.setText(PROVIDE_PIN);
+					}
 				}
 			}
 		});
