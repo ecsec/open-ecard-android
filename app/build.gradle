@@ -25,6 +25,7 @@ android {
 }
 
 repositories {
+    mavenLocal()
     maven {
         url "https://mvn.ecsec.de/repository/openecard-public"
     }
