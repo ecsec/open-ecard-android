@@ -34,7 +34,7 @@ repositories {
     }
 }
 
-def OecVersion = "1.3.0-rc2"
+def OecVersion = "1.3.0-rc3-SNAPSHOT"
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
@@ -42,42 +42,12 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    /* To import WebMethod */
-    compile 'javax.jws:jsr181-api:1.0-MR1'
-
-    /* https://github.com/tony19/logback-android */
-    compile('com.github.tony19:logback-android-classic:1.1.1-6') {
-        exclude group: 'com.google.android', module: 'android'
-    }
-    compile 'com.github.tony19:logback-android-core:1.1.1-6'
-    compile 'org.slf4j:slf4j-api:1.7.25'
-    
     compile 'com.android.support:appcompat-v7:26.0.0-alpha1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:design:26.+'
 
-    compile "org.openecard.gui:android-defs:${OecVersion}@aar"
-    compile "org.openecard.clients:android-lib:${OecVersion}@aar"
-    compile "org.openecard.gui:android:${OecVersion}@jar"
-
-    compile ("org.openecard.addons:tr03112:${OecVersion}") {
-        exclude group: 'net.java.dev.jna', module: 'jna'
-    }
-
-    compile "org.openecard.ifd.scio-backend:android-nfc:${OecVersion}"
-    compile "org.openecard.wsdef:android-marshaller:${OecVersion}"
-    compile "org.openecard.transport:dispatcher:${OecVersion}"
-    compile "org.openecard:recognition:${OecVersion}"
-    compile "org.openecard.ifd:ifd-core:${OecVersion}"
-    compile "org.openecard.ifd:ifd-common:${OecVersion}"
-    compile "org.openecard:common:${OecVersion}"
-    compile "org.openecard:management:${OecVersion}"
-    compile "org.openecard.sal:tiny-sal:${OecVersion}"
-    compile "org.openecard:addon:${OecVersion}"
-    compile "org.openecard.addons:pin-management:${OecVersion}"
-    compile "org.openecard.addons:status:${OecVersion}"
-    compile "org.openecard.addons:genericcryptography:${OecVersion}"
-    compile "org.openecard.ifd.protocols:pace:${OecVersion}"
+    compile (group:'org.openecard.gui', name:'android-defs', version:"${OecVersion}", ext:"aar", transitive:true)
+    compile (group:'org.openecard.clients', name:'android-lib', version:"${OecVersion}", ext:"aar", transitive:true)
 
     testCompile 'junit:junit:4.12'
 }
