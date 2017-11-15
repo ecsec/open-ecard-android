@@ -22,216 +22,168 @@
 
 package org.openecard.android.activities;
 
-import android.app.Activity;
 import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.content.ComponentName;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
+import java.util.List;
 import org.openecard.android.R;
+import org.openecard.android.lib.activities.AbstractActivationActivity;
 import org.openecard.android.fragments.InitFragment;
 import org.openecard.android.fragments.PINInputFragment;
 import org.openecard.android.fragments.ServerDataFragment;
-import org.openecard.android.lib.ServiceErrorResponse;
-import org.openecard.android.lib.ServiceWarningResponse;
-import org.openecard.android.lib.activities.EacActivity;
-import org.openecard.android.lib.ex.BindingTaskStillRunning;
-import org.openecard.android.lib.ex.ContextNotInitialized;
-import org.openecard.android.lib.intent.binding.IntentBinding;
-import org.openecard.android.lib.services.EacServiceConnection;
-import org.openecard.android.lib.services.EacServiceConnectionHandler;
+import org.openecard.gui.android.eac.EacGui;
 import org.openecard.gui.android.eac.types.BoxItem;
 import org.openecard.gui.android.eac.types.ServerData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.List;
 
 
 /**
  * @author Mike Prechtl
  */
-public class BindingActivity extends Activity implements EacServiceConnectionHandler {
+public class BindingActivity extends AbstractActivationActivity {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BindingActivity.class);
+	private static final Logger LOG = LoggerFactory.getLogger(BindingActivity.class);
 
 	public static final String BUNDLE_SERVER_DATA = "ServerData";
 
-	private EacServiceConnection mEacGuiConnection;
-	private EacActivity eacActivity;
+	private EacGui eacService;
 
 	///
 	/// Basic Methods of an Activity
 	///
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_binding);
-
-		eacActivity = new EacActivity(this);
-		eacActivity.onCreate(savedInstanceState);
-
-		mEacGuiConnection = EacServiceConnection.createConnection(this, getApplicationContext());
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		eacActivity.onResume();
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
-		eacActivity.onPause();
 	}
 
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
-		eacActivity.onNewIntent(intent);
-		if (! mEacGuiConnection.isConnected()) {
-			mEacGuiConnection.startService();
-		}
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		eacActivity.onStart();
 
+		// show InitFragment
 		if (findViewById(R.id.fragment) != null) {
 			InitFragment fragment = new InitFragment();
 			fragment.setArguments(getIntent().getExtras());
 			getFragmentManager().beginTransaction()
 					.replace(R.id.fragment, fragment).addToBackStack(null).commit();
 		}
-
-		HandleRequestTask task = new HandleRequestTask();
-		task.execute(eacActivity.getBindingURI(getIntent()));
-	}
-
-	private class HandleRequestTask extends AsyncTask<String, Void, Void> {
-		@Override
-		protected Void doInBackground(String... uri) {
-			IntentBinding binding = IntentBinding.getInstance();
-			try {
-				binding.handleRequest(uri[0]);
-			} catch (ContextNotInitialized | BindingTaskStillRunning e) {
-				e.printStackTrace();
-			}
-			return null;
-		}
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		eacActivity.onStop();
-		eacActivity.cancelRequest();
-		if (mEacGuiConnection.isConnected()) {
-			mEacGuiConnection.stopService();
-		}
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		eacActivity.onDestroy();
-	}
-
-	///
-	/// Methods for interacting with the Eac Service.
-	///
-
-	@Override
-	public void onServerDataPresent(ServerData serverData) {
-		FragmentManager fragmentManager = getFragmentManager();
-
-		Fragment fragment = new ServerDataFragment();
-
-		Bundle bundle = new Bundle();
-		bundle.putParcelable(BUNDLE_SERVER_DATA, serverData);
-		fragment.setArguments(bundle);
-
-		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-		fragmentTransaction.replace(R.id.fragment, fragment);
-		fragmentTransaction.addToBackStack(null);
-		fragmentTransaction.commit();
-	}
-
-	@Override
-	public void onPINIsRequired() {
-		FragmentManager fragmentManager = getFragmentManager();
-
-		Fragment fragment = new PINInputFragment();
-
-		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-		fragmentTransaction.replace(R.id.fragment, fragment);
-		fragmentTransaction.addToBackStack(null);
-		fragmentTransaction.commit();
-	}
-
-	@Override
-	public void onPINInputSuccess() {
-		LOG.info("PIN is correct.");
-	}
-
-	@Override
-	public void onPINInputFailure() {
-		LOG.info("PIN is not correct.");
-	}
-
-	@Override
-	public void onRemoteError(ServiceErrorResponse serviceErrorResponse) {
-		LOG.error(serviceErrorResponse.getMessage());
-	}
-
-	///
-	/// Methods which show whether the connection was successful established.
-	///
-
-	@Override
-	public void onConnectionSuccess() {
-		LOG.info("Successful connected to Eac Gui Service.");
-	}
-
-	@Override
-	public void onConnectionFailure(ServiceErrorResponse serviceErrorResponse) {
-
-	}
-
-	@Override
-	public void onConnectionFailure(ServiceWarningResponse serviceWarningResponse) {
-
-	}
-
-	@Override
-	public void onDisconnectionSuccess() {
-
-	}
-
-	@Override
-	public void onDisconnectionFailure(ServiceErrorResponse serviceErrorResponse) {
-
-	}
-
-	@Override
-	public void onDisconnectionFailure(ServiceWarningResponse serviceWarningResponse) {
-
 	}
 
 	///
 	/// Methods to exchange data with the fragments.
 	///
 
-	public void enterAttributes(List<BoxItem> readAttributes, List<BoxItem> writeAttributes) {
-		mEacGuiConnection.selectAttributes(readAttributes, writeAttributes);
+	public void enterAttributes(List<BoxItem> readAccessAttributes, List<BoxItem> writeAccessAttributes) {
+		try {
+			// use eac gui service to select attributes
+			eacService.selectAttributes(readAccessAttributes, writeAccessAttributes);
+			// retrieve pin status from eac gui service
+			String status = eacService.getPinStatus();
+			if (status.equals("PIN")) {
+				// show PINInputFragment
+				onPINIsRequired();
+			} else {
+				String msg = String.format("PIN Status '{0}' isn't supported yet.", status);
+				LOG.error(msg);
+			}
+		} catch (RemoteException ex) {
+			LOG.error(ex.getMessage(), ex);
+		}
 	}
 
 	public void enterPIN(String can, String pin) {
-		mEacGuiConnection.enterPIN(can, pin);
+		try {
+			// Retrieve PIN from PINInputFragment and send it to Eac Gui Service
+			boolean pinCorrect = eacService.enterPin(can, pin);
+			if (pinCorrect) {
+				LOG.info("The PIN is correct.");
+			} else {
+				LOG.info("The PIN isn't correct, the CAN is required.");
+			}
+		} catch (RemoteException ex) {
+			LOG.error(ex.getMessage(), ex);
+		}
 	}
+
+	public void onServerDataPresent(ServerData serverData) {
+		Fragment fragment = new ServerDataFragment();
+
+		Bundle bundle = new Bundle();
+		bundle.putParcelable(BUNDLE_SERVER_DATA, serverData);
+		fragment.setArguments(bundle);
+
+		// show ServerDataFragment
+		getFragmentManager().beginTransaction()
+				.replace(R.id.fragment, fragment).addToBackStack(null).commit();
+	}
+
+	public void onPINIsRequired() {
+		Fragment fragment = new PINInputFragment();
+
+		// show PINInputFragment
+		getFragmentManager().beginTransaction()
+				.replace(R.id.fragment, fragment).addToBackStack(null).commit();
+	}
+
+	///
+	/// Instance which holds the connection to the Eac Gui Service.
+	///
+
+	@Override
+	public ServiceConnection getServiceConnection() {
+		return serviceConnection;
+	}
+
+	private final ServiceConnection serviceConnection = new ServiceConnection() {
+		@Override
+		public void onServiceConnected(ComponentName componentName, IBinder service) {
+			// Connected to Eac Gui Service
+			eacService = EacGui.Stub.asInterface(service);
+			try {
+				// Get ServerData from Eac Gui Service
+				ServerData serverData = eacService.getServerData();
+				// show ServerData
+				onServerDataPresent(serverData);
+			} catch (RemoteException ex) {
+				LOG.error(ex.getMessage(), ex);
+			}
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName componentName) {
+			eacService = null;
+		}
+	};
 
 }
