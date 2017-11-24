@@ -97,6 +97,8 @@ public class BindingActivity extends AbstractActivationActivity {
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
+		// if you receive a nfc tag, disable the cancel button until the next fragment comes in
+		disableCancel();
 	}
 
 	@Override
@@ -128,6 +130,18 @@ public class BindingActivity extends AbstractActivationActivity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+	}
+
+	///
+	/// Methods to enable or disable the Cancel Button
+	///
+
+	public void enableCancel() {
+		cancelBtn.setEnabled(true);
+	}
+
+	public void disableCancel() {
+		cancelBtn.setEnabled(false);
 	}
 
 	///
@@ -176,6 +190,8 @@ public class BindingActivity extends AbstractActivationActivity {
 		// show ServerDataFragment
 		getFragmentManager().beginTransaction()
 				.replace(R.id.fragment, fragment).addToBackStack(null).commit();
+
+		enableCancel(); // enable cancel if no action is performed by the Open eCard Service
 	}
 
 	public void onPINIsRequired() {
@@ -184,6 +200,8 @@ public class BindingActivity extends AbstractActivationActivity {
 		// show PINInputFragment
 		getFragmentManager().beginTransaction()
 				.replace(R.id.fragment, fragment).addToBackStack(null).commit();
+
+		enableCancel(); // enable cancel if no action is performed by the Open eCard Service
 	}
 
 	///

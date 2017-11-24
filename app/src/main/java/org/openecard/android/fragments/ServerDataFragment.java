@@ -87,6 +87,8 @@ public class ServerDataFragment extends Fragment {
 			public void onClick(View view) {
 				Activity activity = getActivity();
 				if (activity instanceof BindingActivity) {
+					// disable cancel if service is working
+					((BindingActivity) activity).disableCancel();
 					((BindingActivity) activity).enterAttributes(serverData.getReadAccessAttributes(),
 							serverData.getWriteAccessAttributes());
 				}

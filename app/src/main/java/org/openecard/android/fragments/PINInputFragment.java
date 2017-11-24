@@ -69,6 +69,8 @@ public class PINInputFragment extends Fragment {
 						editText.setEnabled(false);
 						editText.setFocusable(false);
 						logLabel.setText(PERFORM_PIN_INPUT);
+						// disable cancel if service is working
+						((BindingActivity) activity).disableCancel();
 						new Thread(new Runnable() {
 							public void run() {
 								((BindingActivity) activity).enterPIN(null, pin);
