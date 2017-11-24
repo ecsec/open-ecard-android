@@ -54,9 +54,8 @@
 
                 <data android:scheme="eid"/>
                 <data android:scheme="http"/>
-                <data android:host="127.0.0.1"/>
-                <data android:host="localhost"/>
-                <data android:port="24727"/>
+                <data android:host="127.0.0.1" android:port="24727"/>
+                <data android:host="localhost" android:port="24727"/>
                 <data android:pathPattern="/eID-Client.*"/>
             </intent-filter>
         </activity>
