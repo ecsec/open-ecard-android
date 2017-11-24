@@ -29,6 +29,8 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.view.View;
+import android.widget.Button;
 import java.util.List;
 import org.openecard.android.R;
 import org.openecard.android.lib.activities.AbstractActivationActivity;
@@ -56,10 +58,26 @@ public class BindingActivity extends AbstractActivationActivity {
 	///
 	/// Basic Methods of an Activity
 	///
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_binding);
+
+		final Button cancelBtn = findViewById(R.id.cancelBtn);
+		cancelBtn.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				if (eacService != null) {
+					try {
+						eacService.cancel();
+					} catch (RemoteException ex) {
+						LOG.error(ex.getMessage(), ex);
+					}
+				}
+				finish();
+			}
+		});
 	}
 
 	@Override
