@@ -32,7 +32,9 @@ import android.os.RemoteException;
 import android.view.View;
 import android.widget.Button;
 import java.util.List;
+import org.openecard.addon.bind.BindingResult;
 import org.openecard.android.R;
+import org.openecard.android.fragments.FailureFragment;
 import org.openecard.android.lib.activities.AbstractActivationActivity;
 import org.openecard.android.fragments.InitFragment;
 import org.openecard.android.fragments.PINInputFragment;
@@ -53,6 +55,8 @@ public class BindingActivity extends AbstractActivationActivity {
 
 	public static final String BUNDLE_SERVER_DATA = "ServerData";
 
+	private Button cancelBtn;
+
 	private EacGui eacService;
 
 	///
@@ -64,7 +68,7 @@ public class BindingActivity extends AbstractActivationActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_binding);
 
-		final Button cancelBtn = findViewById(R.id.cancelBtn);
+		cancelBtn = findViewById(R.id.cancelBtn);
 		cancelBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
@@ -99,9 +103,17 @@ public class BindingActivity extends AbstractActivationActivity {
 	protected void onStart() {
 		super.onStart();
 
-		// show InitFragment
+		Fragment fragment;
 		if (findViewById(R.id.fragment) != null) {
-			InitFragment fragment = new InitFragment();
+			// show FailureFragment
+			if (! isConnectedToOpeneCardService()) {
+				fragment = new FailureFragment();
+				cancelBtn.setVisibility(View.INVISIBLE);
+			// show InitFragment
+			} else {
+				fragment = new InitFragment();
+				cancelBtn.setVisibility(View.VISIBLE);
+			}
 			fragment.setArguments(getIntent().getExtras());
 			getFragmentManager().beginTransaction()
 					.replace(R.id.fragment, fragment).addToBackStack(null).commit();
@@ -203,5 +215,20 @@ public class BindingActivity extends AbstractActivationActivity {
 			eacService = null;
 		}
 	};
+
+	///
+	/// Callbacks where you can open a Dialog which says that the card should be removed and if the authentication
+	/// process was successful or failed.
+	///
+
+	@Override
+	public void authenticationSuccess(BindingResult bindingResult) {
+
+	}
+
+	@Override
+	public void authenticationFailure(BindingResult bindingResult) {
+
+	}
 
 }
