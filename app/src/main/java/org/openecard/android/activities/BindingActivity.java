@@ -22,6 +22,8 @@
 
 package org.openecard.android.activities;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.Fragment;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -119,6 +121,23 @@ public class BindingActivity extends AbstractActivationActivity {
 			fragment.setArguments(getIntent().getExtras());
 			getFragmentManager().beginTransaction()
 					.replace(R.id.fragment, fragment).addToBackStack(null).commit();
+		}
+
+		// onServiceDisconnected was not called, this mean Eac Gui Service is already connected
+		if (eacService != null) {
+			LOG.error("Eac Gui Service already here.");
+			new Thread(new Runnable() {
+				public void run() {
+					try {
+						// Get ServerData from Eac Gui Service
+						ServerData serverData = eacService.getServerData();
+						// show ServerData
+						onServerDataPresent(serverData);
+					} catch (RemoteException ex) {
+						LOG.error(ex.getMessage(), ex);
+					}
+				}
+			}).start();
 		}
 	}
 
@@ -219,6 +238,7 @@ public class BindingActivity extends AbstractActivationActivity {
 			// Connected to Eac Gui Service
 			eacService = EacGui.Stub.asInterface(service);
 			try {
+				LOG.error("Call onServiceConnected()");
 				// Get ServerData from Eac Gui Service
 				ServerData serverData = eacService.getServerData();
 				// show ServerData
@@ -234,19 +254,38 @@ public class BindingActivity extends AbstractActivationActivity {
 		}
 	};
 
+
 	///
-	/// Callbacks where you can open a Dialog which says that the card should be removed and if the authentication
-	/// process was successful or failed.
+	/// Callbacks where you can open a Dialog which says that the card should be removed.
+	///
+
+	@Override
+	public Dialog showCardRemoveDialog() {
+		AlertDialog dialog = new AlertDialog.Builder(this)
+				.setTitle("Remove the Card")
+				.setMessage("Please remove the identity card.")
+				.create();
+		dialog.show();
+		return dialog;
+	}
+
+
+	///
+	/// Methods which indicate whether the authentication was successful or incorrectly.
 	///
 
 	@Override
 	public void authenticationSuccess(BindingResult bindingResult) {
-
+		LOG.info("Authentication successful: " + bindingResult.getResultCode().name());
+		// maybe show a message with indicates that the authentication was successful and then finish
+		finish();
 	}
 
 	@Override
 	public void authenticationFailure(BindingResult bindingResult) {
-
+		LOG.info("Authentication failed: " + bindingResult.getResultCode().name());
+		// maybe show a message with the failure and then finish
+		finish();
 	}
 
 }
