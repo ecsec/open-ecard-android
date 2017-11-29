@@ -29,6 +29,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.View;
@@ -125,8 +126,8 @@ public class BindingActivity extends AbstractActivationActivity {
 
 		// onServiceDisconnected was not called, this mean Eac Gui Service is already connected
 		if (eacService != null) {
-			LOG.error("Eac Gui Service already here.");
-			new Thread(new Runnable() {
+			new Handler().postDelayed(new Runnable() {
+				@Override
 				public void run() {
 					try {
 						// Get ServerData from Eac Gui Service
@@ -137,7 +138,7 @@ public class BindingActivity extends AbstractActivationActivity {
 						LOG.error(ex.getMessage(), ex);
 					}
 				}
-			}).start();
+			}, 100);
 		}
 	}
 
@@ -238,7 +239,6 @@ public class BindingActivity extends AbstractActivationActivity {
 			// Connected to Eac Gui Service
 			eacService = EacGui.Stub.asInterface(service);
 			try {
-				LOG.error("Call onServiceConnected()");
 				// Get ServerData from Eac Gui Service
 				ServerData serverData = eacService.getServerData();
 				// show ServerData
