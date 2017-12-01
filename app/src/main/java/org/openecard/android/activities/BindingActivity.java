@@ -26,6 +26,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Fragment;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -264,6 +265,12 @@ public class BindingActivity extends AbstractActivationActivity {
 		AlertDialog dialog = new AlertDialog.Builder(this)
 				.setTitle("Remove the Card")
 				.setMessage("Please remove the identity card.")
+				.setNeutralButton("Proceed", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+					}
+				})
 				.create();
 		dialog.show();
 		return dialog;
