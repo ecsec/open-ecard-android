@@ -29,6 +29,7 @@ import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -45,6 +46,7 @@ import org.openecard.android.fragments.PINInputFragment;
 import org.openecard.android.fragments.ServerDataFragment;
 import org.openecard.gui.android.eac.EacGui;
 import org.openecard.gui.android.eac.types.BoxItem;
+import org.openecard.gui.android.eac.types.PinStatus;
 import org.openecard.gui.android.eac.types.ServerData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,11 +79,7 @@ public class BindingActivity extends AbstractActivationActivity {
 			@Override
 			public void onClick(View view) {
 				if (eacService != null) {
-					try {
-						eacService.cancel();
-					} catch (RemoteException ex) {
-						LOG.error(ex.getMessage(), ex);
-					}
+					eacService.cancel();
 				}
 				finish();
 			}
@@ -125,7 +123,24 @@ public class BindingActivity extends AbstractActivationActivity {
 					.replace(R.id.fragment, fragment).addToBackStack(null).commit();
 		}
 
-		// onServiceDisconnected was not called, this mean Eac Gui Service is already connected
+		AsyncTask.execute(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					// wait for eacService
+					eacService = getEacIface().deref();
+					// Get ServerData from Eac Gui Service
+					ServerData serverData = eacService.getServerData();
+					// show ServerData
+					onServerDataPresent(serverData);
+				} catch (InterruptedException ex) {
+					LOG.error(ex.getMessage(), ex);
+				}
+			}
+		});
+
+		// onServiceDisconnected was not called, this means Eac Gui Service is already connected
+		// TODO: check if that is necessary with the new code, as
 		if (eacService != null) {
 			new Handler().postDelayed(new Runnable() {
 				@Override
@@ -135,7 +150,7 @@ public class BindingActivity extends AbstractActivationActivity {
 						ServerData serverData = eacService.getServerData();
 						// show ServerData
 						onServerDataPresent(serverData);
-					} catch (RemoteException ex) {
+					} catch (InterruptedException ex) {
 						LOG.error(ex.getMessage(), ex);
 					}
 				}
@@ -174,15 +189,15 @@ public class BindingActivity extends AbstractActivationActivity {
 			// use eac gui service to select attributes
 			eacService.selectAttributes(readAccessAttributes, writeAccessAttributes);
 			// retrieve pin status from eac gui service
-			String status = eacService.getPinStatus();
-			if (status.equals("PIN")) {
+			PinStatus status = eacService.getPinStatus();
+			if (status == PinStatus.PIN) {
 				// show PINInputFragment
 				onPINIsRequired();
 			} else {
 				String msg = String.format("PIN Status '{0}' isn't supported yet.", status);
 				LOG.error(msg);
 			}
-		} catch (RemoteException ex) {
+		} catch (InterruptedException ex) {
 			LOG.error(ex.getMessage(), ex);
 		}
 	}
@@ -196,7 +211,7 @@ public class BindingActivity extends AbstractActivationActivity {
 			} else {
 				LOG.info("The PIN isn't correct, the CAN is required.");
 			}
-		} catch (RemoteException ex) {
+		} catch (InterruptedException ex) {
 			LOG.error(ex.getMessage(), ex);
 		}
 	}
@@ -205,7 +220,7 @@ public class BindingActivity extends AbstractActivationActivity {
 		Fragment fragment = new ServerDataFragment();
 
 		Bundle bundle = new Bundle();
-		bundle.putParcelable(BUNDLE_SERVER_DATA, serverData);
+		bundle.putSerializable(BUNDLE_SERVER_DATA, serverData);
 		fragment.setArguments(bundle);
 
 		// show ServerDataFragment
@@ -224,37 +239,6 @@ public class BindingActivity extends AbstractActivationActivity {
 
 		enableCancel(); // enable cancel if no action is performed by the Open eCard Service
 	}
-
-	///
-	/// Instance which holds the connection to the Eac Gui Service.
-	///
-
-	@Override
-	public ServiceConnection getServiceConnection() {
-		return serviceConnection;
-	}
-
-	private final ServiceConnection serviceConnection = new ServiceConnection() {
-		@Override
-		public void onServiceConnected(ComponentName componentName, IBinder service) {
-			// Connected to Eac Gui Service
-			eacService = EacGui.Stub.asInterface(service);
-			try {
-				// Get ServerData from Eac Gui Service
-				ServerData serverData = eacService.getServerData();
-				// show ServerData
-				onServerDataPresent(serverData);
-			} catch (RemoteException ex) {
-				LOG.error(ex.getMessage(), ex);
-			}
-		}
-
-		@Override
-		public void onServiceDisconnected(ComponentName componentName) {
-			eacService = null;
-		}
-	};
-
 
 	///
 	/// Callbacks where you can open a Dialog which says that the card should be removed.

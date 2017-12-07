@@ -49,7 +49,7 @@ public class ServerDataFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		final View view = inflater.inflate(R.layout.fragment_server_data, container, false);
 
-		final ServerData serverData = getArguments().getParcelable(BindingActivity.BUNDLE_SERVER_DATA);
+		final ServerData serverData = (ServerData) getArguments().getSerializable(BindingActivity.BUNDLE_SERVER_DATA);
 
 		final LinearLayout layout = view.findViewById(R.id.linearLayout);
 
