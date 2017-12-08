@@ -63,6 +63,7 @@ public class MainActivity extends Activity implements ConnectionHandler {
 
 		// initialize connection to Open eCard App
 		mConnection = OpeneCardServiceConnector.createConnection(this);
+		mConnection.setConnectionHandler(this);
 
 		startBtn = findViewById(R.id.btnStart);
 		startBtn.setOnClickListener(new View.OnClickListener() {
