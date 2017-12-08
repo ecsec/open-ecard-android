@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.android.activities;
+package org.openecard.demo.activities;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -31,7 +31,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import org.openecard.android.R;
+import org.openecard.demo.R;
 
 
 /**

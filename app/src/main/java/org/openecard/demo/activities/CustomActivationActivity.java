@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.android.activities;
+package org.openecard.demo.activities;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -31,12 +31,12 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import java.util.List;
-import org.openecard.android.R;
 import org.openecard.android.activation.ActivationResult;
 import org.openecard.android.activation.AbstractActivationActivity;
-import org.openecard.android.fragments.InitFragment;
-import org.openecard.android.fragments.PINInputFragment;
-import org.openecard.android.fragments.ServerDataFragment;
+import org.openecard.demo.R;
+import org.openecard.demo.fragments.InitFragment;
+import org.openecard.demo.fragments.PINInputFragment;
+import org.openecard.demo.fragments.ServerDataFragment;
 import org.openecard.gui.android.eac.EacGui;
 import org.openecard.gui.android.eac.types.BoxItem;
 import org.openecard.gui.android.eac.types.PinStatus;

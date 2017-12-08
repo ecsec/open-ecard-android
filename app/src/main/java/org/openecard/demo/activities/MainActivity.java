@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.android.activities;
+package org.openecard.demo.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -29,23 +29,19 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import org.openecard.android.R;
 import org.openecard.android.ServiceResponseStatusCodes;
+import org.openecard.demo.R;
 import org.openecard.android.system.ConnectionHandler;
 import org.openecard.android.system.OpeneCardServiceConnector;
 import org.openecard.android.system.ServiceErrorResponse;
 import org.openecard.android.system.ServiceWarningResponse;
 import org.openecard.android.utils.NfcUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
  * @author Mike Prechtl
  */
 public class MainActivity extends Activity implements ConnectionHandler {
-
-	private static final Logger LOG = LoggerFactory.getLogger(MainActivity.class);
 
 	private OpeneCardServiceConnector mConnection;
 

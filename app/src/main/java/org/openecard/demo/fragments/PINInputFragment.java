@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.android.fragments;
+package org.openecard.demo.fragments;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -31,8 +31,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import org.openecard.android.R;
-import org.openecard.android.activities.CustomActivationActivity;
+import org.openecard.demo.R;
+import org.openecard.demo.activities.CustomActivationActivity;
 
 
 /**

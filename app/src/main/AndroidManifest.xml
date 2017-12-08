@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
         xmlns:android="http://schemas.android.com/apk/res/android"
-        package="org.openecard.android">
+        package="org.openecard.demo">
 
     <!-- Usage of SDK -->
     <uses-sdk
@@ -60,7 +60,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activities.IdsActivity"
+        <activity android:name="org.openecard.demo.activities.IdsActivity"
                   android:clearTaskOnLaunch="true"
                   android:configChanges="orientation|screenSize" >
 

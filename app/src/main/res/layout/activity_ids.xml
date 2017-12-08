@@ -5,6 +5,6 @@
     android:id="@+id/webView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="org.openecard.android.activities.IdsActivity" >
+    tools:context="org.openecard.android.org.openecard.demo.activities.IdsActivity" >
 
 </WebView>

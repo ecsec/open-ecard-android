@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-package org.openecard.android.fragments;
+package org.openecard.demo.fragments;
 
 import android.app.Fragment;
 import android.content.Intent;
@@ -29,8 +29,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import org.openecard.android.R;
-import org.openecard.android.activities.MainActivity;
+import org.openecard.demo.R;
+import org.openecard.demo.activities.MainActivity;
 
 
 /**

@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    tools:context="org.openecard.android.activities.CustomActivationActivity">
+    tools:context="org.openecard.android.org.openecard.demo.activities.CustomActivationActivity">
 
     <FrameLayout
         android:id="@+id/fragment"
