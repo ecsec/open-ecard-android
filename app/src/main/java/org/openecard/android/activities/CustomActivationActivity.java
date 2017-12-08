@@ -50,9 +50,9 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Mike Prechtl
  */
-public class BindingActivity extends AbstractActivationActivity {
+public class CustomActivationActivity extends AbstractActivationActivity {
 
-	private static final Logger LOG = LoggerFactory.getLogger(BindingActivity.class);
+	private static final Logger LOG = LoggerFactory.getLogger(CustomActivationActivity.class);
 
 	public static final String BUNDLE_SERVER_DATA = "ServerData";
 
@@ -67,7 +67,7 @@ public class BindingActivity extends AbstractActivationActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_binding);
+		setContentView(R.layout.activity_custom);
 
 		cancelBtn = findViewById(R.id.cancelBtn);
 		cancelBtn.setOnClickListener(new View.OnClickListener() {
@@ -118,6 +118,7 @@ public class BindingActivity extends AbstractActivationActivity {
 					.replace(R.id.fragment, fragment).addToBackStack(null).commit();
 		}
 
+		// TODO in AbstractActivationActivity und callback
 		AsyncTask.execute(new Runnable() {
 			@Override
 			public void run() {

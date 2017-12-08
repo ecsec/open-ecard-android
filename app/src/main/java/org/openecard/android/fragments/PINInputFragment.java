@@ -32,7 +32,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import org.openecard.android.R;
-import org.openecard.android.activities.BindingActivity;
+import org.openecard.android.activities.CustomActivationActivity;
 
 
 /**
@@ -61,7 +61,7 @@ public class PINInputFragment extends Fragment {
 			@Override
 			public void onClick(View view) {
 				final Activity activity = getActivity();
-				if (activity instanceof BindingActivity) {
+				if (activity instanceof CustomActivationActivity) {
 					final String pin = editText.getText().toString();
 					logLabel.setVisibility(View.VISIBLE);
 					if (pin.length() == 6) {
@@ -70,10 +70,10 @@ public class PINInputFragment extends Fragment {
 						editText.setFocusable(false);
 						logLabel.setText(PERFORM_PIN_INPUT);
 						// disable cancel if service is working
-						((BindingActivity) activity).disableCancel();
+						((CustomActivationActivity) activity).disableCancel();
 						new Thread(new Runnable() {
 							public void run() {
-								((BindingActivity) activity).enterPIN(null, pin);
+								((CustomActivationActivity) activity).enterPIN(null, pin);
 							}
 						}).start();
 					} else {

@@ -33,7 +33,7 @@ import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import org.openecard.android.R;
-import org.openecard.android.activities.BindingActivity;
+import org.openecard.android.activities.CustomActivationActivity;
 import org.openecard.gui.android.eac.types.BoxItem;
 import org.openecard.gui.android.eac.types.ServerData;
 import java.util.HashMap;
@@ -49,7 +49,7 @@ public class ServerDataFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		final View view = inflater.inflate(R.layout.fragment_server_data, container, false);
 
-		final ServerData serverData = (ServerData) getArguments().getSerializable(BindingActivity.BUNDLE_SERVER_DATA);
+		final ServerData serverData = (ServerData) getArguments().getSerializable(CustomActivationActivity.BUNDLE_SERVER_DATA);
 
 		final LinearLayout layout = view.findViewById(R.id.linearLayout);
 
@@ -86,10 +86,10 @@ public class ServerDataFragment extends Fragment {
 			@Override
 			public void onClick(View view) {
 				Activity activity = getActivity();
-				if (activity instanceof BindingActivity) {
+				if (activity instanceof CustomActivationActivity) {
 					// disable cancel if service is working
-					((BindingActivity) activity).disableCancel();
-					((BindingActivity) activity).enterAttributes(serverData.getReadAccessAttributes(),
+					((CustomActivationActivity) activity).disableCancel();
+					((CustomActivationActivity) activity).enterAttributes(serverData.getReadAccessAttributes(),
 							serverData.getWriteAccessAttributes());
 				}
 			}
