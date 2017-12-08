@@ -219,7 +219,7 @@ public class CustomActivationActivity extends AbstractActivationActivity {
 	///
 
 	@Override
-	public void authenticationFailure(ActivationResult activationResult) {
+	public void onAuthenticationFailure(ActivationResult activationResult) {
 		LOG.info("Authentication failed: " + activationResult.getResultCode().name());
 		if (activationResult.getErrorMessage() != null) {
 			showFailureFragment(activationResult.getErrorMessage());
