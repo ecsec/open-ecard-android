@@ -23,17 +23,19 @@
 package org.openecard.android.activities;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import org.openecard.android.R;
-import org.openecard.android.lib.ServiceErrorResponse;
-import org.openecard.android.lib.ServiceResponseStatusCodes;
-import org.openecard.android.lib.ServiceWarningResponse;
-import org.openecard.android.lib.services.OpeneCardConnectionHandler;
-import org.openecard.android.lib.services.OpeneCardServiceConnection;
-import org.openecard.android.lib.utils.NfcUtils;
+import org.openecard.android.ServiceResponseStatusCodes;
+import org.openecard.android.system.ConnectionHandler;
+import org.openecard.android.system.OpeneCardServiceConnector;
+import org.openecard.android.system.ServiceErrorResponse;
+import org.openecard.android.system.ServiceWarningResponse;
+import org.openecard.android.utils.NfcUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,11 +43,11 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Mike Prechtl
  */
-public class MainActivity extends Activity implements OpeneCardConnectionHandler {
+public class MainActivity extends Activity implements ConnectionHandler {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MainActivity.class);
 
-	private OpeneCardServiceConnection mConnection;
+	private OpeneCardServiceConnector mConnection;
 
 	private TextView txtView;
 	private Button startBtn;
@@ -60,7 +62,7 @@ public class MainActivity extends Activity implements OpeneCardConnectionHandler
 		txtView.setVisibility(View.INVISIBLE);
 
 		// initialize connection to Open eCard App
-		mConnection = OpeneCardServiceConnection.createConnection(this, getApplicationContext());
+		mConnection = OpeneCardServiceConnector.createConnection(this);
 
 		startBtn = findViewById(R.id.btnStart);
 		startBtn.setOnClickListener(new View.OnClickListener() {
@@ -72,6 +74,10 @@ public class MainActivity extends Activity implements OpeneCardConnectionHandler
 				}
 			}
 		});
+
+		if (mConnection.isConnected()) {
+			onConnectionSuccess();
+		}
 	}
 
 	@Override
@@ -84,10 +90,10 @@ public class MainActivity extends Activity implements OpeneCardConnectionHandler
 
 	@Override
 	public void onConnectionSuccess() {
-		String msg = "Successful connected to Open eCard Service.";
-		startBtn.setEnabled(false);
-		txtView.setText(msg);
-		txtView.setVisibility(View.VISIBLE);
+		String idsUri = "https://service.skidentity.de/ids/#ctx=idm";
+		Intent i = new Intent(getApplicationContext(), IdsActivity.class);
+		i.setData(Uri.parse(idsUri));
+		startActivity(i);
 	}
 
 	@Override
