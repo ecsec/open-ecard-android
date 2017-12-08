@@ -42,7 +42,7 @@
         </activity>
 
         <activity
-            android:name=".activities.BindingActivity"
+            android:name=".activities.CustomActivationActivity"
             android:clearTaskOnLaunch="true"
             android:configChanges="orientation|screenSize" >
 
@@ -60,6 +60,21 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".activities.IdsActivity"
+                  android:clearTaskOnLaunch="true"
+                  android:configChanges="orientation|screenSize" >
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data android:scheme="https" />
+                <data android:host="service.skidentity.de" android:port="443" />
+                <data android:pathPattern="/backend/tr03130/terminate-client.*"/>
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
