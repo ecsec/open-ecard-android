@@ -34,6 +34,7 @@ import java.util.List;
 import org.openecard.android.activation.ActivationResult;
 import org.openecard.android.activation.AbstractActivationActivity;
 import org.openecard.demo.R;
+import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.InitFragment;
 import org.openecard.demo.fragments.PINInputFragment;
 import org.openecard.demo.fragments.ServerDataFragment;
@@ -74,7 +75,7 @@ public class CustomActivationActivity extends AbstractActivationActivity {
 				if (eacService != null) {
 					eacService.cancel();
 				}
-				finish();
+				showFailureFragment("You canceled the authentication process.");
 			}
 		});
 	}
@@ -82,23 +83,6 @@ public class CustomActivationActivity extends AbstractActivationActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-	}
-
-	@Override
-	protected void onPause() {
-		super.onPause();
-	}
-
-	@Override
-	protected void onNewIntent(Intent intent) {
-		super.onNewIntent(intent);
-		// if you receive a nfc tag, disable the cancel button until the next fragment comes in
-		disableCancel();
-	}
-
-	@Override
-	protected void onStart() {
-		super.onStart();
 
 		if (findViewById(R.id.fragment) != null) {
 			// show InitFragment
@@ -111,13 +95,10 @@ public class CustomActivationActivity extends AbstractActivationActivity {
 	}
 
 	@Override
-	protected void onStop() {
-		super.onStop();
-	}
-
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		// if you receive a nfc tag, disable the cancel button until the next fragment comes in
+		disableCancel();
 	}
 
 	///
@@ -240,8 +221,22 @@ public class CustomActivationActivity extends AbstractActivationActivity {
 	@Override
 	public void authenticationFailure(ActivationResult activationResult) {
 		LOG.info("Authentication failed: " + activationResult.getResultCode().name());
-		// maybe show a message with the failure and then finish
-		finish();
+		if (activationResult.getErrorMessage() != null) {
+			showFailureFragment(activationResult.getErrorMessage());
+		} else {
+			showFailureFragment("Authentication failed...");
+		}
+	}
+
+	private void showFailureFragment(String errorMessage) {
+		FailureFragment fragment = new FailureFragment();
+		fragment.setErrorMessage(errorMessage);
+
+		cancelBtn.setVisibility(View.INVISIBLE);
+
+		// show ServerDataFragment
+		getFragmentManager().beginTransaction()
+				.replace(R.id.fragment, fragment).addToBackStack(null).commit();
 	}
 
 

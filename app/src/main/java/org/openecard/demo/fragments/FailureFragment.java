@@ -29,6 +29,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
+
 import org.openecard.demo.R;
 import org.openecard.demo.activities.MainActivity;
 
@@ -38,9 +40,16 @@ import org.openecard.demo.activities.MainActivity;
  */
 public class FailureFragment extends Fragment {
 
+	private String txtMsg;
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		final View view = inflater.inflate(R.layout.fragment_failure, container, false);
+
+		final TextView textView = view.findViewById(R.id.txtMsg);
+		if (txtMsg != null) {
+			textView.setText(txtMsg);
+		}
 
 		final Button button = view.findViewById(R.id.btnStartOpeneCardService);
 		button.setOnClickListener(new View.OnClickListener() {
@@ -52,6 +61,10 @@ public class FailureFragment extends Fragment {
 		});
 
 		return view;
+	}
+
+	public void setErrorMessage(String error) {
+		txtMsg = error;
 	}
 
 }
