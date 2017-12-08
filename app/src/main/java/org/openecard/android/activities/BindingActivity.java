@@ -25,15 +25,10 @@ package org.openecard.android.activities;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Fragment;
-import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.RemoteException;
 import android.view.View;
 import android.widget.Button;
 import java.util.List;
@@ -130,32 +125,19 @@ public class BindingActivity extends AbstractActivationActivity {
 					// wait for eacService
 					eacService = getEacIface().deref();
 					// Get ServerData from Eac Gui Service
-					ServerData serverData = eacService.getServerData();
-					// show ServerData
-					onServerDataPresent(serverData);
+					final ServerData serverData = eacService.getServerData();
+					// show ServerData on ui thread, async
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							onServerDataPresent(serverData);
+						}
+					});
 				} catch (InterruptedException ex) {
 					LOG.error(ex.getMessage(), ex);
 				}
 			}
 		});
-
-		// onServiceDisconnected was not called, this means Eac Gui Service is already connected
-		// TODO: check if that is necessary with the new code, as
-		if (eacService != null) {
-			new Handler().postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						// Get ServerData from Eac Gui Service
-						ServerData serverData = eacService.getServerData();
-						// show ServerData
-						onServerDataPresent(serverData);
-					} catch (InterruptedException ex) {
-						LOG.error(ex.getMessage(), ex);
-					}
-				}
-			}, 100);
-		}
 	}
 
 	@Override
