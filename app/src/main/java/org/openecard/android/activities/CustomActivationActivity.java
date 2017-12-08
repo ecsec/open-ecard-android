@@ -27,15 +27,13 @@ import android.app.Dialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import java.util.List;
-import org.openecard.addon.bind.BindingResult;
 import org.openecard.android.R;
-import org.openecard.android.fragments.FailureFragment;
-import org.openecard.android.lib.activities.AbstractActivationActivity;
+import org.openecard.android.activation.ActivationResult;
+import org.openecard.android.activation.AbstractActivationActivity;
 import org.openecard.android.fragments.InitFragment;
 import org.openecard.android.fragments.PINInputFragment;
 import org.openecard.android.fragments.ServerDataFragment;
@@ -102,43 +100,14 @@ public class CustomActivationActivity extends AbstractActivationActivity {
 	protected void onStart() {
 		super.onStart();
 
-		Fragment fragment;
 		if (findViewById(R.id.fragment) != null) {
-			// show FailureFragment
-			if (! isConnectedToOpeneCardService()) {
-				fragment = new FailureFragment();
-				cancelBtn.setVisibility(View.INVISIBLE);
 			// show InitFragment
-			} else {
-				fragment = new InitFragment();
-				cancelBtn.setVisibility(View.VISIBLE);
-			}
+			Fragment fragment = new InitFragment();
+			cancelBtn.setVisibility(View.VISIBLE);
 			fragment.setArguments(getIntent().getExtras());
 			getFragmentManager().beginTransaction()
 					.replace(R.id.fragment, fragment).addToBackStack(null).commit();
 		}
-
-		// TODO in AbstractActivationActivity und callback
-		AsyncTask.execute(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					// wait for eacService
-					eacService = getEacIface().deref();
-					// Get ServerData from Eac Gui Service
-					final ServerData serverData = eacService.getServerData();
-					// show ServerData on ui thread, async
-					runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							onServerDataPresent(serverData);
-						}
-					});
-				} catch (InterruptedException ex) {
-					LOG.error(ex.getMessage(), ex);
-				}
-			}
-		});
 	}
 
 	@Override
@@ -224,6 +193,27 @@ public class CustomActivationActivity extends AbstractActivationActivity {
 	}
 
 	///
+	/// Callback to receive the Eac Gui interface which is used to interact with the Open eCard library.
+	///
+
+	@Override
+	public void onEacIfaceSet(EacGui eacGui) {
+		eacService = eacGui;
+		try {
+			final ServerData serverData = eacService.getServerData();
+			// show ServerData on ui thread, async
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					onServerDataPresent(serverData);
+				}
+			});
+		} catch (InterruptedException ex) {
+			LOG.error(ex.getMessage(), ex);
+		}
+	}
+
+	///
 	/// Callbacks where you can open a Dialog which says that the card should be removed.
 	///
 
@@ -243,23 +233,16 @@ public class CustomActivationActivity extends AbstractActivationActivity {
 		return dialog;
 	}
 
-
 	///
 	/// Methods which indicate whether the authentication was successful or incorrectly.
 	///
 
 	@Override
-	public void authenticationSuccess(BindingResult bindingResult) {
-		LOG.info("Authentication successful: " + bindingResult.getResultCode().name());
-		// maybe show a message with indicates that the authentication was successful and then finish
-		finish();
-	}
-
-	@Override
-	public void authenticationFailure(BindingResult bindingResult) {
-		LOG.info("Authentication failed: " + bindingResult.getResultCode().name());
+	public void authenticationFailure(ActivationResult activationResult) {
+		LOG.info("Authentication failed: " + activationResult.getResultCode().name());
 		// maybe show a message with the failure and then finish
 		finish();
 	}
+
 
 }
