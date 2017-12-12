@@ -47,7 +47,10 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:design:26.+'
 
+    // the actual Open eCard library
     compile (group:'org.openecard.clients', name:'android-lib', version:"${OecVersion}", ext:"aar", transitive:true)
+    // logging library, use whatever you like to output the slf4j log statements
+    compile 'com.github.tony19:logback-android-classic:1.1.1-6'
 
     testCompile 'junit:junit:4.12'
 }
