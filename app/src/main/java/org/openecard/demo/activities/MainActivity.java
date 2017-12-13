@@ -29,96 +29,121 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import org.openecard.android.ServiceResponseStatusCodes;
+import org.openecard.android.system.ServiceResponseStatusCodes;
+import org.openecard.android.system.OpeneCardContext;
+import org.openecard.android.system.OpeneCardServiceHandler;
+import org.openecard.android.system.OpeneCardServiceClientHandler;
 import org.openecard.demo.R;
-import org.openecard.android.system.ConnectionHandler;
-import org.openecard.android.system.OpeneCardServiceConnector;
 import org.openecard.android.system.ServiceErrorResponse;
 import org.openecard.android.system.ServiceWarningResponse;
 import org.openecard.android.utils.NfcUtils;
 
 
 /**
+ * Activity providing the functionality to initialize and destroy the Open eCard Stack.
+ * Once the initialization is complete,
+ *
  * @author Mike Prechtl
+ * @author Tobias Wich
  */
-public class MainActivity extends Activity implements ConnectionHandler {
+public class MainActivity extends Activity {
 
-	private OpeneCardServiceConnector mConnection;
+	private OpeneCardServiceClientHandler serviceClient;
 
 	private TextView txtView;
 	private Button startBtn;
+	private Button stopBtn;
 
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		// initialize connection to Open eCard App
+		serviceClient = new OpeneCardServiceClientHandler(this, new InitServiceHandler());
+
 		setContentView(R.layout.activity_main);
 
 		// set up gui components
 		txtView = findViewById(R.id.textView2);
 		txtView.setVisibility(View.INVISIBLE);
 
-		// initialize connection to Open eCard App
-		mConnection = OpeneCardServiceConnector.createConnection(this);
-		mConnection.setConnectionHandler(this);
-
 		startBtn = findViewById(R.id.btnStart);
 		startBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				if (! mConnection.isConnected()) {
-					// or start immediately
-					mConnection.startService();
-				}
+				startBtn.setEnabled(false);
+				// start Open eCard Stack
+				serviceClient.startService();
 			}
 		});
 
-		if (mConnection.isConnected()) {
-			onConnectionSuccess();
-		}
+		stopBtn = findViewById(R.id.btnStop);
+		stopBtn.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				stopBtn.setEnabled(false);
+				// stop Open eCard Stack
+				serviceClient.stopService();
+			}
+		});
 	}
 
 	@Override
 	protected void onDestroy() {
-		if (mConnection.isConnected()) {
-			mConnection.stopService();
+		// stop Open eCard Stack when this activity is destroyed
+		if (serviceClient.isInitialized()) {
+			serviceClient.stopService();
 		}
 		super.onDestroy();
 	}
 
-	@Override
-	public void onConnectionSuccess() {
-		String idsUri = "https://service.skidentity.de/ids/#ctx=idm";
-		Intent i = new Intent(getApplicationContext(), IdsActivity.class);
-		i.setData(Uri.parse(idsUri));
-		startActivity(i);
-	}
 
-	@Override
-	public void onConnectionFailure(ServiceErrorResponse serviceErrorResponse) {
-		txtView.setText(serviceErrorResponse.getMessage());
-		txtView.setVisibility(View.VISIBLE);
-	}
 
-	@Override
-	public void onConnectionFailure(ServiceWarningResponse serviceWarningResponse) {
-		if (serviceWarningResponse.getStatusCode() == ServiceResponseStatusCodes.NFC_NOT_ENABLED) {
-			// maybe go to nfc settings
-			NfcUtils.getInstance().goToNFCSettings(this);
+	///
+	/// Handler functions for the initialization or termination of the Open eCard Stack management Android Service
+	///
+
+	private class InitServiceHandler implements OpeneCardServiceHandler {
+
+		@Override
+		public void onConnectionSuccess(OpeneCardContext ctx) {
+			stopBtn.setEnabled(true);
+			String idsUri = "https://service.skidentity.de/ids/#ctx=idm";
+			Intent i = new Intent(getApplicationContext(), IdsActivity.class);
+			i.setData(Uri.parse(idsUri));
+			startActivity(i);
 		}
-	}
 
-	@Override
-	public void onDisconnectionSuccess() {
+		@Override
+		public void onConnectionFailure(ServiceErrorResponse serviceErrorResponse) {
+			startBtn.setEnabled(true);
+			txtView.setText(serviceErrorResponse.getMessage());
+			txtView.setVisibility(View.VISIBLE);
+		}
 
-	}
+		@Override
+		public void onConnectionFailure(ServiceWarningResponse serviceWarningResponse) {
+			startBtn.setEnabled(true);
+			if (serviceWarningResponse.getStatusCode() == ServiceResponseStatusCodes.NFC_NOT_ENABLED) {
+				// maybe go to nfc settings
+				NfcUtils.getInstance().goToNFCSettings(MainActivity.this);
+			}
+		}
 
-	@Override
-	public void onDisconnectionFailure(ServiceErrorResponse serviceErrorResponse) {
+		@Override
+		public void onDisconnectionSuccess() {
+			startBtn.setEnabled(true);
+		}
 
-	}
+		@Override
+		public void onDisconnectionFailure(ServiceErrorResponse serviceErrorResponse) {
 
-	@Override
-	public void onDisconnectionFailure(ServiceWarningResponse serviceWarningResponse) {
+		}
+
+		@Override
+		public void onDisconnectionFailure(ServiceWarningResponse serviceWarningResponse) {
+
+		}
 
 	}
 

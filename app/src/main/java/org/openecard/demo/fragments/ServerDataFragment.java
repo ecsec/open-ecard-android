@@ -37,6 +37,7 @@ import org.openecard.demo.activities.CustomActivationActivity;
 import org.openecard.gui.android.eac.types.BoxItem;
 import org.openecard.gui.android.eac.types.ServerData;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -68,15 +69,15 @@ public class ServerDataFragment extends Fragment {
 		TextView validityTxtView = view.findViewById(R.id.validity);
 		validityTxtView.setText(serverData.getValidity());
 
-		Map<CheckBox, BoxItem> readAccessAttributes = new HashMap<>();
+		final Map<BoxItem, CheckBox> readAccessAttributes = new HashMap<>();
 		for (BoxItem boxItem : serverData.getReadAccessAttributes()) {
 			String readableValue = mapBoxItemNameToReadableValue(boxItem.getName());
 			if (readableValue != null) {
 				CheckBox checkBox = new CheckBox(getActivity().getApplicationContext());
 				checkBox.setText(readableValue);
-				checkBox.setSelected(boxItem.isSelected());
+				checkBox.setChecked(boxItem.isSelected());
 				checkBox.setEnabled(! boxItem.isDisabled());
-				readAccessAttributes.put(checkBox, boxItem);
+				readAccessAttributes.put(boxItem, checkBox);
 				layout.addView(checkBox);
 			}
 		}
@@ -85,11 +86,19 @@ public class ServerDataFragment extends Fragment {
 		button.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
+				List<BoxItem> readBoxes = serverData.getReadAccessAttributes();
+				for (BoxItem boxItem : readBoxes) {
+					CheckBox next = readAccessAttributes.get(boxItem);
+					if (next != null) {
+						boxItem.setSelected(next.isChecked());
+					}
+				}
+
 				Activity activity = getActivity();
 				if (activity instanceof CustomActivationActivity) {
 					// disable cancel if service is working
 					((CustomActivationActivity) activity).disableCancel();
-					((CustomActivationActivity) activity).enterAttributes(serverData.getReadAccessAttributes(),
+					((CustomActivationActivity) activity).enterAttributes(readBoxes,
 							serverData.getWriteAccessAttributes());
 				}
 			}

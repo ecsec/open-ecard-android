@@ -54,6 +54,7 @@ public class PINInputFragment extends Fragment {
 		final EditText editText = view.findViewById(R.id.pinInput);
 		editText.setEnabled(true);
 		editText.setFocusable(true);
+		editText.requestFocus();
 
 		final Button buttonContinue = view.findViewById(R.id.btnPINInput);
 		buttonContinue.setEnabled(true);

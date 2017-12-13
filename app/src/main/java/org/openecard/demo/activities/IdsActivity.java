@@ -31,6 +31,8 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import org.openecard.android.activation.AbstractActivationActivity;
+import org.openecard.android.activation.ActivationImplementationInterface;
 import org.openecard.demo.R;
 
 
@@ -51,14 +53,19 @@ public class IdsActivity extends AppCompatActivity {
 		settings.setJavaScriptEnabled(true);
 		settings.setDomStorageEnabled(true);
 
+		// add interceptor for eID-Client URLs (match criteria should be more precise in production code)
 		webView.setWebViewClient(new WebViewClient() {
 			@Override
 			public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 					String activationUri = request.getUrl().toString();
 					if (activationUri.contains(":24727/eID-Client")) {
+						// perform explicit URL Intent to the Activation Activity
 						Intent i = new Intent(Intent.ACTION_VIEW);
+						i.setClass(IdsActivity.this, CustomActivationActivity.class);
 						i.setData(Uri.parse(activationUri));
+						// add class name for explicit redirect Intent
+						i.putExtra(ActivationImplementationInterface.RETURN_CLASS, IdsActivity.class.getName());
 						startActivity(i);
 					}
 				}

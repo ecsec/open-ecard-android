@@ -47,7 +47,12 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * Implementation of the Activation Activity.
+ * The abstract base class takes care of handling the Intents and the Open eCard Stack initialization.
+ *
+ *
  * @author Mike Prechtl
+ * @author Tobias Wich
  */
 public class CustomActivationActivity extends AbstractActivationActivity {
 
@@ -57,10 +62,83 @@ public class CustomActivationActivity extends AbstractActivationActivity {
 
 	private Button cancelBtn;
 
-	private EacGui eacService;
+	private EacGui eacGui;
+
 
 	///
-	/// Basic Methods of an Activity
+	/// Must implement methods as defined in AbstractActivationActivity
+	/// Note that the success case is already fully implemented in AbstractActivationActivity
+	///
+
+	// Callback to receive the Eac Gui interface which is used to interact with the Open eCard library.
+	@Override
+	public void onEacIfaceSet(EacGui eacGui) {
+		this.eacGui = eacGui;
+		try {
+			// this one blocks until the data is available, but it's ok as this is run in the background
+			final ServerData serverData = this.eacGui.getServerData();
+			// show ServerData on ui thread to move context out of the background
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					onServerDataPresent(serverData);
+				}
+			});
+		} catch (InterruptedException ex) {
+			LOG.error(ex.getMessage(), ex);
+		}
+	}
+
+
+	// Callbacks where you can open a Dialog which says that the card should be removed.
+	@Override
+	public Dialog showCardRemoveDialog() {
+		AlertDialog dialog = new AlertDialog.Builder(this)
+				.setTitle("Remove the Card")
+				.setMessage("Please remove the identity card.")
+				.setNeutralButton("Proceed", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+					}
+				})
+				.create();
+		dialog.show();
+		return dialog;
+	}
+
+
+	// Methods which indicate whether the authentication was successful or incorrectly.
+	@Override
+	public void onAuthenticationFailure(ActivationResult activationResult) {
+		LOG.info("Authentication failed: " + activationResult.getResultCode().name());
+		if (activationResult.getErrorMessage() != null) {
+			showFailureFragment(activationResult.getErrorMessage());
+		} else {
+			showFailureFragment("Authentication failed...");
+		}
+	}
+
+	private void showFailureFragment(String errorMessage) {
+		FailureFragment fragment = new FailureFragment();
+		fragment.setErrorMessage(errorMessage);
+
+		cancelBtn.setVisibility(View.INVISIBLE);
+
+		// show ServerDataFragment
+		getFragmentManager().beginTransaction()
+				.replace(R.id.fragment, fragment).addToBackStack(null).commit();
+	}
+
+
+
+
+
+
+
+
+	///
+	/// Everything below represents general initialization of the UI and after that the interaction with the EAC process
 	///
 
 	@Override
@@ -72,8 +150,8 @@ public class CustomActivationActivity extends AbstractActivationActivity {
 		cancelBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				if (eacService != null) {
-					eacService.cancel();
+				if (eacGui != null) {
+					eacGui.cancel();
 				}
 				showFailureFragment("You canceled the authentication process.");
 			}
@@ -101,6 +179,7 @@ public class CustomActivationActivity extends AbstractActivationActivity {
 		disableCancel();
 	}
 
+
 	///
 	/// Methods to enable or disable the Cancel Button
 	///
@@ -113,16 +192,17 @@ public class CustomActivationActivity extends AbstractActivationActivity {
 		cancelBtn.setEnabled(false);
 	}
 
+
 	///
-	/// Methods to exchange data with the fragments.
+	/// Methods to exchange data with the fragments (aka the EAC process interaction)
 	///
 
 	public void enterAttributes(List<BoxItem> readAccessAttributes, List<BoxItem> writeAccessAttributes) {
 		try {
 			// use eac gui service to select attributes
-			eacService.selectAttributes(readAccessAttributes, writeAccessAttributes);
+			eacGui.selectAttributes(readAccessAttributes, writeAccessAttributes);
 			// retrieve pin status from eac gui service
-			PinStatus status = eacService.getPinStatus();
+			PinStatus status = eacGui.getPinStatus();
 			if (status == PinStatus.PIN) {
 				// show PINInputFragment
 				onPINIsRequired();
@@ -135,10 +215,20 @@ public class CustomActivationActivity extends AbstractActivationActivity {
 		}
 	}
 
+	public void onPINIsRequired() {
+		Fragment fragment = new PINInputFragment();
+
+		// show PINInputFragment
+		getFragmentManager().beginTransaction()
+				.replace(R.id.fragment, fragment).addToBackStack(null).commit();
+
+		enableCancel(); // enable cancel if no action is performed by the Open eCard Service
+	}
+
 	public void enterPIN(String can, String pin) {
 		try {
 			// Retrieve PIN from PINInputFragment and send it to Eac Gui Service
-			boolean pinCorrect = eacService.enterPin(can, pin);
+			boolean pinCorrect = eacGui.enterPin(can, pin);
 			if (pinCorrect) {
 				LOG.info("The PIN is correct.");
 			} else {
@@ -162,82 +252,5 @@ public class CustomActivationActivity extends AbstractActivationActivity {
 
 		enableCancel(); // enable cancel if no action is performed by the Open eCard Service
 	}
-
-	public void onPINIsRequired() {
-		Fragment fragment = new PINInputFragment();
-
-		// show PINInputFragment
-		getFragmentManager().beginTransaction()
-				.replace(R.id.fragment, fragment).addToBackStack(null).commit();
-
-		enableCancel(); // enable cancel if no action is performed by the Open eCard Service
-	}
-
-	///
-	/// Callback to receive the Eac Gui interface which is used to interact with the Open eCard library.
-	///
-
-	@Override
-	public void onEacIfaceSet(EacGui eacGui) {
-		eacService = eacGui;
-		try {
-			final ServerData serverData = eacService.getServerData();
-			// show ServerData on ui thread, async
-			runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					onServerDataPresent(serverData);
-				}
-			});
-		} catch (InterruptedException ex) {
-			LOG.error(ex.getMessage(), ex);
-		}
-	}
-
-	///
-	/// Callbacks where you can open a Dialog which says that the card should be removed.
-	///
-
-	@Override
-	public Dialog showCardRemoveDialog() {
-		AlertDialog dialog = new AlertDialog.Builder(this)
-				.setTitle("Remove the Card")
-				.setMessage("Please remove the identity card.")
-				.setNeutralButton("Proceed", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.dismiss();
-					}
-				})
-				.create();
-		dialog.show();
-		return dialog;
-	}
-
-	///
-	/// Methods which indicate whether the authentication was successful or incorrectly.
-	///
-
-	@Override
-	public void onAuthenticationFailure(ActivationResult activationResult) {
-		LOG.info("Authentication failed: " + activationResult.getResultCode().name());
-		if (activationResult.getErrorMessage() != null) {
-			showFailureFragment(activationResult.getErrorMessage());
-		} else {
-			showFailureFragment("Authentication failed...");
-		}
-	}
-
-	private void showFailureFragment(String errorMessage) {
-		FailureFragment fragment = new FailureFragment();
-		fragment.setErrorMessage(errorMessage);
-
-		cancelBtn.setVisibility(View.INVISIBLE);
-
-		// show ServerDataFragment
-		getFragmentManager().beginTransaction()
-				.replace(R.id.fragment, fragment).addToBackStack(null).commit();
-	}
-
 
 }
