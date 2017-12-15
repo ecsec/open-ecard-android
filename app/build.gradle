@@ -30,9 +30,6 @@ repositories {
     maven {
         url "https://mvn.ecsec.de/repository/openecard-public"
     }
-    maven {
-        url "https://mvn.ecsec.de/repository/openecard-snapshot"
-    }
 }
 
 def OecVersion = "1.3.0-rc6"
