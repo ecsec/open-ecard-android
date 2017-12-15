@@ -25,7 +25,7 @@
             android:id="@+id/textView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Post App"
+            android:text="Open eCard Demo App"
             android:textAlignment="center" />
 
         <Button
