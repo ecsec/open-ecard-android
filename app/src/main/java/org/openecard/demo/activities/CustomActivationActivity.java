@@ -127,7 +127,7 @@ public class CustomActivationActivity extends AbstractActivationActivity {
 
 		// show ServerDataFragment
 		getFragmentManager().beginTransaction()
-				.replace(R.id.fragment, fragment).addToBackStack(null).commit();
+				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 	}
 
 
