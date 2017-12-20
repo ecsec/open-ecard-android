@@ -156,11 +156,6 @@ public class CustomActivationActivity extends AbstractActivationActivity {
 				showFailureFragment("You canceled the authentication process.");
 			}
 		});
-	}
-
-	@Override
-	protected void onResume() {
-		super.onResume();
 
 		if (findViewById(R.id.fragment) != null) {
 			// show InitFragment
@@ -220,7 +215,7 @@ public class CustomActivationActivity extends AbstractActivationActivity {
 
 		// show PINInputFragment
 		getFragmentManager().beginTransaction()
-				.replace(R.id.fragment, fragment).addToBackStack(null).commit();
+				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 
 		enableCancel(); // enable cancel if no action is performed by the Open eCard Service
 	}
@@ -248,7 +243,7 @@ public class CustomActivationActivity extends AbstractActivationActivity {
 
 		// show ServerDataFragment
 		getFragmentManager().beginTransaction()
-				.replace(R.id.fragment, fragment).addToBackStack(null).commit();
+				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 
 		enableCancel(); // enable cancel if no action is performed by the Open eCard Service
 	}
