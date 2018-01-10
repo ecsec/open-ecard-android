@@ -31,7 +31,6 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import org.openecard.android.activation.AbstractActivationActivity;
 import org.openecard.android.activation.ActivationImplementationInterface;
 import org.openecard.demo.R;
 
