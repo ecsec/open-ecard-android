@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion '26.0.2'
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "org.openecard.demo"
         minSdkVersion 17
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0.0-rc4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -40,9 +40,9 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    implementation 'com.android.support:appcompat-v7:26.+'
+    implementation 'com.android.support:appcompat-v7:27.+'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
-    implementation 'com.android.support:design:26.+'
+    implementation 'com.android.support:design:27.+'
 
     // the actual Open eCard library
     implementation (group:'org.openecard.clients', name:'android-lib', version:"${OecVersion}", ext:"aar", transitive:true)
