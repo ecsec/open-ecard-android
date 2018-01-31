@@ -33,6 +33,7 @@ import org.openecard.android.system.ServiceResponseStatusCodes;
 import org.openecard.android.system.OpeneCardContext;
 import org.openecard.android.system.OpeneCardServiceHandler;
 import org.openecard.android.system.OpeneCardServiceClientHandler;
+import org.openecard.common.util.TR03112Utils;
 import org.openecard.demo.R;
 import org.openecard.android.system.ServiceErrorResponse;
 import org.openecard.android.system.ServiceWarningResponse;
@@ -57,6 +58,9 @@ public class MainActivity extends Activity {
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		// enable developer mode if needed
+		TR03112Utils.DEVELOPER_MODE = false;
 
 		// initialize connection to Open eCard App
 		serviceClient = new OpeneCardServiceClientHandler(this, new InitServiceHandler());
