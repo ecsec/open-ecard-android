@@ -227,20 +227,22 @@ public class CustomActivationActivity extends AppCompatActivity {
 			eacGui.selectAttributes(readAccessAttributes, writeAccessAttributes);
 			// retrieve pin status from eac gui service
 			PinStatus status = eacGui.getPinStatus();
-			if (status == PinStatus.PIN) {
+			if (status.isOperational()) {
 				// show PINInputFragment
-				onPINIsRequired();
+				onPINIsRequired(status);
 			} else {
-				String msg = String.format("PIN Status '{0}' isn't supported yet.", status);
+				String msg = String.format("PIN Status '%s' isn't supported yet.", status);
 				LOG.error(msg);
+				eacGui.cancel();
 			}
 		} catch (InterruptedException ex) {
 			LOG.error(ex.getMessage(), ex);
 		}
 	}
 
-	public void onPINIsRequired() {
-		Fragment fragment = new PINInputFragment();
+	public void onPINIsRequired(PinStatus status) {
+		PINInputFragment fragment = new PINInputFragment();
+		fragment.setStatus(status);
 
 		// show PINInputFragment
 		getFragmentManager().beginTransaction()
@@ -257,6 +259,20 @@ public class CustomActivationActivity extends AppCompatActivity {
 				LOG.info("The PIN is correct.");
 			} else {
 				LOG.info("The PIN isn't correct, the CAN is required.");
+				final PinStatus status = eacGui.getPinStatus();
+				if (status.isOperational()) {
+					// show PINInputFragment
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							onPINIsRequired(status);
+						}
+					});
+				} else {
+					String msg = String.format("PIN Status '%s' isn't supported yet.", status);
+					LOG.error(msg);
+					eacGui.cancel();
+				}
 			}
 		} catch (InterruptedException ex) {
 			LOG.error(ex.getMessage(), ex);

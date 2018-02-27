@@ -29,6 +29,13 @@
             android:ems="15"
             android:inputType="numberPassword"/>
 
+        <EditText
+            android:id="@+id/canInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="15"
+            android:inputType="numberPassword"/>
+
         <Button
             android:id="@+id/btnPINInput"
             android:layout_width="match_parent"
