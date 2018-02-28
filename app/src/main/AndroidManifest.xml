@@ -11,10 +11,6 @@
     <!-- NFC -->
     <uses-permission android:name="android.permission.NFC"/>
 
-    <uses-feature
-        android:name="android.hardware.nfc"
-        android:required="true" />
-
     <!-- Other permissions -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.CLEAR_APP_CACHE"/>
