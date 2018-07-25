@@ -19,7 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|center_horizontal"
-            android:text="Activation URL: "
+            android:text="TCToken URL: "
             app:layout_anchorGravity="center_vertical|center_horizontal"/>
 
         <AutoCompleteTextView
