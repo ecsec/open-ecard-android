@@ -93,7 +93,7 @@ public class PINInputFragment extends Fragment {
 		canText.setFocusable(true);
 
 		final Button buttonContinue = view.findViewById(R.id.btnPINInput);
-		buttonContinue.setEnabled(true);
+		buttonContinue.setEnabled(false);
 
 		pinText.addTextChangedListener(new TextWatcher() {
 			@Override
