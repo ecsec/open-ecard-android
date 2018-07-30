@@ -26,6 +26,8 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +36,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
 import org.openecard.demo.R;
 import org.openecard.demo.activities.CustomActivationActivity;
 import org.openecard.gui.android.eac.types.PinStatus;
@@ -46,6 +49,8 @@ public class PINInputFragment extends Fragment {
 
 	private static final String PERFORM_PIN_INPUT = "Please wait a moment...";
 	private static final String PROVIDE_PIN = "Please provide the PIN to the corresponding identity card.";
+	private static final String WRONG_PIN = "The entered PIN was wrong, please try again.";
+	private static final String NEED_CAN = "The entered PIN was wrong, please try again and also enter your CAN.";
 
 	private PinStatus status;
 	private EditText pinTextField;
@@ -67,15 +72,78 @@ public class PINInputFragment extends Fragment {
 		//pinText.requestFocus();
 
 		final EditText canText = view.findViewById(R.id.canInput);
-		if (status != null && ! status.needsCan()) {
-			canText.setVisibility(View.GONE);
+		if (status != null) {
+			if (!status.needsCan()) {
+				canText.setVisibility(View.GONE);
+
+				if (status == PinStatus.RC2) {
+					logLabel.setVisibility(View.VISIBLE);
+					logLabel.setText(WRONG_PIN);
+				} else if (status == PinStatus.RC3) {
+					logLabel.setVisibility(View.VISIBLE);
+					logLabel.setText(PROVIDE_PIN);
+				}
+
+			} else {
+				logLabel.setVisibility(View.VISIBLE);
+				logLabel.setText(NEED_CAN);
+			}
 		}
 		canText.setEnabled(true);
 		canText.setFocusable(true);
 
-
 		final Button buttonContinue = view.findViewById(R.id.btnPINInput);
 		buttonContinue.setEnabled(true);
+
+		pinText.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			}
+
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+
+				boolean pinLengthCorrect = pinText.getText().toString().length() == 6;
+				boolean canContinue = pinLengthCorrect;
+
+				if(canText.getVisibility() == View.VISIBLE) {
+					canContinue = canContinue && canText.getText().toString().length() == 6;
+				}
+
+				buttonContinue.setEnabled(canContinue);
+			}
+
+			@Override
+			public void afterTextChanged(Editable s) {
+			}
+		});
+
+		canText.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			}
+
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+
+				boolean pinLengthCorrect = pinText.getText().toString().length() == 6;
+				boolean canContinue = pinLengthCorrect;
+
+				if(canText.getVisibility() == View.VISIBLE) {
+					canContinue = canContinue && canText.getText().toString().length() == 6;
+				}
+
+				buttonContinue.setEnabled(canContinue);
+			}
+
+			@Override
+			public void afterTextChanged(Editable s) {
+			}
+		});
+
+
 		buttonContinue.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
@@ -104,8 +172,6 @@ public class PINInputFragment extends Fragment {
 								((CustomActivationActivity) activity).enterPIN(can, pin);
 							}
 						}).start();
-					} else {
-						logLabel.setText(PROVIDE_PIN);
 					}
 				}
 			}
