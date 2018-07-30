@@ -23,14 +23,19 @@
 package org.openecard.demo.activities;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
+import org.openecard.android.activation.ActivationImplementationInterface;
 import org.openecard.demo.R;
-import org.openecard.demo.fragments.WebViewFragment;
+import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.URLInputFragment;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 
 /**
@@ -39,6 +44,7 @@ import org.openecard.demo.fragments.URLInputFragment;
  */
 public class IdsActivity extends AppCompatActivity {
 
+	private String defaultTcTokenURL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_20&redirect=true";
 	private Button cancelBtn;
 
 	@Override
@@ -56,24 +62,63 @@ public class IdsActivity extends AppCompatActivity {
 		});
 
 		if (findViewById(R.id.fragment) != null) {
-			init();
+
+			Uri uri = getIntent().getData();
+
+			if(uri != null) {
+
+				if((uri.getHost().equals("localhost") || uri.getHost().equals("127.0.0.1")) && uri.getPort() == 24727) {  //activate
+					activate(uri.toString());
+				} else { //redirect
+					showRedirectAddress(getIntent().getData());
+				}
+
+			} else {
+				init();
+			}
 		}
 
 	}
 
 	public void onUrlSelection(String url) {
-		WebViewFragment fragment = new WebViewFragment();
-		fragment.setUrl(url);
+
+		try {
+			String encoded = URLEncoder.encode(url, "UTF-8");
+			String actUrl = "/eID-Client?tcTokenURL=" + encoded;
+			activate(actUrl);
+
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void activate(String url)
+	{// perform explicit URL Intent to the Activation Activity
+		Intent i = new Intent(Intent.ACTION_VIEW);
+		i.setClass(IdsActivity.this, CustomActivationActivity.class);
+		i.setData(Uri.parse(url));
+		// add class name for explicit redirect Intent
+		i.putExtra(ActivationImplementationInterface.RETURN_CLASS, IdsActivity.class.getName());
+		startActivity(i);
+
+		enableCancel();}
+
+	private void showRedirectAddress(Uri address) {
+		String message = "You would be redirected to: "+address.toString();
+
+		FailureFragment fragment = new FailureFragment(); //no actual failure, just reusing the fragment
+		fragment.setErrorMessage(message);
+
+		cancelBtn.setVisibility(View.INVISIBLE);
+
 		getFragmentManager().beginTransaction()
 				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
-
-		enableCancel();
 	}
 
 
 	public void init() {
 		URLInputFragment fragment = new URLInputFragment();
-		fragment.setDefaultUrl(getIntent().getData().toString());
+		fragment.setDefaultUrl(defaultTcTokenURL);
 
 		getFragmentManager().beginTransaction()
 				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
