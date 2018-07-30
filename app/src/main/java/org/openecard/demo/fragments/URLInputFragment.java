@@ -2,6 +2,7 @@ package org.openecard.demo.fragments;
 
 
 import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -12,9 +13,15 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+
 import org.openecard.demo.R;
 import org.openecard.demo.activities.IdsActivity;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +32,9 @@ import java.util.List;
 public class URLInputFragment extends Fragment {
 
 	private String defaultUrl;
+	private final InternalStorage storage = new InternalStorage();
+	private List<String> urls;
+	private ArrayAdapter<String> adapter;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -34,10 +44,8 @@ public class URLInputFragment extends Fragment {
 		final Button okBtn = view.findViewById(R.id.btnContinue);
 		okBtn.setEnabled(false);
 
-		List<String> urls = new ArrayList<>();
-		urls.add("https://test.com");
-
-		ArrayAdapter<String> adapter = new ArrayAdapter<>(view.getContext(), android.R.layout.simple_list_item_1, urls);
+		urls = getUrlsFromCache();
+		adapter = new ArrayAdapter<>(view.getContext(), android.R.layout.simple_list_item_1, urls);
 		urlInput.setAdapter(adapter);
 
 		urlInput.addTextChangedListener(new TextWatcher() {
@@ -57,7 +65,6 @@ public class URLInputFragment extends Fragment {
 
 		if (defaultUrl != null) {
 			urlInput.setText(defaultUrl);
-			adapter.add(defaultUrl);
 		}
 
 		okBtn.setOnClickListener(new View.OnClickListener() {
@@ -66,6 +73,7 @@ public class URLInputFragment extends Fragment {
 				String url = urlInput.getText().toString();
 
 				if(isValidUrl(url)) {
+					cacheUrl(url);
 					((IdsActivity)getActivity()).onUrlSelection(url);
 				}
 			}
@@ -80,7 +88,59 @@ public class URLInputFragment extends Fragment {
 		}
 	}
 
+	private void cacheUrl(String url) {
+
+		if(!urls.contains(url)) {
+			adapter.add(url);
+			urls.add(url);
+			cacheUrlsToFile(urls);
+		}
+	}
+
 	private boolean isValidUrl(String url) {
 		return  Patterns.WEB_URL.matcher(url).matches();
+	}
+
+	private List<String> getUrlsFromCache(){
+		try {
+			List<String> urls = (List<String>) storage.readObject(getActivity().getApplicationContext());
+			return  urls;
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+
+		return new ArrayList<>();
+	}
+
+	private void cacheUrlsToFile(List<String> urls) {
+		try {
+			storage.writeObject(getActivity().getApplicationContext(), urls);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private final class InternalStorage{
+
+		private final String key = "CACHED_URLS";
+		private InternalStorage() {}
+
+		public void writeObject(Context context, Object object) throws IOException {
+			FileOutputStream fos = context.openFileOutput(key, Context.MODE_PRIVATE);
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			oos.writeObject(object);
+			oos.close();
+			fos.close();
+		}
+
+		public Object readObject(Context context) throws IOException,
+				ClassNotFoundException {
+			FileInputStream fis = context.openFileInput(key);
+			ObjectInputStream ois = new ObjectInputStream(fis);
+			Object object = ois.readObject();
+			return object;
+		}
 	}
 }
