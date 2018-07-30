@@ -202,7 +202,16 @@ public class CustomActivationActivity extends AppCompatActivity {
 		super.onNewIntent(intent);
 		activationImpl.onNewIntent(intent);
 		// if you receive a nfc tag, disable the cancel button until the next fragment comes in
-		disableCancel();
+		//disableCancel();
+
+		if (findViewById(R.id.fragment) != null) {
+			// show InitFragment
+			Fragment fragment = new WaitFragment();
+			cancelBtn.setVisibility(View.VISIBLE);
+			fragment.setArguments(getIntent().getExtras());
+			getFragmentManager().beginTransaction()
+					.replace(R.id.fragment, fragment).addToBackStack(null).commit();
+		}
 	}
 
 
