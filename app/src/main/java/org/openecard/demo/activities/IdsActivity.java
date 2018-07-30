@@ -32,6 +32,7 @@ import android.widget.Button;
 import org.openecard.android.activation.ActivationImplementationInterface;
 import org.openecard.demo.R;
 import org.openecard.demo.fragments.FailureFragment;
+import org.openecard.demo.fragments.RedirectFragment;
 import org.openecard.demo.fragments.URLInputFragment;
 
 import java.io.UnsupportedEncodingException;
@@ -109,10 +110,8 @@ public class IdsActivity extends AppCompatActivity {
 		enableCancel();}
 
 	private void showRedirectAddress(Uri address) {
-		String message = "You would be redirected to: "+address.toString();
-
-		FailureFragment fragment = new FailureFragment(); //no actual failure, just reusing the fragment
-		fragment.setErrorMessage(message);
+		RedirectFragment fragment = new RedirectFragment();
+		fragment.setRedirectUrl(address.toString());
 
 		cancelBtn.setVisibility(View.INVISIBLE);
 
