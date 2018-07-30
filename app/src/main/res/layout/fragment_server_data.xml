@@ -118,7 +118,7 @@
                     android:id="@+id/textViewValidity"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="SubjectURL: " />
+                    android:text="Validity: " />
 
                 <Space
                     android:layout_width="20dp"
