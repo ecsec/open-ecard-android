@@ -34,11 +34,13 @@ import android.widget.Button;
 import java.util.List;
 import org.openecard.android.activation.AbstractActivationHandler;
 import org.openecard.android.activation.ActivationResult;
+import org.openecard.android.activation.ActivationController;
 import org.openecard.demo.R;
 import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.InitFragment;
 import org.openecard.demo.fragments.PINInputFragment;
 import org.openecard.demo.fragments.ServerDataFragment;
+import org.openecard.demo.fragments.WaitFragment;
 import org.openecard.gui.android.eac.EacGui;
 import org.openecard.gui.android.eac.types.BoxItem;
 import org.openecard.gui.android.eac.types.PinStatus;
@@ -231,7 +233,8 @@ public class CustomActivationActivity extends AppCompatActivity {
 				// show PINInputFragment
 				onPINIsRequired(status);
 			} else {
-				String msg = String.format("PIN Status '%s' isn't supported yet.", status);
+				String msg = String.format("PIN Status is '%s'.", status);
+				showFailureFragment(msg);
 				LOG.error(msg);
 				eacGui.cancel();
 			}
@@ -269,7 +272,8 @@ public class CustomActivationActivity extends AppCompatActivity {
 						}
 					});
 				} else {
-					String msg = String.format("PIN Status '%s' isn't supported yet.", status);
+					String msg = String.format("PIN Status is '%s'.", status);
+					showFailureFragment(msg);
 					LOG.error(msg);
 					eacGui.cancel();
 				}
