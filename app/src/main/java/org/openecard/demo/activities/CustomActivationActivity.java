@@ -139,7 +139,10 @@ public class CustomActivationActivity extends AppCompatActivity {
 
 	}
 
-
+	@Override
+	public void onBackPressed() {
+		//deactivate
+	}
 
 
 

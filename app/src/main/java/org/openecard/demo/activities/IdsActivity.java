@@ -48,6 +48,12 @@ public class IdsActivity extends AppCompatActivity {
 	private Button cancelBtn;
 
 	@Override
+	public void onBackPressed() {
+		Intent intent = new Intent(IdsActivity.this, MainActivity.class);
+		startActivity(intent);
+	}
+
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_ids);
@@ -56,8 +62,7 @@ public class IdsActivity extends AppCompatActivity {
 		cancelBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				Intent intent = new Intent(IdsActivity.this, MainActivity.class);
-				startActivity(intent);
+				onBackPressed();
 			}
 		});
 
