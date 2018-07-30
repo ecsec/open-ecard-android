@@ -112,9 +112,12 @@ public class MainActivity extends Activity {
 		@Override
 		public void onConnectionSuccess(OpeneCardContext ctx) {
 			stopBtn.setEnabled(true);
-			String idsUri = "https://service.skidentity.de/ids/#ctx=idm";
+
 			Intent i = new Intent(getApplicationContext(), IdsActivity.class);
-			i.setData(Uri.parse(idsUri));
+			if(getIntent().getData() != null){
+				i.setData(getIntent().getData());
+			}
+
 			startActivity(i);
 		}
 
