@@ -28,13 +28,14 @@ import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import java.util.List;
 import org.openecard.android.activation.AbstractActivationHandler;
 import org.openecard.android.activation.ActivationResult;
-import org.openecard.android.activation.ActivationController;
+import org.openecard.android.activation.ActivationResultCode;
 import org.openecard.demo.R;
 import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.InitFragment;
@@ -132,6 +133,8 @@ public class CustomActivationActivity extends AppCompatActivity {
 			LOG.info("Authentication failed: " + activationResult.getResultCode().name());
 			if (activationResult.getErrorMessage() != null) {
 				showFailureFragment(activationResult.getErrorMessage());
+ 			} else if (activationResult.getResultCode().equals(ActivationResultCode.INTERRUPTED)){
+				showFailureFragment("User cancelled authentication process.");
 			} else {
 				showFailureFragment("Authentication failed...");
 			}
@@ -177,11 +180,28 @@ public class CustomActivationActivity extends AppCompatActivity {
 		cancelBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				if (eacGui != null) {
-					eacGui.cancel();
-				}
-				showFailureFragment("You canceled the authentication process.");
 
+				LOG.info("Cancel pressed");
+				cancelBtn.setEnabled(false);
+				cancelBtn.setClickable(false);
+
+				WaitFragment fragment = new WaitFragment();
+				fragment.setWaitMessage("Cancelling authentication...");
+				fragment.setArguments(getIntent().getExtras());
+				getFragmentManager().beginTransaction()
+						.replace(R.id.fragment, fragment).addToBackStack(null).commit();
+
+				Handler handler = new Handler();
+				handler.postDelayed(new Runnable() {
+					@Override
+					public void run() {
+						if (eacGui != null) {
+							eacGui.cancel();
+						} else {
+							activationImpl.cancelAuthentication();
+						}
+					}
+				}, 100);
 			}
 		});
 
@@ -206,7 +226,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 		super.onNewIntent(intent);
 		activationImpl.onNewIntent(intent);
 		// if you receive a nfc tag, disable the cancel button until the next fragment comes in
-		disableCancel();
+		//disableCancel();
 
 		if (findViewById(R.id.fragment) != null) {
 			// show InitFragment
