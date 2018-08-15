@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import org.openecard.demo.R;
 
@@ -36,9 +37,21 @@ import org.openecard.demo.R;
  */
 public class WaitFragment extends Fragment {
 
+	private String txtMsg;
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.fragment_wait, container, false);
+		final View view = inflater.inflate(R.layout.fragment_wait, container, false);
+
+		final TextView textView = view.findViewById(R.id.txtMsg);
+		if (txtMsg != null) {
+			textView.setText(txtMsg);
+		}
+
+		return view;
 	}
 
+	public void setWaitMessage(String msg) {
+		txtMsg = msg;
+	}
 }
