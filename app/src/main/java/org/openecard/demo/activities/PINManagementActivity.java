@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -12,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
+import org.openecard.android.activation.ActivationImplementationInterface;
 import org.openecard.android.activation.ActivationResult;
 import org.openecard.android.activation.PinMgmtActivationHandler;
 import org.openecard.demo.R;
@@ -54,7 +56,16 @@ public class PINManagementActivity extends AppCompatActivity {
 
         @Override
         public void onAuthenticationFailure(ActivationResult result) {
+            LOG.info("Authentication failure: {}", result);
+        }
 
+        @Override
+        public void onAuthenticationInterrupted(ActivationResult result) {
+            LOG.info("Authentication interrupted: {}", result);
+            //back to Main menu
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setClass(PINManagementActivity.this, IdsActivity.class);
+            startActivity(i);
         }
 
         @Nullable
@@ -87,7 +98,7 @@ public class PINManagementActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        //deactivate
+        activationImpl.cancelAuthentication();
     }
 
 
@@ -135,6 +146,7 @@ public class PINManagementActivity extends AppCompatActivity {
                         if (pinMngGui != null) {
                             pinMngGui.cancel();
                         }
+                        activationImpl.cancelAuthentication();
                     }
                 }, 100);
             }
