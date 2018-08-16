@@ -32,14 +32,14 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import java.util.List;
-import org.openecard.android.activation.AbstractActivationHandler;
+
 import org.openecard.android.activation.ActivationResult;
 import org.openecard.android.activation.ActivationResultCode;
 import org.openecard.android.activation.EacActivationHandler;
 import org.openecard.demo.R;
 import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.InitFragment;
+import org.openecard.demo.fragments.PINBlockedFragment;
 import org.openecard.demo.fragments.PINInputFragment;
 import org.openecard.demo.fragments.ServerDataFragment;
 import org.openecard.demo.fragments.WaitFragment;
@@ -49,6 +49,8 @@ import org.openecard.gui.android.eac.types.PinStatus;
 import org.openecard.gui.android.eac.types.ServerData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 
 /**
@@ -139,6 +141,13 @@ public class CustomActivationActivity extends AppCompatActivity {
 			} else {
 				showFailureFragment("Authentication failed...");
 			}
+		}
+
+		@Override
+		public void onAuthenticationInterrupted(ActivationResult result) {
+			// forward as failure. Can be overridden by the implementor
+			// ignore
+			LOG.info("authentication interrupted");
 		}
 
 	}
@@ -266,6 +275,9 @@ public class CustomActivationActivity extends AppCompatActivity {
 			if (status.isOperational()) {
 				// show PINInputFragment
 				onPINIsRequired(status);
+			} else if(status.equals(PinStatus.BLOCKED)) {
+				showPINBlockedFragment();
+				activationImpl.cancelAuthentication();
 			} else {
 				String msg = String.format("PIN Status is '%s'.", status);
 				showFailureFragment(msg);
@@ -305,6 +317,10 @@ public class CustomActivationActivity extends AppCompatActivity {
 							onPINIsRequired(status);
 						}
 					});
+				} else if(status.equals(PinStatus.BLOCKED)) {
+					showPINBlockedFragment();
+					activationImpl.cancelAuthentication();
+
 				} else {
 					String msg = String.format("PIN Status is '%s'.", status);
 					showFailureFragment(msg);
@@ -339,6 +355,12 @@ public class CustomActivationActivity extends AppCompatActivity {
 		cancelBtn.setVisibility(View.INVISIBLE);
 
 		// show ServerDataFragment
+		getFragmentManager().beginTransaction()
+				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
+	}
+
+	private void showPINBlockedFragment(){
+		PINBlockedFragment fragment = new PINBlockedFragment();
 		getFragmentManager().beginTransaction()
 				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 	}
