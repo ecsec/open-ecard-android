@@ -3,6 +3,8 @@ package org.openecard.demo.fragments;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -14,8 +16,11 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 
+import org.openecard.android.activation.ActivationImplementationInterface;
 import org.openecard.demo.R;
 import org.openecard.demo.activities.IdsActivity;
+import org.openecard.demo.activities.MainActivity;
+import org.openecard.demo.activities.PINManagementActivity;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -76,6 +81,18 @@ public class URLInputFragment extends Fragment {
 					cacheUrl(url);
 					((IdsActivity)getActivity()).onUrlSelection(url);
 				}
+			}
+		});
+
+		final Button pinManagement = view.findViewById(R.id.btnPinManagement);
+		pinManagement.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				Intent i = new Intent(Intent.ACTION_VIEW);
+				i.setClass(getActivity(), PINManagementActivity.class);
+				i.setData(Uri.parse("/eID-Client?ShowUI=PINManagement"));
+				i.putExtra(ActivationImplementationInterface.RETURN_CLASS, MainActivity.class.getName());
+				startActivity(i);
 			}
 		});
 
