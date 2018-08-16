@@ -36,6 +36,7 @@ import java.util.List;
 import org.openecard.android.activation.AbstractActivationHandler;
 import org.openecard.android.activation.ActivationResult;
 import org.openecard.android.activation.ActivationResultCode;
+import org.openecard.android.activation.EacActivationHandler;
 import org.openecard.demo.R;
 import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.InitFragment;
@@ -66,7 +67,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 
 	private Button cancelBtn;
 
-	private final AbstractActivationHandler<CustomActivationActivity> activationImpl;
+	private final EacActivationHandler<CustomActivationActivity> activationImpl;
 	private EacGui eacGui;
 
 	public CustomActivationActivity() {
@@ -78,7 +79,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 	/// Implementation of the ActivationHandler
 	///
 
-	private class ActivationImpl extends AbstractActivationHandler<CustomActivationActivity> {
+	private class ActivationImpl extends EacActivationHandler<CustomActivationActivity> {
 
 		public ActivationImpl() {
 			super(CustomActivationActivity.this);
@@ -91,7 +92,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 
 		// Callback to receive the Eac Gui interface which is used to interact with the Open eCard library.
 		@Override
-		public void onEacIfaceSet(EacGui eacGui) {
+		public void onGuiIfaceSet(EacGui eacGui) {
 			CustomActivationActivity.this.eacGui = eacGui;
 			try {
 				// this one blocks until the data is available, but it's ok as this is run in the background
