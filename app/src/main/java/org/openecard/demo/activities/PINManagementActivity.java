@@ -270,6 +270,12 @@ public class PINManagementActivity extends AppCompatActivity {
             if(!changeSuccessful) {
                 initPinChangeGui();
             } else {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        cancelBtn.setEnabled(false);
+                    }
+                });
                 showMessageFragment("Your PIN was changed successfully.");
                 pinMngGui.cancel();
             }
