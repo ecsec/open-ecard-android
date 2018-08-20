@@ -64,7 +64,7 @@ public class PINManagementActivity extends AppCompatActivity {
             LOG.info("Authentication interrupted: {}", result);
             //back to Main menu
             Intent i = new Intent(Intent.ACTION_VIEW);
-            i.setClass(PINManagementActivity.this, IdsActivity.class);
+            i.setClass(PINManagementActivity.this, MainActivity.class);
             startActivity(i);
         }
 
