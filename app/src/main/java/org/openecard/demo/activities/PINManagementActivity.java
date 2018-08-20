@@ -176,8 +176,8 @@ public class PINManagementActivity extends AppCompatActivity {
         // if you receive a nfc tag, disable the cancel button until the next fragment comes in
         //disableCancel();
 
-        if (findViewById(R.id.fragment) != null) {
-            // show InitFragment
+        if (pinMngGui == null || findViewById(R.id.fragment) != null) {
+            // show WaitFragment
             Fragment fragment = new WaitFragment();
             cancelBtn.setVisibility(View.VISIBLE);
             fragment.setArguments(getIntent().getExtras());
