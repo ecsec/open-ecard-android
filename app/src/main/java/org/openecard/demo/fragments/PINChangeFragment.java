@@ -94,7 +94,7 @@ public class PINChangeFragment extends Fragment {
 
                     final String pin = pinText.getText().toString();
 
-                    if (pin.length() == 6) {
+                    if (pin.length() == 6 || pin.length() == 5) { // for transport PIN
                         buttonContinue.setEnabled(false);
                         pinText.setEnabled(false);
                         pinText.setFocusable(false);
