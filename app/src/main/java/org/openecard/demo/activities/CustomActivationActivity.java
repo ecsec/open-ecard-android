@@ -34,7 +34,6 @@ import android.view.View;
 import android.widget.Button;
 
 import org.openecard.android.activation.ActivationResult;
-import org.openecard.android.activation.ActivationResultCode;
 import org.openecard.android.activation.EacActivationHandler;
 import org.openecard.demo.R;
 import org.openecard.demo.fragments.FailureFragment;
@@ -136,18 +135,15 @@ public class CustomActivationActivity extends AppCompatActivity {
 			LOG.info("Authentication failed: " + activationResult.getResultCode().name());
 			if (activationResult.getErrorMessage() != null) {
 				showFailureFragment(activationResult.getErrorMessage());
- 			} else if (activationResult.getResultCode().equals(ActivationResultCode.INTERRUPTED)){
-				showFailureFragment("User cancelled authentication process.");
-			} else {
+ 			} else {
 				showFailureFragment("Authentication failed...");
 			}
 		}
 
 		@Override
 		public void onAuthenticationInterrupted(ActivationResult result) {
-			// forward as failure. Can be overridden by the implementor
-			// ignore
 			LOG.info("authentication interrupted");
+			showFailureFragment("User cancelled authentication.");
 		}
 
 	}

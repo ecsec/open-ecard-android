@@ -57,15 +57,25 @@ public class PINManagementActivity extends AppCompatActivity {
         @Override
         public void onAuthenticationFailure(ActivationResult result) {
             LOG.info("Authentication failure: {}", result);
+            showMessageFragment("An error occurred: "+result.getErrorMessage());
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    cancelBtn.setEnabled(false);
+                }
+            });
         }
 
         @Override
         public void onAuthenticationInterrupted(ActivationResult result) {
             LOG.info("Authentication interrupted: {}", result);
-            //back to Main menu
-            Intent i = new Intent(Intent.ACTION_VIEW);
-            i.setClass(PINManagementActivity.this, MainActivity.class);
-            startActivity(i);
+            showMessageFragment("User cancelled PIN Management");
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    cancelBtn.setEnabled(false);
+                }
+            });
         }
 
         @Nullable
