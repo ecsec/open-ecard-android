@@ -273,7 +273,6 @@ public class CustomActivationActivity extends AppCompatActivity {
 				onPINIsRequired(status);
 			} else if(status.equals(PinStatus.BLOCKED)) {
 				showPINBlockedFragment();
-				activationImpl.cancelAuthentication();
 				eacGui.cancel();
 			} else {
 				String msg = String.format("PIN Status is '%s'.", status);
@@ -316,7 +315,6 @@ public class CustomActivationActivity extends AppCompatActivity {
 					});
 				} else if(status.equals(PinStatus.BLOCKED)) {
 					showPINBlockedFragment();
-					activationImpl.cancelAuthentication();
 					eacGui.cancel();
 
 				} else {
