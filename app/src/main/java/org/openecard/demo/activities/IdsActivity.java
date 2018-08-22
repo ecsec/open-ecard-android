@@ -52,6 +52,7 @@ public class IdsActivity extends AppCompatActivity {
 	public void onBackPressed() {
 		Intent intent = new Intent(IdsActivity.this, MainActivity.class);
 		startActivity(intent);
+		finish();
 	}
 
 	@Override

@@ -22,6 +22,7 @@
 
 package org.openecard.demo.fragments;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
@@ -32,7 +33,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import org.openecard.demo.R;
+import org.openecard.demo.activities.CustomActivationActivity;
 import org.openecard.demo.activities.MainActivity;
+import org.openecard.demo.activities.PINManagementActivity;
 
 
 /**
@@ -55,8 +58,12 @@ public class FailureFragment extends Fragment {
 		button.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				Intent intent = new Intent(getActivity(), MainActivity.class);
+
+				Activity activity = getActivity();
+				Intent intent = new Intent(activity, MainActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
+				activity.finish();
 			}
 		});
 

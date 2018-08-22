@@ -22,6 +22,7 @@
 
 package org.openecard.demo.fragments;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.net.Uri;
@@ -56,8 +57,11 @@ public class RedirectFragment extends Fragment {
 		button.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				Intent intent = new Intent(getActivity(), MainActivity.class);
+				Activity activity = getActivity();
+				Intent intent = new Intent(activity, MainActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
+				activity.finish();
 			}
 		});
 

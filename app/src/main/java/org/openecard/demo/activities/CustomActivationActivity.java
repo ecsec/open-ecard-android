@@ -345,7 +345,6 @@ public class CustomActivationActivity extends AppCompatActivity {
 		enableCancel(); // enable cancel if no action is performed by the Open eCard Service
 	}
 
-
 	private void showFailureFragment(String errorMessage) {
 		FailureFragment fragment = new FailureFragment();
 		fragment.setErrorMessage(errorMessage);
