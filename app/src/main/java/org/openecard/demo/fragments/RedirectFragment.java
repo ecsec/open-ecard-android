@@ -50,7 +50,7 @@ public class RedirectFragment extends Fragment {
 
 		final TextView textView = view.findViewById(R.id.txtMsg1);
 		if (url != null) {
-			textView.setText("You would be redirected to: "+url);
+			textView.setText(String.format("You would be redirected to: %s", url));
 		}
 
 		final Button button = view.findViewById(R.id.btnStartOpeneCardService1);
