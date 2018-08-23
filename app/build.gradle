@@ -49,7 +49,7 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:1.7.25'
 
     // logging library, use whatever you like to output the slf4j log statements
-    implementation 'com.github.tony19:logback-android-classic:1.1.1-6'
+    implementation 'com.github.tony19:logback-android:1.1.1-12'
 
     testImplementation 'junit:junit:4.12'
 }
