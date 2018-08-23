@@ -25,6 +25,7 @@ package org.openecard.demo.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -90,6 +91,11 @@ public class MainActivity extends Activity {
 				serviceClient.stopService();
 			}
 		});
+
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+			startBtn.setEnabled(false);
+			// TODO: Display text, that android version is too old
+		}
 	}
 
 	@Override

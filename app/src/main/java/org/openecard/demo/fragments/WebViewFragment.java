@@ -1,5 +1,7 @@
 package org.openecard.demo.fragments;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.content.Intent;
 import android.net.Uri;
@@ -21,12 +23,13 @@ import org.openecard.demo.activities.IdsActivity;
 /**
  * @author Sebastian Schuberth
  */
-
+@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class WebViewFragment extends Fragment {
 
 	private String url;
 
 	@Override
+	@SuppressLint("SetJavaScriptEnabled")
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		final View view = inflater.inflate(R.layout.fragment_ids, container, false);
 
@@ -41,17 +44,15 @@ public class WebViewFragment extends Fragment {
 		webView.setWebViewClient(new WebViewClient() {
 			@Override
 			public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-					String activationUri = request.getUrl().toString();
-					if (activationUri.contains(":24727/eID-Client")) {
-						// perform explicit URL Intent to the Activation Activity
-						Intent i = new Intent(Intent.ACTION_VIEW);
-						i.setClass(getActivity(), CustomActivationActivity.class);
-						i.setData(Uri.parse(activationUri));
-						// add class name for explicit redirect Intent
-						i.putExtra(ActivationImplementationInterface.RETURN_CLASS, IdsActivity.class.getName());
-						startActivity(i);
-					}
+				String activationUri = request.getUrl().toString();
+				if (activationUri.contains(":24727/eID-Client")) {
+					// perform explicit URL Intent to the Activation Activity
+					Intent i = new Intent(Intent.ACTION_VIEW);
+					i.setClass(getActivity(), CustomActivationActivity.class);
+					i.setData(Uri.parse(activationUri));
+					// add class name for explicit redirect Intent
+					i.putExtra(ActivationImplementationInterface.RETURN_CLASS, IdsActivity.class.getName());
+					startActivity(i);
 				}
 				return false;
 			}
