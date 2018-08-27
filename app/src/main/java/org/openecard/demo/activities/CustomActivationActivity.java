@@ -68,12 +68,9 @@ public class CustomActivationActivity extends AppCompatActivity {
 
 	private Button cancelBtn;
 
-	private final EacActivationHandler<CustomActivationActivity> activationImpl;
+	private EacActivationHandler<CustomActivationActivity> activationImpl;
 	private EacGui eacGui;
-
-	public CustomActivationActivity() {
-		this.activationImpl = new ActivationImpl();
-	}
+	private boolean handleInterrupted = true;
 
 
 	///
@@ -143,7 +140,10 @@ public class CustomActivationActivity extends AppCompatActivity {
 		@Override
 		public void onAuthenticationInterrupted(ActivationResult result) {
 			LOG.info("authentication interrupted");
-			showFailureFragment("User cancelled authentication.");
+
+			if(handleInterrupted) {
+				showFailureFragment("User cancelled authentication.");
+			}
 		}
 
 	}
@@ -162,6 +162,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 	@Override
 	protected void onStart() {
 		super.onStart();
+		this.activationImpl = new ActivationImpl();
 		activationImpl.onStart();
 	}
 
@@ -327,6 +328,24 @@ public class CustomActivationActivity extends AppCompatActivity {
 		} catch (InterruptedException ex) {
 			LOG.error(ex.getMessage(), ex);
 		}
+	}
+
+	public void cancelEacGui(){
+		handleInterrupted = false;
+		if(eacGui != null){
+			eacGui.cancel();
+			LOG.info("Cancelled EAC GUI");
+		}
+	}
+
+	public void cancelAuthentication(){
+		handleInterrupted = false;
+		activationImpl.cancelAuthentication();
+	}
+
+	public void cancelAll(){
+		cancelEacGui();
+		cancelAuthentication();
 	}
 
 	public void onServerDataPresent(ServerData serverData) {
