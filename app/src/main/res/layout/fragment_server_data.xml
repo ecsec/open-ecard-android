@@ -130,7 +130,30 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
 
-            <Button
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center_vertical|center_horizontal"
+            app:layout_anchorGravity="center_vertical|center_horizontal">
+
+            <TextView
+                android:id="@+id/textViewTransactionInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TransactionInfo: " />
+
+            <Space
+                android:layout_width="20dp"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/transactionInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <Button
                 android:id="@+id/btnContinue"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -50,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -65,6 +66,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 	private static final Logger LOG = LoggerFactory.getLogger(CustomActivationActivity.class);
 
 	public static final String BUNDLE_SERVER_DATA = "ServerData";
+	public static final String BUNDLE_TRANSACTION_INFO = "TransactionInfo";
 
 	private Button cancelBtn;
 
@@ -94,13 +96,11 @@ public class CustomActivationActivity extends AppCompatActivity {
 			CustomActivationActivity.this.eacGui = eacGui;
 			try {
 				// this one blocks until the data is available, but it's ok as this is run in the background
-				final ServerData serverData = CustomActivationActivity.this.eacGui.getServerData();
+				ServerData serverData = CustomActivationActivity.this.eacGui.getServerData();
+				String txInfo = CustomActivationActivity.this.eacGui.getTransactionInfo();
 				// show ServerData on ui thread to move context out of the background
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						onServerDataPresent(serverData);
-					}
+				runOnUiThread(() -> {
+					onServerDataPresent(serverData, Optional.ofNullable(txInfo).orElse(""));
 				});
 			} catch (InterruptedException ex) {
 				LOG.error(ex.getMessage(), ex);
@@ -348,11 +348,12 @@ public class CustomActivationActivity extends AppCompatActivity {
 		cancelAuthentication();
 	}
 
-	public void onServerDataPresent(ServerData serverData) {
+	public void onServerDataPresent(ServerData serverData, String txInfo) {
 		Fragment fragment = new ServerDataFragment();
 
 		Bundle bundle = new Bundle();
 		bundle.putSerializable(BUNDLE_SERVER_DATA, serverData);
+		bundle.putString(BUNDLE_TRANSACTION_INFO, txInfo);
 		fragment.setArguments(bundle);
 
 		// show ServerDataFragment

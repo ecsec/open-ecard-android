@@ -51,6 +51,7 @@ public class ServerDataFragment extends Fragment {
 		final View view = inflater.inflate(R.layout.fragment_server_data, container, false);
 
 		final ServerData serverData = (ServerData) getArguments().getSerializable(CustomActivationActivity.BUNDLE_SERVER_DATA);
+		final String transactionInfo = getArguments().getString(CustomActivationActivity.BUNDLE_TRANSACTION_INFO);
 
 		final LinearLayout layout = view.findViewById(R.id.linearLayout);
 
@@ -68,6 +69,9 @@ public class ServerDataFragment extends Fragment {
 
 		TextView validityTxtView = view.findViewById(R.id.validity);
 		validityTxtView.setText(serverData.getValidity());
+
+		TextView txInfoTxtView = view.findViewById(R.id.transactionInfo);
+		txInfoTxtView.setText(transactionInfo);
 
 		final Map<BoxItem, CheckBox> readAccessAttributes = new HashMap<>();
 		for (BoxItem boxItem : serverData.getReadAccessAttributes()) {
