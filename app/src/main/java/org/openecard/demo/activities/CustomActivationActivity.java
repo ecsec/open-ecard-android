@@ -100,7 +100,8 @@ public class CustomActivationActivity extends AppCompatActivity {
 				String txInfo = CustomActivationActivity.this.eacGui.getTransactionInfo();
 				// show ServerData on ui thread to move context out of the background
 				runOnUiThread(() -> {
-					onServerDataPresent(serverData, Optional.ofNullable(txInfo).orElse(""));
+					String ti = txInfo == null ? "" : txInfo;
+					onServerDataPresent(serverData, ti);
 				});
 			} catch (InterruptedException ex) {
 				LOG.error(ex.getMessage(), ex);
