@@ -40,7 +40,7 @@ repositories {
     }
 }
 
-def OecVersion = "1.3.0-rc15"
+def OecVersion = "1.3.0-rc16-SNAPSHOT"
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
