@@ -38,8 +38,6 @@ import org.openecard.demo.R;
 import org.openecard.android.system.ServiceErrorResponse;
 import org.openecard.android.system.ServiceWarningResponse;
 import org.openecard.android.utils.NfcUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -50,8 +48,6 @@ import org.slf4j.LoggerFactory;
  * @author Tobias Wich
  */
 public class MainActivity extends Activity {
-
-	private static final Logger LOG = LoggerFactory.getLogger(MainActivity.class);
 
 	private OpeneCardServiceClientHandler serviceClient;
 
