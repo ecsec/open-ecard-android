@@ -24,7 +24,6 @@ package org.openecard.demo.activities;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -39,6 +38,8 @@ import org.openecard.demo.R;
 import org.openecard.android.system.ServiceErrorResponse;
 import org.openecard.android.system.ServiceWarningResponse;
 import org.openecard.android.utils.NfcUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -49,6 +50,8 @@ import org.openecard.android.utils.NfcUtils;
  * @author Tobias Wich
  */
 public class MainActivity extends Activity {
+
+	private static final Logger LOG = LoggerFactory.getLogger(MainActivity.class);
 
 	private OpeneCardServiceClientHandler serviceClient;
 
@@ -99,12 +102,35 @@ public class MainActivity extends Activity {
 	}
 
 	@Override
+	protected void onResume() {
+		super.onResume();
+
+		boolean isInitialized = serviceClient.isInitialized();
+
+		stopBtn.setEnabled(isInitialized);
+		startBtn.setEnabled(! isInitialized);
+
+		if (isInitialized) {
+			skipStartingStep();
+		}
+	}
+
+	@Override
 	protected void onDestroy() {
 		// stop Open eCard Stack when this activity is destroyed
 		if (serviceClient.isInitialized()) {
 			serviceClient.stopService();
 		}
 		super.onDestroy();
+	}
+
+	public void skipStartingStep() {
+		Intent i = new Intent(getApplicationContext(), IdsActivity.class);
+		if(getIntent().getData() != null){
+			i.setData(getIntent().getData());
+		}
+
+		startActivity(i);
 	}
 
 
@@ -118,13 +144,7 @@ public class MainActivity extends Activity {
 		@Override
 		public void onConnectionSuccess(OpeneCardContext ctx) {
 			stopBtn.setEnabled(true);
-
-			Intent i = new Intent(getApplicationContext(), IdsActivity.class);
-			if(getIntent().getData() != null){
-				i.setData(getIntent().getData());
-			}
-
-			startActivity(i);
+			skipStartingStep();
 		}
 
 		@Override
