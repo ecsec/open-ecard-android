@@ -208,8 +208,9 @@ public class CustomActivationActivity extends AppCompatActivity {
 						} else {
 							activationImpl.cancelAuthentication();
 						}
+						showFailureFragment("The User cancelled the authentication procedure.");
 					}
-				}, 100);
+				}, 1000);
 			}
 		});
 
