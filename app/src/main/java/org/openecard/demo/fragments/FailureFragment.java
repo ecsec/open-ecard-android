@@ -61,7 +61,7 @@ public class FailureFragment extends Fragment {
 
 				Activity activity = getActivity();
 				Intent intent = new Intent(activity, MainActivity.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 				startActivity(intent);
 				activity.finish();
 			}
