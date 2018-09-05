@@ -41,12 +41,14 @@ import java.net.URLEncoder;
 
 
 /**
+ * Activity which provides an UI to choose what the next step would be, e.g. example authentication or PIN management.
+ *
  * @author Mike Prechtl
  * @author Sebastian Schuberth
  */
-public class IdsActivity extends AppCompatActivity {
+public class UseCaseSelectorActivity extends AppCompatActivity {
 
-	private static final Logger LOG = LoggerFactory.getLogger(IdsActivity.class);
+	private static final Logger LOG = LoggerFactory.getLogger(UseCaseSelectorActivity.class);
 
 	private static final String DEFAULT_TC_TOKEN_URL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_20&redirect=true";
 
@@ -58,7 +60,7 @@ public class IdsActivity extends AppCompatActivity {
 
 	@Override
 	public void onBackPressed() {
-		Intent intent = new Intent(IdsActivity.this, MainActivity.class);
+		Intent intent = new Intent(UseCaseSelectorActivity.this, MainActivity.class);
 		startActivity(intent);
 		finish();
 	}
@@ -113,11 +115,11 @@ public class IdsActivity extends AppCompatActivity {
 
 		// perform explicit URL Intent to the Activation Activity
 		Intent i = new Intent(Intent.ACTION_VIEW);
-		i.setClass(IdsActivity.this, CustomActivationActivity.class);
+		i.setClass(UseCaseSelectorActivity.this, CustomActivationActivity.class);
 		i.setData(Uri.parse(url));
 
 		// add class name for explicit redirect Intent
-		i.putExtra(ActivationImplementationInterface.RETURN_CLASS, IdsActivity.class.getName());
+		i.putExtra(ActivationImplementationInterface.RETURN_CLASS, UseCaseSelectorActivity.class.getName());
 		startActivity(i);
 
 		enableCancel();

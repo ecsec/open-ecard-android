@@ -18,7 +18,7 @@ import android.webkit.WebViewClient;
 import org.openecard.android.activation.ActivationImplementationInterface;
 import org.openecard.demo.R;
 import org.openecard.demo.activities.CustomActivationActivity;
-import org.openecard.demo.activities.IdsActivity;
+import org.openecard.demo.activities.UseCaseSelectorActivity;
 
 /**
  * @author Sebastian Schuberth
@@ -51,7 +51,7 @@ public class WebViewFragment extends Fragment {
 					i.setClass(getActivity(), CustomActivationActivity.class);
 					i.setData(Uri.parse(activationUri));
 					// add class name for explicit redirect Intent
-					i.putExtra(ActivationImplementationInterface.RETURN_CLASS, IdsActivity.class.getName());
+					i.putExtra(ActivationImplementationInterface.RETURN_CLASS, UseCaseSelectorActivity.class.getName());
 					startActivity(i);
 				}
 				return false;

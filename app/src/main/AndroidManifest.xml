@@ -66,7 +66,7 @@
             </intent-filter-->
         </activity>
 
-        <activity android:name="org.openecard.demo.activities.IdsActivity"
+        <activity android:name="org.openecard.demo.activities.UseCaseSelectorActivity"
                   android:clearTaskOnLaunch="true"
                   android:configChanges="orientation|screenSize" >
 

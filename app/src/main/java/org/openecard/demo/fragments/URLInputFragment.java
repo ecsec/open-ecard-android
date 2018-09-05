@@ -18,7 +18,7 @@ import android.widget.Button;
 
 import org.openecard.android.activation.ActivationImplementationInterface;
 import org.openecard.demo.R;
-import org.openecard.demo.activities.IdsActivity;
+import org.openecard.demo.activities.UseCaseSelectorActivity;
 import org.openecard.demo.activities.MainActivity;
 import org.openecard.demo.activities.PINManagementActivity;
 
@@ -79,7 +79,7 @@ public class URLInputFragment extends Fragment {
 
 				if(isValidUrl(url)) {
 					cacheUrl(url);
-					((IdsActivity)getActivity()).onUrlSelection(url);
+					((UseCaseSelectorActivity)getActivity()).onUrlSelection(url);
 				}
 			}
 		});

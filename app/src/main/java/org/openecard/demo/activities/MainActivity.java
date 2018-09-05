@@ -115,13 +115,13 @@ public class MainActivity extends Activity {
 	protected void onDestroy() {
 		// stop Open eCard Stack when this activity is destroyed
 		if (serviceClient.isInitialized()) {
-			serviceClient.stopService();
+            serviceClient.stopService();
 		}
 		super.onDestroy();
 	}
 
 	public void skipStartingStep() {
-		Intent i = new Intent(getApplicationContext(), IdsActivity.class);
+		Intent i = new Intent(getApplicationContext(), UseCaseSelectorActivity.class);
 		if(getIntent().getData() != null){
 			i.setData(getIntent().getData());
 		}
