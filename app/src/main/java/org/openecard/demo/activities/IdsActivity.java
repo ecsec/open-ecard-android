@@ -31,9 +31,10 @@ import android.widget.Button;
 
 import org.openecard.android.activation.ActivationImplementationInterface;
 import org.openecard.demo.R;
-import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.RedirectFragment;
 import org.openecard.demo.fragments.URLInputFragment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -45,8 +46,15 @@ import java.net.URLEncoder;
  */
 public class IdsActivity extends AppCompatActivity {
 
-	private String defaultTcTokenURL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_20&redirect=true";
+	private static final Logger LOG = LoggerFactory.getLogger(IdsActivity.class);
+
+	private static final String DEFAULT_TC_TOKEN_URL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_20&redirect=true";
+
 	private Button cancelBtn;
+
+	// indicates if activity stack is thrown away or not
+    // because activation URL from outside can only be used once
+	private static boolean clearActivityHistory = false;
 
 	@Override
 	public void onBackPressed() {
@@ -69,50 +77,56 @@ public class IdsActivity extends AppCompatActivity {
 		});
 
 		if (findViewById(R.id.fragment) != null) {
+			Intent intent = getIntent();
+			Uri intentUri = intent.getData();
 
-			Uri uri = getIntent().getData();
-
-			if(uri != null) {
-
-				if((uri.getHost().equals("localhost") || uri.getHost().equals("127.0.0.1")) && uri.getPort() == 24727) {  //activate
-					activate(uri.toString());
-				} else { //redirect
-					showRedirectAddress(getIntent().getData());
+			if(intentUri != null) {
+				if((intentUri.getHost().equals("localhost") || intentUri.getHost().equals("127.0.0.1"))
+						&& intentUri.getPort() == 24727) {
+					clearActivityHistory = true;
+					activate(intentUri.toString());
+				} else {
+					showRedirectAddress(intentUri);
 				}
-
 			} else {
 				init();
 			}
 		}
-
 	}
 
 	public void onUrlSelection(String url) {
-
 		try {
 			String encoded = URLEncoder.encode(url, "UTF-8");
 			String actUrl = "/eID-Client?tcTokenURL=" + encoded;
-			activate(actUrl);
 
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			clearActivityHistory = false;
+			activate(actUrl);
+		} catch (UnsupportedEncodingException ex) {
+			String msg = "The character encoding is not supported!";
+			LOG.warn(msg, ex);
+			throw new RuntimeException(msg, ex);
 		}
 	}
 
-	private void activate(String url)
-	{// perform explicit URL Intent to the Activation Activity
+	private void activate(String url) {
+        LOG.debug("Activation URL: {}", url);
+
+		// perform explicit URL Intent to the Activation Activity
 		Intent i = new Intent(Intent.ACTION_VIEW);
 		i.setClass(IdsActivity.this, CustomActivationActivity.class);
 		i.setData(Uri.parse(url));
+
 		// add class name for explicit redirect Intent
 		i.putExtra(ActivationImplementationInterface.RETURN_CLASS, IdsActivity.class.getName());
 		startActivity(i);
 
-		enableCancel();}
+		enableCancel();
+	}
 
 	private void showRedirectAddress(Uri address) {
 		RedirectFragment fragment = new RedirectFragment();
 		fragment.setRedirectUrl(address.toString());
+		fragment.clearHistory(clearActivityHistory);
 
 		cancelBtn.setVisibility(View.INVISIBLE);
 
@@ -120,10 +134,9 @@ public class IdsActivity extends AppCompatActivity {
 				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 	}
 
-
 	public void init() {
 		URLInputFragment fragment = new URLInputFragment();
-		fragment.setDefaultUrl(defaultTcTokenURL);
+		fragment.setDefaultUrl(DEFAULT_TC_TOKEN_URL);
 
 		getFragmentManager().beginTransaction()
 				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();

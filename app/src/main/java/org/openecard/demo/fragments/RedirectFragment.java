@@ -44,6 +44,8 @@ public class RedirectFragment extends Fragment {
 
 	private String url;
 
+	private boolean clearHistory = false;
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		final View view = inflater.inflate(R.layout.fragment_redirect, container, false);
@@ -53,20 +55,24 @@ public class RedirectFragment extends Fragment {
 			textView.setText(String.format("You would be redirected to: %s", url));
 		}
 
-		final Button button = view.findViewById(R.id.btnStartOpeneCardService1);
-		button.setOnClickListener(new View.OnClickListener() {
+		final Button backBtn = view.findViewById(R.id.btnStartOpeneCardService1);
+
+		backBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				Activity activity = getActivity();
+
 				Intent intent = new Intent(activity, MainActivity.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+				int flag = clearHistory ? Intent.FLAG_ACTIVITY_CLEAR_TOP : Intent.FLAG_ACTIVITY_REORDER_TO_FRONT;
+				intent.setFlags(flag);
+
 				startActivity(intent);
 				activity.finish();
 			}
 		});
 
-		final Button browser = view.findViewById(R.id.btnOpenBrowser);
-		browser.setOnClickListener(new View.OnClickListener() {
+		final Button redirectBrowserBtn = view.findViewById(R.id.btnOpenBrowser);
+		redirectBrowserBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				Intent i = new Intent(Intent.ACTION_VIEW);
@@ -79,7 +85,11 @@ public class RedirectFragment extends Fragment {
 	}
 
 	public void setRedirectUrl(String redirectUrl) {
-		url = redirectUrl;
+		this.url = redirectUrl;
+	}
+
+	public void clearHistory(boolean clearHistory) {
+		this.clearHistory = clearHistory;
 	}
 
 }
