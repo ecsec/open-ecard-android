@@ -1,3 +1,25 @@
+/****************************************************************************
+ * Copyright (C) 2018 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
+ *
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.demo.activities;
 
 import android.app.AlertDialog;
@@ -5,7 +27,6 @@ import android.app.Dialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -13,7 +34,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
-import org.openecard.android.activation.ActivationImplementationInterface;
 import org.openecard.android.activation.ActivationResult;
 import org.openecard.android.activation.PinMgmtActivationHandler;
 import org.openecard.demo.R;
@@ -29,10 +49,10 @@ import org.openecard.gui.android.pinmanagement.PinStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 public class PINManagementActivity extends AppCompatActivity {
 
     private static final Logger LOG = LoggerFactory.getLogger(PINManagementActivity.class);
-
 
     private final PinMgmtActivationHandler<PINManagementActivity> activationImpl;
     private PINManagementGui pinMngGui;
@@ -42,9 +62,10 @@ public class PINManagementActivity extends AppCompatActivity {
         this.activationImpl = new ActivationImpl();
     }
 
+
     private class ActivationImpl extends PinMgmtActivationHandler<PINManagementActivity> {
 
-        public ActivationImpl() {
+        ActivationImpl() {
             super(PINManagementActivity.this);
         }
 
@@ -196,10 +217,10 @@ public class PINManagementActivity extends AppCompatActivity {
         }
     }
 
-    public void onCANIsRequired(boolean triedBefore){
+    public void onCANIsRequired(boolean triedBefore) {
         GenericInputFragment fragment = new CANInputFragment();
 
-        if(triedBefore){
+        if (triedBefore) {
             fragment.setMessage("The entered CAN was wrong, please try again.");
         }
 
@@ -208,10 +229,10 @@ public class PINManagementActivity extends AppCompatActivity {
                 .replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
     }
 
-    public void onPUKIsRequired(boolean triedBefore){
+    public void onPUKIsRequired(boolean triedBefore) {
         GenericInputFragment fragment = new PUKInputFragment();
 
-        if(triedBefore){
+        if (triedBefore) {
             fragment.setMessage("The entered PUK was wrong, please try again.");
         }
 
@@ -220,12 +241,12 @@ public class PINManagementActivity extends AppCompatActivity {
                 .replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
     }
 
-    public void enterCan(String can){
+    public void enterCan(String can) {
         try {
             boolean canCorrect = pinMngGui.enterCan(can);
             LOG.info("CAN correct: {}", canCorrect);
 
-            if(canCorrect){
+            if (canCorrect) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -244,13 +265,12 @@ public class PINManagementActivity extends AppCompatActivity {
                     }
                 });
             }
-
         } catch (InterruptedException ex) {
             LOG.error(ex.getMessage(), ex);
         }
     }
 
-    public void enterPUK(String puk){
+    public void enterPUK(String puk) {
         try {
             boolean pukCorrect = pinMngGui.unblockPin(puk);
             LOG.info("PUK correct: {}", pukCorrect);
@@ -265,19 +285,18 @@ public class PINManagementActivity extends AppCompatActivity {
             } else {
                 showMessageFragment("PIN was successful unblocked.");
             }
-
         } catch (InterruptedException ex) {
             LOG.error(ex.getMessage(), ex);
         }
     }
 
-    public void changePin(String oldPin, String newPin){
+    public void changePin(String oldPin, String newPin) {
         try {
             LOG.info("Perform PIN change...");
             boolean changeSuccessful = pinMngGui.changePin(oldPin, newPin);
             LOG.info("PINChange was successful: {}", changeSuccessful);
 
-            if(!changeSuccessful) {
+            if (! changeSuccessful) {
                 initPinChangeGui();
             } else {
                 runOnUiThread(new Runnable() {
@@ -289,8 +308,6 @@ public class PINManagementActivity extends AppCompatActivity {
                 showMessageFragment("Your PIN was changed successfully.");
                 pinMngGui.cancel();
             }
-
-
         } catch (InterruptedException ex) {
             LOG.error(ex.getMessage(), ex);
         }
@@ -305,43 +322,38 @@ public class PINManagementActivity extends AppCompatActivity {
                 .replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
     }
 
-    private void initPinChangeGui(){
-
+    private void initPinChangeGui() {
         try {
             final PinStatus pinStatus = pinMngGui.getPinStatus();
             LOG.info("PIN status: {}", pinStatus);
 
-            if(pinStatus.isNormalPinEntry()){
+            if (pinStatus.isNormalPinEntry()) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         onPINIsRequired(pinStatus);
                     }
                 });
-            }
-            else if(pinStatus.needsCan()){
+            } else if (pinStatus.needsCan()) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         onCANIsRequired(false);
                     }
                 });
-            }
-
-            else if (pinStatus.needsPuk()){
+            } else if (pinStatus.needsPuk()) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         onPUKIsRequired(false);
                     }
                 });
-            } else if (pinStatus.isDead()){
+            } else if (pinStatus.isDead()) {
                 String msg = String.format("PIN Status is '%s'.", pinStatus);
                 showMessageFragment(msg);
                 LOG.error(msg);
                 pinMngGui.cancel();
             }
-
         } catch (InterruptedException ex) {
             LOG.error(ex.getMessage(), ex);
         }

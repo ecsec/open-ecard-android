@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017 ecsec GmbH.
+ * Copyright (C) 2017-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -33,9 +33,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import org.openecard.demo.R;
-import org.openecard.demo.activities.CustomActivationActivity;
 import org.openecard.demo.activities.MainActivity;
-import org.openecard.demo.activities.PINManagementActivity;
 
 
 /**
@@ -58,7 +56,6 @@ public class FailureFragment extends Fragment {
 		button.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-
 				Activity activity = getActivity();
 				Intent intent = new Intent(activity, MainActivity.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);

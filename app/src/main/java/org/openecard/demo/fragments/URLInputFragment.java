@@ -1,5 +1,26 @@
-package org.openecard.demo.fragments;
+/****************************************************************************
+ * Copyright (C) 2018 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
+ *
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
 
+package org.openecard.demo.fragments;
 
 import android.app.Fragment;
 import android.content.Context;
@@ -21,20 +42,24 @@ import org.openecard.demo.R;
 import org.openecard.demo.activities.UseCaseSelectorActivity;
 import org.openecard.demo.activities.MainActivity;
 import org.openecard.demo.activities.PINManagementActivity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
 
 /**
  * @author Sebastian Schuberth
  */
-
 public class URLInputFragment extends Fragment {
+
+    private static final Logger LOG = LoggerFactory.getLogger(URLInputFragment.class);
 
 	private String defaultUrl;
 	private final InternalStorage storage = new InternalStorage();
@@ -55,8 +80,7 @@ public class URLInputFragment extends Fragment {
 
 		urlInput.addTextChangedListener(new TextWatcher() {
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-			}
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -64,8 +88,7 @@ public class URLInputFragment extends Fragment {
 			}
 
 			@Override
-			public void afterTextChanged(Editable s) {
-			}
+			public void afterTextChanged(Editable s) { }
 		});
 
 		if (defaultUrl != null) {
@@ -74,10 +97,9 @@ public class URLInputFragment extends Fragment {
 
 		okBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-
 				String url = urlInput.getText().toString();
 
-				if(isValidUrl(url)) {
+				if (isValidUrl(url)) {
 					cacheUrl(url);
 					((UseCaseSelectorActivity)getActivity()).onUrlSelection(url);
 				}
@@ -100,14 +122,13 @@ public class URLInputFragment extends Fragment {
 	}
 
 	public void setDefaultUrl(String url) {
-		if(isValidUrl(url)) {
+		if (isValidUrl(url)) {
 			defaultUrl = url;
 		}
 	}
 
 	private void cacheUrl(String url) {
-
-		if(!urls.contains(url)) {
+		if (! urls.contains(url)) {
 			adapter.add(url);
 			urls.add(url);
 			cacheUrlsToFile(urls);
@@ -115,36 +136,36 @@ public class URLInputFragment extends Fragment {
 	}
 
 	private boolean isValidUrl(String url) {
-		return  Patterns.WEB_URL.matcher(url).matches();
+		return Patterns.WEB_URL.matcher(url).matches();
 	}
 
-	private List<String> getUrlsFromCache(){
+    @SuppressWarnings("unchecked")
+	private List<String> getUrlsFromCache() {
 		try {
-			List<String> urls = (List<String>) storage.readObject(getActivity().getApplicationContext());
-			return  urls;
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			return (List<String>) storage.readObject(getActivity().getApplicationContext());
+		} catch (IOException | ClassNotFoundException e) {
+			String msg = "Unable to retrieve cached urls from internal storage.";
+			LOG.error(msg);
 		}
-
-		return new ArrayList<>();
+		return Collections.emptyList();
 	}
 
 	private void cacheUrlsToFile(List<String> urls) {
 		try {
 			storage.writeObject(getActivity().getApplicationContext(), urls);
 		} catch (IOException e) {
-			e.printStackTrace();
+			String msg = "Unable to store url in internal storage.";
+			LOG.error(msg);
 		}
 	}
 
-	private final class InternalStorage{
+	private final class InternalStorage {
 
 		private final String key = "CACHED_URLS";
-		private InternalStorage() {}
 
-		public void writeObject(Context context, Object object) throws IOException {
+        private InternalStorage() {}
+
+        void writeObject(Context context, Object object) throws IOException {
 			FileOutputStream fos = context.openFileOutput(key, Context.MODE_PRIVATE);
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
 			oos.writeObject(object);
@@ -152,12 +173,10 @@ public class URLInputFragment extends Fragment {
 			fos.close();
 		}
 
-		public Object readObject(Context context) throws IOException,
-				ClassNotFoundException {
+        Object readObject(Context context) throws IOException, ClassNotFoundException {
 			FileInputStream fis = context.openFileInput(key);
 			ObjectInputStream ois = new ObjectInputStream(fis);
-			Object object = ois.readObject();
-			return object;
+            return ois.readObject();
 		}
 	}
 }

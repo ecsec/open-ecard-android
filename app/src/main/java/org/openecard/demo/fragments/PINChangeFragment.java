@@ -1,3 +1,25 @@
+/****************************************************************************
+ * Copyright (C) 2018 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
+ *
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.demo.fragments;
 
 import android.app.Activity;
@@ -50,7 +72,6 @@ public class PINChangeFragment extends Fragment {
         final Button buttonContinue = view.findViewById(R.id.btnPINInput);
         buttonContinue.setEnabled(false);
 
-
         if (status != null) {
             if (status == PinStatus.RC2) {
                 logLabel.setVisibility(View.VISIBLE);
@@ -86,7 +107,7 @@ public class PINChangeFragment extends Fragment {
                     final String newPIN = newPin.getText().toString();
                     final String newPIN2 = newPinConfirm.getText().toString();
 
-                    if (!newPIN.equals(newPIN2)) {
+                    if (! newPIN.equals(newPIN2)) {
                         logLabel.setText(MISMATCHING_PINS);
                         logLabel.setVisibility(View.VISIBLE);
                         return;
@@ -118,11 +139,13 @@ public class PINChangeFragment extends Fragment {
         return view;
     }
 
-    private boolean canContinue(){
+    private boolean canContinue() {
         boolean pinLengthCorrect = pinText.getText().toString().length() == 6
                 || pinText.getText().toString().length() == 5; //transport PIN
+
         boolean newPinLengthCorrect = (newPin.getText().toString().length() == 6
                 && newPinConfirm.getText().toString().length() == 6);
+
         return pinLengthCorrect && newPinLengthCorrect;
     }
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2017 ecsec GmbH.
+ * Copyright (C) 2017-2018 ecsec GmbH.
  * All rights reserved.
  * Contact: ecsec GmbH (info@ecsec.de)
  *
@@ -24,15 +24,12 @@ package org.openecard.demo.fragments;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -53,7 +50,6 @@ public class PINInputFragment extends Fragment {
 	private static final String NEED_CAN = "The entered PIN was wrong, please try again and also enter your CAN.";
 
 	private PinStatus status;
-	private EditText pinTextField;
 
 	public void setStatus(PinStatus status) {
 		this.status = status;
@@ -97,50 +93,38 @@ public class PINInputFragment extends Fragment {
 
 		pinText.addTextChangedListener(new TextWatcher() {
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-			}
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				boolean canContinue = pinText.getText().toString().length() == 6;
 
-
-				boolean pinLengthCorrect = pinText.getText().toString().length() == 6;
-				boolean canContinue = pinLengthCorrect;
-
-				if(canText.getVisibility() == View.VISIBLE) {
+				if (canText.getVisibility() == View.VISIBLE) {
 					canContinue = canContinue && canText.getText().toString().length() == 6;
 				}
-
 				buttonContinue.setEnabled(canContinue);
 			}
 
 			@Override
-			public void afterTextChanged(Editable s) {
-			}
+			public void afterTextChanged(Editable s) { }
 		});
 
 		canText.addTextChangedListener(new TextWatcher() {
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-			}
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-
-				boolean pinLengthCorrect = pinText.getText().toString().length() == 6;
-				boolean canContinue = pinLengthCorrect;
+				boolean canContinue = pinText.getText().toString().length() == 6;
 
 				if(canText.getVisibility() == View.VISIBLE) {
 					canContinue = canContinue && canText.getText().toString().length() == 6;
 				}
-
 				buttonContinue.setEnabled(canContinue);
 			}
 
 			@Override
-			public void afterTextChanged(Editable s) {
-			}
+			public void afterTextChanged(Editable s) { }
 		});
 
 

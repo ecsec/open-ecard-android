@@ -1,3 +1,25 @@
+/****************************************************************************
+ * Copyright (C) 2018 ecsec GmbH.
+ * All rights reserved.
+ * Contact: ecsec GmbH (info@ecsec.de)
+ *
+ * This file is part of the Open eCard App.
+ *
+ * GNU General Public License Usage
+ * This file may be used under the terms of the GNU General Public
+ * License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of
+ * this file. Please review the following information to ensure the
+ * GNU General Public License version 3.0 requirements will be met:
+ * http://www.gnu.org/copyleft/gpl.html.
+ *
+ * Other Usage
+ * Alternatively, this file may be used in accordance with the terms
+ * and conditions contained in a signed written agreement between
+ * you and ecsec GmbH.
+ *
+ ***************************************************************************/
+
 package org.openecard.demo.fragments;
 
 import android.app.Activity;
@@ -15,14 +37,14 @@ import android.widget.TextView;
 import org.openecard.demo.R;
 import org.openecard.demo.activities.PINManagementActivity;
 
-public abstract class GenericInputFragment extends Fragment {
 
+public abstract class GenericInputFragment extends Fragment {
 
     private String logMsg;
     private String inputName;
     private String hint;
 
-    public GenericInputFragment(String inputName, String hint){
+    public GenericInputFragment(String inputName, String hint) {
         this.inputName = inputName;
         this.hint = hint;
     }
@@ -38,7 +60,7 @@ public abstract class GenericInputFragment extends Fragment {
         final TextView inputType = view.findViewById(R.id.typeOfInput);
         inputType.setText(inputName);
 
-        if(logMsg != null) {
+        if (logMsg != null) {
             logLabel.setText(logMsg);
         } else {
             logLabel.setVisibility(View.INVISIBLE);
@@ -50,8 +72,7 @@ public abstract class GenericInputFragment extends Fragment {
 
         inputField.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -60,8 +81,7 @@ public abstract class GenericInputFragment extends Fragment {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
-            }
+            public void afterTextChanged(Editable s) { }
         });
 
         buttonContinue.setOnClickListener(new View.OnClickListener() {
@@ -86,7 +106,6 @@ public abstract class GenericInputFragment extends Fragment {
                 }
             }
         });
-
 
         return view;
 
