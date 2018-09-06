@@ -78,7 +78,11 @@ public class PINManagementActivity extends AppCompatActivity {
         @Override
         public void onAuthenticationFailure(ActivationResult result) {
             LOG.info("Authentication failure: {}", result);
-            showMessageFragment("An error occurred: "+result.getErrorMessage());
+
+            // show error
+            String errorMsg = buildErrorMsg(result);
+            showMessageFragment(errorMsg);
+
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -90,7 +94,11 @@ public class PINManagementActivity extends AppCompatActivity {
         @Override
         public void onAuthenticationInterrupted(ActivationResult result) {
             LOG.info("Authentication interrupted: {}", result);
-            showMessageFragment("User cancelled PIN Management");
+
+            // show error message
+            String errorMsg = buildInterruptedMsg(result);
+            showMessageFragment(errorMsg);
+
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -358,4 +366,40 @@ public class PINManagementActivity extends AppCompatActivity {
             LOG.error(ex.getMessage(), ex);
         }
     }
+
+
+    ///
+    /// methods for building error messages
+    ///
+
+    private String buildErrorMsg(ActivationResult result) {
+        String msg;
+        if (result.getErrorMessage() != null) {
+            String errorType = result.getResultCode().name();
+            String errorMsg = result.getErrorMessage();
+            msg = String.format("During PIN Management an error occurred (%s): %s.", errorType, errorMsg);
+        } else if (result.getResultCode() != null) {
+            String errorType = result.getResultCode().name();
+            msg = String.format("During PIN Management an unknown error occurred (%s).", errorType);
+        } else {
+            msg = "During PIN Management an unknown error occurred.";
+        }
+        return msg;
+    }
+
+    private String buildInterruptedMsg(ActivationResult result) {
+        String msg;
+        if (result.getErrorMessage() != null) {
+            String errorType = result.getResultCode().name();
+            String errorMsg = result.getErrorMessage();
+            msg = String.format("PIN Management was interrupted. (%s): %s.", errorType, errorMsg);
+        } else if (result.getResultCode() != null) {
+            String errorType = result.getResultCode().name();
+            msg = String.format("PIN Management was interrupted (%s).", errorType);
+        } else {
+            msg = "PIN Management was interrupted.";
+        }
+        return msg;
+    }
+
 }
