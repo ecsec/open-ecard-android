@@ -6,7 +6,7 @@ xmlns:tools="http://schemas.android.com/tools"
 android:layout_width="match_parent"
 android:layout_height="match_parent"
 android:orientation="horizontal"
-tools:context="org.openecard.android.org.openecard.demo.activities.IdsActivity" >
+tools:context="org.openecard.demo.activities.UseCaseSelectorActivity" >
 
 <FrameLayout
     android:id="@+id/fragment"

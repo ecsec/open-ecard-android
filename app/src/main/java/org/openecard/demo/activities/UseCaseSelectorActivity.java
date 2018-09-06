@@ -78,7 +78,7 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_ids);
+		setContentView(R.layout.activity_use_case_selector);
 
 		serviceClient = new OpeneCardServiceClientHandler(this, new UseCaseSelectorActivity.InitServiceHandler());
 
