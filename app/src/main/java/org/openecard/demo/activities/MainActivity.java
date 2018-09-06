@@ -115,7 +115,7 @@ public class MainActivity extends Activity {
 	protected void onDestroy() {
 		// stop Open eCard Stack when this activity is destroyed
 		if (serviceClient.isInitialized()) {
-            serviceClient.stopService();
+            serviceClient.unbindService();
 		}
 		super.onDestroy();
 	}

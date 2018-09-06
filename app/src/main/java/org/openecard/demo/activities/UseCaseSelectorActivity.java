@@ -30,7 +30,13 @@ import android.view.View;
 import android.widget.Button;
 
 import org.openecard.android.activation.ActivationImplementationInterface;
+import org.openecard.android.system.OpeneCardContext;
+import org.openecard.android.system.OpeneCardServiceClientHandler;
+import org.openecard.android.system.OpeneCardServiceHandler;
+import org.openecard.android.system.ServiceErrorResponse;
+import org.openecard.android.system.ServiceWarningResponse;
 import org.openecard.demo.R;
+import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.RedirectFragment;
 import org.openecard.demo.fragments.URLInputFragment;
 import org.slf4j.Logger;
@@ -52,7 +58,8 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 
 	private static final String DEFAULT_TC_TOKEN_URL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_20&redirect=true";
 
-	private Button cancelBtn;
+	private OpeneCardServiceClientHandler serviceClient;
+	private Button stopBtn;
 
 	// indicates if activity stack is thrown away or not
     // because activation URL from outside can only be used once
@@ -60,9 +67,12 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 
 	@Override
 	public void onBackPressed() {
-		Intent intent = new Intent(UseCaseSelectorActivity.this, MainActivity.class);
-		startActivity(intent);
-		finish();
+		// stop OeC Service if it is running
+		if (serviceClient.isInitialized()) {
+			serviceClient.stopService();
+		} else {
+			goToMainActivity();
+		}
 	}
 
 	@Override
@@ -70,8 +80,10 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_ids);
 
-		cancelBtn = findViewById(R.id.cancelBtn);
-		cancelBtn.setOnClickListener(new View.OnClickListener() {
+		serviceClient = new OpeneCardServiceClientHandler(this, new UseCaseSelectorActivity.InitServiceHandler());
+
+		stopBtn = findViewById(R.id.stopBtn);
+		stopBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				onBackPressed();
@@ -131,7 +143,7 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 		fragment.setRedirectUrl(address.toString());
 		fragment.clearHistory(clearActivityHistory);
 
-		cancelBtn.setVisibility(View.INVISIBLE);
+		stopBtn.setVisibility(View.INVISIBLE);
 
 		getFragmentManager().beginTransaction()
 				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
@@ -148,6 +160,57 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 	}
 
 	public void enableCancel() {
-		cancelBtn.setEnabled(true);
+		stopBtn.setEnabled(true);
+	}
+
+	public void goToMainActivity() {
+		Intent intent = new Intent(UseCaseSelectorActivity.this, MainActivity.class);
+		startActivity(intent);
+		finish();
+	}
+
+	private void showFailureFragment(String errorMessage) {
+		FailureFragment fragment = new FailureFragment();
+		fragment.setErrorMessage(errorMessage);
+		getFragmentManager().beginTransaction()
+				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
+	}
+
+
+	///
+	/// Handler functions for the initialization or termination of the Open eCard Stack management Android Service
+	///
+
+	private class InitServiceHandler implements OpeneCardServiceHandler {
+
+		@Override
+		public void onConnectionSuccess(OpeneCardContext ctx) { }
+
+		@Override
+		public void onConnectionFailure(ServiceErrorResponse serviceErrorResponse) { }
+
+		@Override
+		public void onConnectionFailure(ServiceWarningResponse serviceWarningResponse) { }
+
+		@Override
+		public void onDisconnectionSuccess() {
+			goToMainActivity();
+		}
+
+		@Override
+		public void onDisconnectionFailure(ServiceErrorResponse serviceErrorResponse) {
+			// should not occur
+			String errorMsg = serviceErrorResponse.getMessage();
+			LOG.error("Disconnecting from Oec Service failed: {}", errorMsg);
+			showFailureFragment(errorMsg);
+		}
+
+		@Override
+		public void onDisconnectionFailure(ServiceWarningResponse serviceWarningResponse) {
+			String warnMsg = serviceWarningResponse.getMessage();
+			LOG.warn("Disconnecting from Oec Service failed: {}", warnMsg);
+			goToMainActivity();
+		}
+
 	}
 }
