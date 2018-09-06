@@ -395,9 +395,10 @@ public class PINManagementActivity extends AppCompatActivity {
             msg = String.format("PIN Management was interrupted. (%s): %s.", errorType, errorMsg);
         } else if (result.getResultCode() != null) {
             String errorType = result.getResultCode().name();
-            msg = String.format("PIN Management was interrupted (%s).", errorType);
+            msg = String.format("PIN Management was interrupted by the user or implicitly by a shutdown of a " +
+                    "subsystem or the whole system (%s).", errorType);
         } else {
-            msg = "PIN Management was interrupted.";
+            msg = "PIN Management was interrupted by the user or implicitly by a shutdown of a subsystem or the whole system.";
         }
         return msg;
     }
