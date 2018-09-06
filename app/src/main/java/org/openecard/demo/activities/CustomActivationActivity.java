@@ -130,19 +130,20 @@ public class CustomActivationActivity extends AppCompatActivity {
 		@Override
 		public void onAuthenticationFailure(ActivationResult activationResult) {
 			LOG.info("Authentication failed: " + activationResult.getResultCode().name());
-			if (activationResult.getErrorMessage() != null) {
-				showFailureFragment(activationResult.getErrorMessage());
- 			} else {
-				showFailureFragment("Authentication failed...");
-			}
+
+			// build error message
+            String errorMsg = buildAuthenticationFailedMsg(activationResult);
+            showFailureFragment(errorMsg);
 		}
 
 		@Override
 		public void onAuthenticationInterrupted(ActivationResult result) {
-			LOG.info("authentication interrupted");
+			LOG.info("Authentication interrupted.");
 
-			if(handleInterrupted) {
-				showFailureFragment("User cancelled authentication.");
+			if (handleInterrupted) {
+			    // build interrupted error message
+				String errorMsg = buildInterruptedMsg(result);
+				showFailureFragment(errorMsg);
 			}
 		}
 
@@ -380,5 +381,42 @@ public class CustomActivationActivity extends AppCompatActivity {
 		getFragmentManager().beginTransaction()
 				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 	}
+
+
+	///
+    /// methods for building error messages
+    ///
+
+	private String buildAuthenticationFailedMsg(ActivationResult result) {
+        String msg;
+        if (result.getErrorMessage() != null) {
+            String errorType = result.getResultCode().name();
+            String errorMsg = result.getErrorMessage();
+            msg = String.format("During the authentication an error occurred (%s): %s.", errorType, errorMsg);
+        } else if (result.getResultCode() != null) {
+            String errorType = result.getResultCode().name();
+            msg = String.format("During the authentication an error occurred (%s).", errorType);
+        } else {
+            msg = "During the authentication an unknown error occurred.";
+        }
+        return msg;
+    }
+
+    private String buildInterruptedMsg(ActivationResult result) {
+        String msg;
+        if (result.getErrorMessage() != null) {
+            String errorType = result.getResultCode().name();
+            String errorMsg = result.getErrorMessage();
+            msg = String.format("Authentication process was interrupted (%s): %s.", errorType, errorMsg);
+        } else if (result.getResultCode() != null) {
+            String errorType = result.getResultCode().name();
+            msg = String.format("Authentication process was interrupted by the user or implicitly by a shutdown of a " +
+                    "subsystem or the whole system (%s).", errorType);
+        } else {
+            msg = "Authentication process was interrupted by the user or implicitly by a shutdown of a subsystem " +
+                    "or the whole system.";
+        }
+        return msg;
+    }
 
 }
