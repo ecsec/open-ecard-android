@@ -305,6 +305,12 @@ public class CustomActivationActivity extends AppCompatActivity {
 			boolean pinCorrect = eacGui.enterPin(can, pin);
 			if (pinCorrect) {
 				LOG.info("The PIN is correct.");
+				// enable cancel while the rest of EAC is processed
+				runOnUiThread(() -> {
+					// delete handle to gui, so cancelAuthentication is called in case of a cancel button event
+					this.eacGui = null;
+					enableCancel();
+				});
 			} else {
 				LOG.info("The PIN isn't correct, the CAN is required.");
 				final PinStatus status = eacGui.getPinStatus();
