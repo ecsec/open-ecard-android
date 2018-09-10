@@ -81,6 +81,7 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_use_case_selector);
 
 		serviceClient = new OpeneCardServiceClientHandler(this, new UseCaseSelectorActivity.InitServiceHandler());
+		serviceClient.startService();
 
 		stopBtn = findViewById(R.id.stopBtn);
 		stopBtn.setOnClickListener(new View.OnClickListener() {
