@@ -36,6 +36,7 @@ import org.openecard.demo.R;
 import org.openecard.demo.activities.CustomActivationActivity;
 import org.openecard.demo.activities.MainActivity;
 import org.openecard.demo.activities.PINManagementActivity;
+import org.openecard.demo.activities.UseCaseSelectorActivity;
 
 
 public class PINBlockedFragment extends Fragment {
@@ -48,8 +49,8 @@ public class PINBlockedFragment extends Fragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getActivity(), MainActivity.class);
-                ((CustomActivationActivity) getActivity()).cancelAll();
+                Intent intent = new Intent(getActivity(), UseCaseSelectorActivity.class);
+                ((CustomActivationActivity) getActivity()).cancelEacGui();
                 startActivity(intent);
                 getActivity().finish();
             }
@@ -62,8 +63,8 @@ public class PINBlockedFragment extends Fragment {
                 Intent i = new Intent(Intent.ACTION_VIEW);
                 i.setClass(getActivity(), PINManagementActivity.class);
                 i.setData(Uri.parse("/eID-Client?ShowUI=PINManagement"));
-                i.putExtra(ActivationImplementationInterface.RETURN_CLASS, MainActivity.class.getName());
-                ((CustomActivationActivity) getActivity()).cancelAll();
+                i.putExtra(ActivationImplementationInterface.RETURN_CLASS, UseCaseSelectorActivity.class.getName());
+                ((CustomActivationActivity) getActivity()).cancelEacGui();
                 startActivity(i);
                 getActivity().finish();
             }
