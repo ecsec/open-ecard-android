@@ -50,6 +50,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -142,12 +143,12 @@ public class URLInputFragment extends Fragment {
     @SuppressWarnings("unchecked")
 	private List<String> getUrlsFromCache() {
 		try {
-			return (List<String>) storage.readObject(getActivity().getApplicationContext());
+			return new ArrayList<>((List<String>) storage.readObject(getActivity().getApplicationContext()));
 		} catch (IOException | ClassNotFoundException e) {
 			String msg = "Unable to retrieve cached urls from internal storage.";
 			LOG.error(msg);
 		}
-		return Collections.emptyList();
+		return new ArrayList<>();
 	}
 
 	private void cacheUrlsToFile(List<String> urls) {
