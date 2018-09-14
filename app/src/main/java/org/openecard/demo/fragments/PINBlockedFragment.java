@@ -60,13 +60,16 @@ public class PINBlockedFragment extends Fragment {
         toPinManage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setClass(getActivity(), PINManagementActivity.class);
-                i.setData(Uri.parse("/eID-Client?ShowUI=PINManagement"));
-                i.putExtra(ActivationImplementationInterface.RETURN_CLASS, UseCaseSelectorActivity.class.getName());
-                ((CustomActivationActivity) getActivity()).cancelEacGui();
-                startActivity(i);
-                getActivity().finish();
+                CustomActivationActivity activity = ((CustomActivationActivity) getActivity());
+                activity.cancelEacGui();
+                activity.setStartPinManagementDialog(() -> {
+                    Intent i = new Intent(Intent.ACTION_VIEW);
+                    i.setClass(getActivity(), PINManagementActivity.class);
+                    i.setData(Uri.parse("/eID-Client?ShowUI=PINManagement"));
+                    i.putExtra(ActivationImplementationInterface.RETURN_CLASS, UseCaseSelectorActivity.class.getName());
+                    activity.startActivity(i);
+                    activity.finish();
+                });
             }
         });
 

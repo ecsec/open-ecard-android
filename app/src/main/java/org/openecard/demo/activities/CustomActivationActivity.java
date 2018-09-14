@@ -27,6 +27,7 @@ import android.app.Dialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -35,6 +36,7 @@ import android.widget.Button;
 
 import org.openecard.android.activation.ActivationResult;
 import org.openecard.android.activation.EacActivationHandler;
+import org.openecard.bouncycastle.asn1.x500.style.RFC4519Style;
 import org.openecard.demo.R;
 import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.InitFragment;
@@ -72,6 +74,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 	private EacActivationHandler<CustomActivationActivity> activationImpl;
 	private EacGui eacGui;
 	private boolean handleInterrupted = true;
+	private Runnable startPinManagementDialog;
 
 
 	///
@@ -125,25 +128,44 @@ public class CustomActivationActivity extends AppCompatActivity {
 			return dialog;
 		}
 
+		@Override
+		public void onAuthenticationSuccess(ActivationResult result) {
+        	if (! startPinManagementIfSet()) {
+				super.onAuthenticationSuccess(result);
+			}
+		}
 
 		// Methods which indicate whether the authentication was successful or incorrectly.
 		@Override
 		public void onAuthenticationFailure(ActivationResult activationResult) {
 			LOG.info("Authentication failed: " + activationResult.getResultCode().name());
 
-			// build error message
-            String errorMsg = buildAuthenticationFailedMsg(activationResult);
-            showFailureFragment(errorMsg);
+			if (! startPinManagementIfSet()) {
+				// build error message
+				String errorMsg = buildAuthenticationFailedMsg(activationResult);
+				showFailureFragment(errorMsg);
+			}
 		}
 
 		@Override
 		public void onAuthenticationInterrupted(ActivationResult result) {
 			LOG.info("Authentication interrupted.");
 
-			if (handleInterrupted) {
-			    // build interrupted error message
-				String errorMsg = buildInterruptedMsg(result);
-				showFailureFragment(errorMsg);
+			if (! startPinManagementIfSet()) {
+				if (handleInterrupted) {
+					// build interrupted error message
+					String errorMsg = buildInterruptedMsg(result);
+					showFailureFragment(errorMsg);
+				}
+			}
+		}
+
+		private boolean startPinManagementIfSet() {
+        	if (startPinManagementDialog != null) {
+				AsyncTask.execute(startPinManagementDialog);
+				return true;
+			} else {
+        		return false;
 			}
 		}
 
@@ -171,6 +193,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 	protected void onStop() {
 		super.onStop();
 		activationImpl.onStop();
+		this.startPinManagementDialog = null;
 	}
 
 	@Override
@@ -349,6 +372,10 @@ public class CustomActivationActivity extends AppCompatActivity {
 	public void cancelAuthentication(){
 		handleInterrupted = false;
 		activationImpl.cancelAuthentication();
+	}
+
+	public void setStartPinManagementDialog(Runnable action) {
+		this.startPinManagementDialog = action;
 	}
 
 	public void cancelAll(){
