@@ -149,12 +149,12 @@ public class PINInputFragment extends Fragment {
 						canText.setEnabled(false);
 						canText.setFocusable(false);
 						logLabel.setText(PERFORM_PIN_INPUT);
-						// disable cancel if service is working
-						((CustomActivationActivity) activity).disableCancel();
-						new Thread(new Runnable() {
-							public void run() {
-								((CustomActivationActivity) activity).enterPIN(can, pin);
-							}
+						new Thread(() -> {
+							((CustomActivationActivity) activity).enterPIN(can, pin);
+							// disable cancel after PACE is successful
+							PINInputFragment.super.getActivity().runOnUiThread(() -> {
+								((CustomActivationActivity) activity).disableCancel();
+							});
 						}).start();
 					}
 				}

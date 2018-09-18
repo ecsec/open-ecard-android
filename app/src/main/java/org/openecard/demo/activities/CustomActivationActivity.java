@@ -222,18 +222,15 @@ public class CustomActivationActivity extends AppCompatActivity {
 				getFragmentManager().beginTransaction()
 						.replace(R.id.fragment, fragment).addToBackStack(null).commit();
 
-				Handler handler = new Handler();
-				handler.postDelayed(new Runnable() {
-					@Override
-					public void run() {
-						if (eacGui != null) {
-							eacGui.cancel();
-						} else {
-							activationImpl.cancelAuthentication();
-						}
-						showFailureFragment("The User cancelled the authentication procedure.");
+				// cancellation after EAC is finished is currently not implemented in this client
+				AsyncTask.execute(() -> {
+					if (eacGui != null) {
+						eacGui.cancel();
+					} else {
+						activationImpl.cancelAuthentication();
 					}
-				}, 1000);
+					showFailureFragment("The User cancelled the authentication procedure, please wait for the process to end.");
+				});
 			}
 		});
 
@@ -331,7 +328,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 				// enable cancel while the rest of EAC is processed
 				runOnUiThread(() -> {
 					// delete handle to gui, so cancelAuthentication is called in case of a cancel button event
-					this.eacGui = null;
+					//this.eacGui = null;
 					enableCancel();
 				});
 			} else {
