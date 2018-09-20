@@ -222,9 +222,10 @@ public class CustomActivationActivity extends AppCompatActivity {
 				getFragmentManager().beginTransaction()
 						.replace(R.id.fragment, fragment).addToBackStack(null).commit();
 
-				// cancellation after EAC is finished is currently not implemented in this client
+				// cancellation after EAC is finished falls back to killing the process
+				// in that case there is no orderly return according to TR-03124 (return to websession)
 				AsyncTask.execute(() -> {
-					if (eacGui != null) {
+					if (eacGui != null && ! eacGui.isDone()) {
 						eacGui.cancel();
 					} else {
 						activationImpl.cancelAuthentication();
