@@ -49,10 +49,8 @@ public class PINBlockedFragment extends Fragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getActivity(), UseCaseSelectorActivity.class);
+                //Intent intent = new Intent(getActivity(), UseCaseSelectorActivity.class);
                 ((CustomActivationActivity) getActivity()).cancelEacGui();
-                startActivity(intent);
-                getActivity().finish();
             }
         });
 
