@@ -101,7 +101,7 @@ public class ServerDataFragment extends Fragment {
 				Activity activity = getActivity();
 				if (activity instanceof CustomActivationActivity) {
 					// disable cancel if service is working
-					((CustomActivationActivity) activity).disableCancel();
+					//((CustomActivationActivity) activity).disableCancel();
 					((CustomActivationActivity) activity).enterAttributes(readBoxes,
 							serverData.getWriteAccessAttributes());
 				}

@@ -153,7 +153,7 @@ public class PINInputFragment extends Fragment {
 							((CustomActivationActivity) activity).enterPIN(can, pin);
 							// disable cancel after PACE is successful
 							PINInputFragment.super.getActivity().runOnUiThread(() -> {
-								((CustomActivationActivity) activity).disableCancel();
+								//((CustomActivationActivity) activity).disableCancel();
 							});
 						}).start();
 					}
