@@ -124,7 +124,6 @@ public class CustomActivationActivity extends AppCompatActivity {
 						}
 					})
 					.create();
-			dialog.show();
 			return dialog;
 		}
 
@@ -226,11 +225,15 @@ public class CustomActivationActivity extends AppCompatActivity {
 				// in that case there is no orderly return according to TR-03124 (return to websession)
 				AsyncTask.execute(() -> {
 					if (eacGui != null && ! eacGui.isDone()) {
+						LOG.debug("Cancelling with EAC GUI.");
 						eacGui.cancel();
 					} else {
+						LOG.debug("Cancelling with ActivationActivity.");
 						activationImpl.cancelAuthentication();
 					}
-					showFailureFragment("The User cancelled the authentication procedure, please wait for the process to end.");
+					runOnUiThread(() -> {
+						showFailureFragment("The User cancelled the authentication procedure, please wait for the process to end.");
+					});
 				});
 			}
 		});
@@ -270,19 +273,6 @@ public class CustomActivationActivity extends AppCompatActivity {
 
 
 	///
-	/// Methods to enable or disable the Cancel Button
-	///
-
-	public void enableCancel() {
-		cancelBtn.setEnabled(true);
-	}
-
-	public void disableCancel() {
-		cancelBtn.setEnabled(false);
-	}
-
-
-	///
 	/// Methods to exchange data with the fragments (aka the EAC process interaction)
 	///
 
@@ -316,8 +306,6 @@ public class CustomActivationActivity extends AppCompatActivity {
 		// show PINInputFragment
 		getFragmentManager().beginTransaction()
 				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
-
-		enableCancel(); // enable cancel if no action is performed by the Open eCard Service
 	}
 
 	public void enterPIN(String can, String pin) {
@@ -326,30 +314,25 @@ public class CustomActivationActivity extends AppCompatActivity {
 			boolean pinCorrect = eacGui.enterPin(can, pin);
 			if (pinCorrect) {
 				LOG.info("The PIN is correct.");
-				// enable cancel while the rest of EAC is processed
-				runOnUiThread(() -> {
-					// delete handle to gui, so cancelAuthentication is called in case of a cancel button event
-					//this.eacGui = null;
-					enableCancel();
-				});
 			} else {
 				LOG.info("The PIN isn't correct, the CAN is required.");
 				final PinStatus status = eacGui.getPinStatus();
 				if (status.isOperational()) {
 					// show PINInputFragment
-					runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							onPINIsRequired(status);
-						}
+					runOnUiThread(() -> {
+						onPINIsRequired(status);
 					});
 				} else if(status.equals(PinStatus.BLOCKED)) {
-					showPINBlockedFragment();
+					runOnUiThread(() -> {
+						showPINBlockedFragment();
+					});
 					//eacGui.cancel();
 
 				} else {
 					String msg = String.format("PIN Status is '%s'.", status);
-					showFailureFragment(msg);
+					runOnUiThread(() -> {
+						showFailureFragment(msg);
+					});
 					LOG.error(msg);
 					eacGui.cancel();
 				}
@@ -392,8 +375,6 @@ public class CustomActivationActivity extends AppCompatActivity {
 		// show ServerDataFragment
 		getFragmentManager().beginTransaction()
 				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
-
-		enableCancel(); // enable cancel if no action is performed by the Open eCard Service
 	}
 
 	private void showFailureFragment(String errorMessage) {
@@ -403,6 +384,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 		cancelBtn.setVisibility(View.INVISIBLE);
 
 		// show ServerDataFragment
+		LOG.debug("Replace fragment with FailureFragment.");
 		getFragmentManager().beginTransaction()
 				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 	}

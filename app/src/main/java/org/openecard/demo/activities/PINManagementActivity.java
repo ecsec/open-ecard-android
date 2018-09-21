@@ -82,13 +82,6 @@ public class PINManagementActivity extends AppCompatActivity {
             // show error
             String errorMsg = buildErrorMsg(result);
             showMessageFragment(errorMsg);
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    cancelBtn.setEnabled(false);
-                }
-            });
         }
 
         @Override
@@ -98,13 +91,6 @@ public class PINManagementActivity extends AppCompatActivity {
             // show error message
             String errorMsg = buildInterruptedMsg(result);
             showMessageFragment(errorMsg);
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    cancelBtn.setEnabled(false);
-                }
-            });
         }
 
         @Nullable
@@ -120,7 +106,6 @@ public class PINManagementActivity extends AppCompatActivity {
                         }
                     })
                     .create();
-            dialog.show();
             return dialog;
         }
     }
@@ -307,13 +292,9 @@ public class PINManagementActivity extends AppCompatActivity {
             if (! changeSuccessful) {
                 initPinChangeGui();
             } else {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        cancelBtn.setEnabled(false);
-                    }
+                runOnUiThread(() -> {
+                    showMessageFragment("Your PIN was changed successfully.");
                 });
-                showMessageFragment("Your PIN was changed successfully.");
                 pinMngGui.cancel();
             }
         } catch (InterruptedException ex) {
@@ -324,6 +305,8 @@ public class PINManagementActivity extends AppCompatActivity {
     private void showMessageFragment(String msg) {
         FailureFragment fragment = new FailureFragment();
         fragment.setErrorMessage(msg);
+
+        cancelBtn.setEnabled(false);
 
         // show ServerDataFragment
         getFragmentManager().beginTransaction()
