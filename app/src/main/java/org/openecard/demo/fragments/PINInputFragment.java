@@ -24,7 +24,6 @@ package org.openecard.demo.fragments;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -148,13 +147,13 @@ public class PINInputFragment extends Fragment {
 					canText.setEnabled(false);
 					canText.setFocusable(false);
 					logLabel.setText(PERFORM_PIN_INPUT);
-					AsyncTask.execute(() -> {
+					new Thread(() -> {
 						((CustomActivationActivity) activity).enterPIN(can, pin);
 						// disable cancel after PACE is successful
 						//PINInputFragment.super.getActivity().runOnUiThread(() -> {
 							//((CustomActivationActivity) activity).disableCancel();
 						//});
-					});
+					}).start();
 				}
 			}
 		});

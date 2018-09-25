@@ -24,7 +24,6 @@ package org.openecard.demo.fragments;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -96,15 +95,14 @@ public abstract class GenericInputFragment extends Fragment {
                     inputField.setEnabled(false);
                     inputField.setFocusable(false);
 
-                    AsyncTask.execute(() -> {
+                    new Thread(() -> {
                         enterNumber(number, (PINManagementActivity)activity);
-                    });
+                    }).start();
                 }
             }
         });
 
         return view;
-
     }
 
     public void setMessage(String logMsg) {
