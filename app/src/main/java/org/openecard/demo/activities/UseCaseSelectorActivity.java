@@ -84,12 +84,7 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 		serviceClient.startService();
 
 		stopBtn = findViewById(R.id.stopBtn);
-		stopBtn.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				onBackPressed();
-			}
-		});
+		stopBtn.setOnClickListener(v -> onBackPressed());
 
 		if (findViewById(R.id.fragment) != null) {
 			Intent intent = getIntent();

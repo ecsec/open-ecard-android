@@ -25,18 +25,14 @@ package org.openecard.demo.activities;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Fragment;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
 import org.openecard.android.activation.ActivationResult;
 import org.openecard.android.activation.EacActivationHandler;
-import org.openecard.bouncycastle.asn1.x500.style.RFC4519Style;
 import org.openecard.demo.R;
 import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.InitFragment;
@@ -100,11 +96,9 @@ public class CustomActivationActivity extends AppCompatActivity {
 				// this one blocks until the data is available, but it's ok as this is run in the background
 				ServerData serverData = CustomActivationActivity.this.eacGui.getServerData();
 				String txInfo = CustomActivationActivity.this.eacGui.getTransactionInfo();
-				// show ServerData on ui thread to move context out of the background
-				runOnUiThread(() -> {
-					String ti = txInfo == null ? "" : txInfo;
-					onServerDataPresent(serverData, ti);
-				});
+				// show ServerData
+				String ti = txInfo == null ? "" : txInfo;
+				onServerDataPresent(serverData, ti);
 			} catch (InterruptedException ex) {
 				LOG.error(ex.getMessage(), ex);
 			}
@@ -114,17 +108,11 @@ public class CustomActivationActivity extends AppCompatActivity {
 		// Callbacks where you can open a Dialog which says that the card should be removed.
 		@Override
 		public Dialog showCardRemoveDialog() {
-			AlertDialog dialog = new AlertDialog.Builder(CustomActivationActivity.this)
+			return new AlertDialog.Builder(CustomActivationActivity.this)
 					.setTitle("Remove the Card")
 					.setMessage("Please remove the identity card.")
-					.setNeutralButton("Proceed", new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							dialog.dismiss();
-						}
-					})
+					.setNeutralButton("Proceed", (dialog, which) -> dialog.dismiss())
 					.create();
-			return dialog;
 		}
 
 		@Override
@@ -161,7 +149,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 
 		private boolean startPinManagementIfSet() {
         	if (startPinManagementDialog != null) {
-				AsyncTask.execute(startPinManagementDialog);
+				new Thread(startPinManagementDialog).start();
 				return true;
 			} else {
         		return false;
@@ -207,35 +195,29 @@ public class CustomActivationActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_custom);
 
 		cancelBtn = findViewById(R.id.cancelBtn);
-		cancelBtn.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
+		cancelBtn.setOnClickListener((view) -> {
+			LOG.info("Cancel pressed");
+			cancelBtn.setEnabled(false);
+			cancelBtn.setClickable(false);
 
-				LOG.info("Cancel pressed");
-				cancelBtn.setEnabled(false);
-				cancelBtn.setClickable(false);
+			WaitFragment fragment = new WaitFragment();
+			fragment.setWaitMessage("Cancelling authentication...");
+			fragment.setArguments(getIntent().getExtras());
+			getFragmentManager().beginTransaction()
+					.replace(R.id.fragment, fragment).addToBackStack(null).commit();
 
-				WaitFragment fragment = new WaitFragment();
-				fragment.setWaitMessage("Cancelling authentication...");
-				fragment.setArguments(getIntent().getExtras());
-				getFragmentManager().beginTransaction()
-						.replace(R.id.fragment, fragment).addToBackStack(null).commit();
-
-				// cancellation after EAC is finished falls back to killing the process
-				// in that case there is no orderly return according to TR-03124 (return to websession)
-				AsyncTask.execute(() -> {
-					if (eacGui != null && ! eacGui.isDone()) {
-						LOG.debug("Cancelling with EAC GUI.");
-						eacGui.cancel();
-					} else {
-						LOG.debug("Cancelling with ActivationActivity.");
-						activationImpl.cancelAuthentication();
-					}
-					runOnUiThread(() -> {
-						showFailureFragment("The User cancelled the authentication procedure, please wait for the process to end.");
-					});
-				});
-			}
+			// cancellation after EAC is finished falls back to killing the process
+			// in that case there is no orderly return according to TR-03124 (return to websession)
+			new Thread(() -> {
+				if (eacGui != null && ! eacGui.isDone()) {
+					LOG.debug("Cancelling with EAC GUI.");
+					eacGui.cancel();
+				} else {
+					LOG.debug("Cancelling with ActivationActivity.");
+					activationImpl.cancelAuthentication();
+				}
+				showFailureFragment("The User cancelled the authentication procedure, please wait for the process to end.");
+			}).start();
 		});
 
 		if (findViewById(R.id.fragment) != null) {
@@ -319,20 +301,14 @@ public class CustomActivationActivity extends AppCompatActivity {
 				final PinStatus status = eacGui.getPinStatus();
 				if (status.isOperational()) {
 					// show PINInputFragment
-					runOnUiThread(() -> {
-						onPINIsRequired(status);
-					});
+					onPINIsRequired(status);
 				} else if(status.equals(PinStatus.BLOCKED)) {
-					runOnUiThread(() -> {
-						showPINBlockedFragment();
-					});
+					showPINBlockedFragment();
 					//eacGui.cancel();
 
 				} else {
 					String msg = String.format("PIN Status is '%s'.", status);
-					runOnUiThread(() -> {
-						showFailureFragment(msg);
-					});
+					showFailureFragment(msg);
 					LOG.error(msg);
 					eacGui.cancel();
 				}
@@ -341,6 +317,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 			LOG.error(ex.getMessage(), ex);
 		}
 	}
+
 
 	public void cancelEacGui(){
 		handleInterrupted = false;
@@ -355,13 +332,14 @@ public class CustomActivationActivity extends AppCompatActivity {
 		activationImpl.cancelAuthentication();
 	}
 
-	public void setStartPinManagementDialog(Runnable action) {
-		this.startPinManagementDialog = action;
-	}
-
 	public void cancelAll(){
 		cancelEacGui();
 		cancelAuthentication();
+	}
+
+
+	public void setStartPinManagementDialog(Runnable action) {
+		this.startPinManagementDialog = action;
 	}
 
 	public void onServerDataPresent(ServerData serverData, String txInfo) {
@@ -381,7 +359,9 @@ public class CustomActivationActivity extends AppCompatActivity {
 		FailureFragment fragment = new FailureFragment();
 		fragment.setErrorMessage(errorMessage);
 
-		cancelBtn.setVisibility(View.INVISIBLE);
+		runOnUiThread(() -> {
+			cancelBtn.setVisibility(View.INVISIBLE);
+		});
 
 		// show ServerDataFragment
 		LOG.debug("Replace fragment with FailureFragment.");

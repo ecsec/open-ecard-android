@@ -24,6 +24,7 @@ package org.openecard.demo.fragments;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -84,25 +85,20 @@ public abstract class GenericInputFragment extends Fragment {
             public void afterTextChanged(Editable s) { }
         });
 
-        buttonContinue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                final Activity activity = getActivity();
-                if (activity instanceof PINManagementActivity) {
+        buttonContinue.setOnClickListener(v -> {
+            final Activity activity = getActivity();
+            if (activity instanceof PINManagementActivity) {
 
-                    final String number = inputField.getText().toString();
+                final String number = inputField.getText().toString();
 
-                    if (number.length() == lengthOfNumber()) {
-                        buttonContinue.setEnabled(false);
-                        inputField.setEnabled(false);
-                        inputField.setFocusable(false);
+                if (number.length() == lengthOfNumber()) {
+                    buttonContinue.setEnabled(false);
+                    inputField.setEnabled(false);
+                    inputField.setFocusable(false);
 
-                        new Thread(new Runnable() {
-                            public void run() {
-                                enterNumber(number, (PINManagementActivity)activity);
-                            }
-                        }).start();
-                    }
+                    AsyncTask.execute(() -> {
+                        enterNumber(number, (PINManagementActivity)activity);
+                    });
                 }
             }
         });

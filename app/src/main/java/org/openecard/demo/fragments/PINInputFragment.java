@@ -24,6 +24,7 @@ package org.openecard.demo.fragments;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -128,35 +129,32 @@ public class PINInputFragment extends Fragment {
 		});
 
 
-		buttonContinue.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				final Activity activity = getActivity();
-				if (activity instanceof CustomActivationActivity) {
-					final String pin = pinText.getText().toString();
-					final String can;
-					if (canText.getVisibility() == View.VISIBLE) {
-						can = canText.getText().toString();
-					} else {
-						can = null;
-					}
+		buttonContinue.setOnClickListener(v -> {
+			final Activity activity = getActivity();
+			if (activity instanceof CustomActivationActivity) {
+				final String pin = pinText.getText().toString();
+				final String can;
+				if (canText.getVisibility() == View.VISIBLE) {
+					can = canText.getText().toString();
+				} else {
+					can = null;
+				}
 
-					logLabel.setVisibility(View.VISIBLE);
-					if (pin.length() == 6) {
-						buttonContinue.setEnabled(false);
-						pinText.setEnabled(false);
-						pinText.setFocusable(false);
-						canText.setEnabled(false);
-						canText.setFocusable(false);
-						logLabel.setText(PERFORM_PIN_INPUT);
-						new Thread(() -> {
-							((CustomActivationActivity) activity).enterPIN(can, pin);
-							// disable cancel after PACE is successful
-							PINInputFragment.super.getActivity().runOnUiThread(() -> {
-								//((CustomActivationActivity) activity).disableCancel();
-							});
-						}).start();
-					}
+				logLabel.setVisibility(View.VISIBLE);
+				if (pin.length() == 6) {
+					buttonContinue.setEnabled(false);
+					pinText.setEnabled(false);
+					pinText.setFocusable(false);
+					canText.setEnabled(false);
+					canText.setFocusable(false);
+					logLabel.setText(PERFORM_PIN_INPUT);
+					AsyncTask.execute(() -> {
+						((CustomActivationActivity) activity).enterPIN(can, pin);
+						// disable cancel after PACE is successful
+						//PINInputFragment.super.getActivity().runOnUiThread(() -> {
+							//((CustomActivationActivity) activity).disableCancel();
+						//});
+					});
 				}
 			}
 		});

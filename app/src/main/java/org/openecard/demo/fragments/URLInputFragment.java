@@ -51,7 +51,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 
@@ -96,27 +95,22 @@ public class URLInputFragment extends Fragment {
 			urlInput.setText(defaultUrl);
 		}
 
-		okBtn.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				String url = urlInput.getText().toString();
+		okBtn.setOnClickListener(v -> {
+			String url = urlInput.getText().toString();
 
-				if (isValidUrl(url)) {
-					cacheUrl(url);
-					((UseCaseSelectorActivity)getActivity()).onUrlSelection(url);
-				}
+			if (isValidUrl(url)) {
+				cacheUrl(url);
+				((UseCaseSelectorActivity)getActivity()).onUrlSelection(url);
 			}
 		});
 
 		final Button pinManagement = view.findViewById(R.id.btnPinManagement);
-		pinManagement.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				Intent i = new Intent(Intent.ACTION_VIEW);
-				i.setClass(getActivity(), PINManagementActivity.class);
-				i.setData(Uri.parse("/eID-Client?ShowUI=PINManagement"));
-				i.putExtra(ActivationImplementationInterface.RETURN_CLASS, MainActivity.class.getName());
-				startActivity(i);
-			}
+		pinManagement.setOnClickListener(v -> {
+			Intent i = new Intent(Intent.ACTION_VIEW);
+			i.setClass(getActivity(), PINManagementActivity.class);
+			i.setData(Uri.parse("/eID-Client?ShowUI=PINManagement"));
+			i.putExtra(ActivationImplementationInterface.RETURN_CLASS, MainActivity.class.getName());
+			startActivity(i);
 		});
 
 		return view;

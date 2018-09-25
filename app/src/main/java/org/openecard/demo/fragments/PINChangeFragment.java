@@ -24,6 +24,7 @@ package org.openecard.demo.fragments;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -98,40 +99,33 @@ public class PINChangeFragment extends Fragment {
         newPin.addTextChangedListener(textChangeListener);
         newPinConfirm.addTextChangedListener(textChangeListener);
 
-        buttonContinue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                final Activity activity = getActivity();
-                if (activity instanceof PINManagementActivity) {
+        buttonContinue.setOnClickListener(v -> {
+            final Activity activity = getActivity();
+            if (activity instanceof PINManagementActivity) {
 
-                    final String newPIN = newPin.getText().toString();
-                    final String newPIN2 = newPinConfirm.getText().toString();
+                final String newPIN = newPin.getText().toString();
+                final String newPIN2 = newPinConfirm.getText().toString();
 
-                    if (! newPIN.equals(newPIN2)) {
-                        logLabel.setText(MISMATCHING_PINS);
-                        logLabel.setVisibility(View.VISIBLE);
-                        return;
-                    }
+                if (! newPIN.equals(newPIN2)) {
+                    logLabel.setText(MISMATCHING_PINS);
+                    logLabel.setVisibility(View.VISIBLE);
+                    return;
+                }
 
-                    final String pin = pinText.getText().toString();
+                final String pin = pinText.getText().toString();
 
-                    if (pin.length() == 6 || pin.length() == 5) { // for transport PIN
-                        buttonContinue.setEnabled(false);
-                        pinText.setEnabled(false);
-                        pinText.setFocusable(false);
-                        newPin.setEnabled(false);
-                        newPin.setFocusable(false);
-                        newPinConfirm.setEnabled(false);
-                        newPinConfirm.setFocusable(false);
-                        logLabel.setText(PERFORM_PIN_CHANGE);
-                        logLabel.setVisibility(View.VISIBLE);
+                if (pin.length() == 6 || pin.length() == 5) { // for transport PIN
+                    buttonContinue.setEnabled(false);
+                    pinText.setEnabled(false);
+                    pinText.setFocusable(false);
+                    newPin.setEnabled(false);
+                    newPin.setFocusable(false);
+                    newPinConfirm.setEnabled(false);
+                    newPinConfirm.setFocusable(false);
+                    logLabel.setText(PERFORM_PIN_CHANGE);
+                    logLabel.setVisibility(View.VISIBLE);
 
-                        new Thread(new Runnable() {
-                            public void run() {
-                                ((PINManagementActivity) activity).changePin(pin, newPIN);
-                            }
-                        }).start();
-                    }
+                    AsyncTask.execute(() -> ((PINManagementActivity) activity).changePin(pin, newPIN));
                 }
             }
         });

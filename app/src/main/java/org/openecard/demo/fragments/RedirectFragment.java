@@ -57,28 +57,22 @@ public class RedirectFragment extends Fragment {
 
 		final Button backBtn = view.findViewById(R.id.btnStartOpeneCardService1);
 
-		backBtn.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				Activity activity = getActivity();
+		backBtn.setOnClickListener(v -> {
+			Activity activity = getActivity();
 
-				Intent intent = new Intent(activity, MainActivity.class);
-				int flag = clearHistory ? Intent.FLAG_ACTIVITY_CLEAR_TOP : Intent.FLAG_ACTIVITY_REORDER_TO_FRONT;
-				intent.setFlags(flag);
+			Intent intent = new Intent(activity, MainActivity.class);
+			int flag = clearHistory ? Intent.FLAG_ACTIVITY_CLEAR_TOP : Intent.FLAG_ACTIVITY_REORDER_TO_FRONT;
+			intent.setFlags(flag);
 
-				startActivity(intent);
-				activity.finish();
-			}
+			startActivity(intent);
+			activity.finish();
 		});
 
 		final Button redirectBrowserBtn = view.findViewById(R.id.btnOpenBrowser);
-		redirectBrowserBtn.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				Intent i = new Intent(Intent.ACTION_VIEW);
-				i.setData(Uri.parse(url));
-				startActivity(i);
-			}
+		redirectBrowserBtn.setOnClickListener(v -> {
+			Intent i = new Intent(Intent.ACTION_VIEW);
+			i.setData(Uri.parse(url));
+			startActivity(i);
 		});
 
 		return view;

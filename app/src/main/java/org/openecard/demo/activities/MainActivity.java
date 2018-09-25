@@ -72,23 +72,17 @@ public class MainActivity extends Activity {
 		txtView.setVisibility(View.INVISIBLE);
 
 		startBtn = findViewById(R.id.btnStart);
-		startBtn.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				startBtn.setEnabled(false);
-				// start Open eCard Stack
-				serviceClient.startService();
-			}
+		startBtn.setOnClickListener(v -> {
+			startBtn.setEnabled(false);
+			// start Open eCard Stack
+			serviceClient.startService();
 		});
 
 		stopBtn = findViewById(R.id.btnStop);
-		stopBtn.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				stopBtn.setEnabled(false);
-				// stop Open eCard Stack
-				serviceClient.stopService();
-			}
+		stopBtn.setOnClickListener(v -> {
+			stopBtn.setEnabled(false);
+			// stop Open eCard Stack
+			serviceClient.stopService();
 		});
 
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
@@ -139,29 +133,35 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void onConnectionSuccess(OpeneCardContext ctx) {
-			stopBtn.setEnabled(true);
-			skipStartingStep();
+			runOnUiThread(() -> {
+				stopBtn.setEnabled(true);
+				skipStartingStep();
+			});
 		}
 
 		@Override
 		public void onConnectionFailure(ServiceErrorResponse serviceErrorResponse) {
-			startBtn.setEnabled(true);
-			txtView.setText(serviceErrorResponse.getMessage());
-			txtView.setVisibility(View.VISIBLE);
+			runOnUiThread(() -> {
+				startBtn.setEnabled(true);
+				txtView.setText(serviceErrorResponse.getMessage());
+				txtView.setVisibility(View.VISIBLE);
+			});
 		}
 
 		@Override
 		public void onConnectionFailure(ServiceWarningResponse serviceWarningResponse) {
-			startBtn.setEnabled(true);
-			if (serviceWarningResponse.getStatusCode() == ServiceResponseStatusCodes.NFC_NOT_ENABLED) {
-				// maybe go to nfc settings
-				NfcUtils.getInstance().goToNFCSettings(MainActivity.this);
-			}
+			runOnUiThread(() -> {
+				startBtn.setEnabled(true);
+				if (serviceWarningResponse.getStatusCode() == ServiceResponseStatusCodes.NFC_NOT_ENABLED) {
+					// maybe go to nfc settings
+					NfcUtils.getInstance().goToNFCSettings(MainActivity.this);
+				}
+			});
 		}
 
 		@Override
 		public void onDisconnectionSuccess() {
-			startBtn.setEnabled(true);
+			runOnUiThread(() -> startBtn.setEnabled(true));
 		}
 
 		@Override

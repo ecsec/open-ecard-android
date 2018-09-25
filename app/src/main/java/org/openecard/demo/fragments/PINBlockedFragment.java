@@ -34,7 +34,6 @@ import android.widget.Button;
 import org.openecard.android.activation.ActivationImplementationInterface;
 import org.openecard.demo.R;
 import org.openecard.demo.activities.CustomActivationActivity;
-import org.openecard.demo.activities.MainActivity;
 import org.openecard.demo.activities.PINManagementActivity;
 import org.openecard.demo.activities.UseCaseSelectorActivity;
 
@@ -46,29 +45,20 @@ public class PINBlockedFragment extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_pin_blocked, container, false);
 
         final Button button = view.findViewById(R.id.btnStartOpeneCardService);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //Intent intent = new Intent(getActivity(), UseCaseSelectorActivity.class);
-                ((CustomActivationActivity) getActivity()).cancelEacGui();
-            }
-        });
+        button.setOnClickListener(v -> ((CustomActivationActivity) getActivity()).cancelEacGui());
 
         final Button toPinManage = view.findViewById(R.id.btnPinManagement);
-        toPinManage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                CustomActivationActivity activity = ((CustomActivationActivity) getActivity());
-                activity.cancelEacGui();
-                activity.setStartPinManagementDialog(() -> {
-                    Intent i = new Intent(Intent.ACTION_VIEW);
-                    i.setClass(getActivity(), PINManagementActivity.class);
-                    i.setData(Uri.parse("/eID-Client?ShowUI=PINManagement"));
-                    i.putExtra(ActivationImplementationInterface.RETURN_CLASS, UseCaseSelectorActivity.class.getName());
-                    activity.startActivity(i);
-                    activity.finish();
-                });
-            }
+        toPinManage.setOnClickListener(v -> {
+            CustomActivationActivity activity = ((CustomActivationActivity) getActivity());
+            activity.cancelEacGui();
+            activity.setStartPinManagementDialog(() -> {
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setClass(getActivity(), PINManagementActivity.class);
+                i.setData(Uri.parse("/eID-Client?ShowUI=PINManagement"));
+                i.putExtra(ActivationImplementationInterface.RETURN_CLASS, UseCaseSelectorActivity.class.getName());
+                activity.startActivity(i);
+                activity.finish();
+            });
         });
 
         return view;

@@ -25,10 +25,8 @@ package org.openecard.demo.activities;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Fragment;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -96,27 +94,12 @@ public class PINManagementActivity extends AppCompatActivity {
         @Nullable
         @Override
         public Dialog showCardRemoveDialog() {
-            AlertDialog dialog = new AlertDialog.Builder(PINManagementActivity.this)
+            return new AlertDialog.Builder(PINManagementActivity.this)
                     .setTitle("Remove the Card")
                     .setMessage("Please remove the identity card.")
-                    .setNeutralButton("Proceed", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    })
+                    .setNeutralButton("Proceed", (dialog, which) -> dialog.dismiss())
                     .create();
-            return dialog;
         }
-    }
-
-    public void onPINIsRequired(PinStatus status) {
-        PINChangeFragment fragment = new PINChangeFragment();
-        fragment.setStatus(status);
-
-        // show PINChangeFragment
-        getFragmentManager().beginTransaction()
-                .replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
     }
 
 
@@ -155,25 +138,17 @@ public class PINManagementActivity extends AppCompatActivity {
         setContentView(R.layout.activity_custom);
 
         cancelBtn = findViewById(R.id.cancelBtn);
-        cancelBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        cancelBtn.setOnClickListener(view -> {
+			LOG.info("Cancel pressed");
+			cancelBtn.setEnabled(false);
+			cancelBtn.setClickable(false);
 
-                LOG.info("Cancel pressed");
-                cancelBtn.setEnabled(false);
-                cancelBtn.setClickable(false);
-
-                Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (pinMngGui != null) {
-                            pinMngGui.cancel();
-                        }
-                        activationImpl.cancelAuthentication();
-                    }
-                }, 100);
-            }
+			new Thread(() -> {
+				if (pinMngGui != null) {
+					pinMngGui.cancel();
+				}
+				activationImpl.cancelAuthentication();
+			}).start();
         });
 
         if (findViewById(R.id.fragment) != null) {
@@ -184,7 +159,6 @@ public class PINManagementActivity extends AppCompatActivity {
             getFragmentManager().beginTransaction()
                     .replace(R.id.fragment, fragment).addToBackStack(null).commit();
         }
-
     }
 
     @Override
@@ -210,7 +184,16 @@ public class PINManagementActivity extends AppCompatActivity {
         }
     }
 
-    public void onCANIsRequired(boolean triedBefore) {
+    public void onPINIsRequired(PinStatus status) {
+		PINChangeFragment fragment = new PINChangeFragment();
+		fragment.setStatus(status);
+
+		// show PINChangeFragment
+		getFragmentManager().beginTransaction()
+				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
+	}
+
+	public void onCANIsRequired(boolean triedBefore) {
         GenericInputFragment fragment = new CANInputFragment();
 
         if (triedBefore) {
@@ -240,23 +223,13 @@ public class PINManagementActivity extends AppCompatActivity {
             LOG.info("CAN correct: {}", canCorrect);
 
             if (canCorrect) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            onPINIsRequired(pinMngGui.getPinStatus());
-                        } catch (InterruptedException ex) {
-                            LOG.error(ex.getMessage(), ex);
-                        }
-                    }
-                });
+				try {
+					onPINIsRequired(pinMngGui.getPinStatus());
+				} catch (InterruptedException ex) {
+					LOG.error(ex.getMessage(), ex);
+				}
             } else {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        onCANIsRequired(true);
-                    }
-                });
+				onCANIsRequired(true);
             }
         } catch (InterruptedException ex) {
             LOG.error(ex.getMessage(), ex);
@@ -268,15 +241,10 @@ public class PINManagementActivity extends AppCompatActivity {
             boolean pukCorrect = pinMngGui.unblockPin(puk);
             LOG.info("PUK correct: {}", pukCorrect);
 
-            if(!pukCorrect){
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        onPUKIsRequired(true);
-                    }
-                });
+            if (! pukCorrect){
+				onPUKIsRequired(true);
             } else {
-                showMessageFragment("PIN was successful unblocked.");
+				showMessageFragment("PIN was successful unblocked.");
             }
         } catch (InterruptedException ex) {
             LOG.error(ex.getMessage(), ex);
@@ -292,9 +260,7 @@ public class PINManagementActivity extends AppCompatActivity {
             if (! changeSuccessful) {
                 initPinChangeGui();
             } else {
-                runOnUiThread(() -> {
-                    showMessageFragment("Your PIN was changed successfully.");
-                });
+				showMessageFragment("Your PIN was changed successfully.");
                 pinMngGui.cancel();
             }
         } catch (InterruptedException ex) {
@@ -306,7 +272,7 @@ public class PINManagementActivity extends AppCompatActivity {
         FailureFragment fragment = new FailureFragment();
         fragment.setErrorMessage(msg);
 
-        cancelBtn.setEnabled(false);
+        runOnUiThread(() -> cancelBtn.setEnabled(false));
 
         // show ServerDataFragment
         getFragmentManager().beginTransaction()
@@ -319,29 +285,14 @@ public class PINManagementActivity extends AppCompatActivity {
             LOG.info("PIN status: {}", pinStatus);
 
             if (pinStatus.isNormalPinEntry()) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        onPINIsRequired(pinStatus);
-                    }
-                });
+				onPINIsRequired(pinStatus);
             } else if (pinStatus.needsCan()) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        onCANIsRequired(false);
-                    }
-                });
+				onCANIsRequired(false);
             } else if (pinStatus.needsPuk()) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        onPUKIsRequired(false);
-                    }
-                });
+				onPUKIsRequired(false);
             } else if (pinStatus.isDead()) {
                 String msg = String.format("PIN Status is '%s'.", pinStatus);
-                showMessageFragment(msg);
+				showMessageFragment(msg);
                 LOG.error(msg);
                 pinMngGui.cancel();
             }

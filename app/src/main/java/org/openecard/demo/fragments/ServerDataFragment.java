@@ -87,24 +87,21 @@ public class ServerDataFragment extends Fragment {
 		}
 
 		Button button = view.findViewById(R.id.btnContinue);
-		button.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				List<BoxItem> readBoxes = serverData.getReadAccessAttributes();
-				for (BoxItem boxItem : readBoxes) {
-					CheckBox next = readAccessAttributes.get(boxItem);
-					if (next != null) {
-						boxItem.setSelected(next.isChecked());
-					}
+		button.setOnClickListener(view2 -> {
+			List<BoxItem> readBoxes = serverData.getReadAccessAttributes();
+			for (BoxItem boxItem : readBoxes) {
+				CheckBox next = readAccessAttributes.get(boxItem);
+				if (next != null) {
+					boxItem.setSelected(next.isChecked());
 				}
+			}
 
-				Activity activity = getActivity();
-				if (activity instanceof CustomActivationActivity) {
-					// disable cancel if service is working
-					//((CustomActivationActivity) activity).disableCancel();
-					((CustomActivationActivity) activity).enterAttributes(readBoxes,
-							serverData.getWriteAccessAttributes());
-				}
+			Activity activity = getActivity();
+			if (activity instanceof CustomActivationActivity) {
+				// disable cancel if service is working
+				//((CustomActivationActivity) activity).disableCancel();
+				((CustomActivationActivity) activity).enterAttributes(readBoxes,
+						serverData.getWriteAccessAttributes());
 			}
 		});
 
