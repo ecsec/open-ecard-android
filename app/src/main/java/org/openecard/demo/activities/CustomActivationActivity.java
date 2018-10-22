@@ -327,16 +327,6 @@ public class CustomActivationActivity extends AppCompatActivity {
 		}
 	}
 
-	public void cancelAuthentication(){
-		handleInterrupted = false;
-		activationImpl.cancelAuthentication();
-	}
-
-	public void cancelAll(){
-		cancelEacGui();
-		cancelAuthentication();
-	}
-
 
 	public void setStartPinManagementDialog(Runnable action) {
 		this.startPinManagementDialog = action;
