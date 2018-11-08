@@ -2,13 +2,13 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 28
-    buildToolsVersion '28.0.2'
+    buildToolsVersion '28.0.3'
     defaultConfig {
         applicationId "org.openecard.demo"
         minSdkVersion 17
         targetSdkVersion 28
-        versionCode 7
-        versionName "1.0.0-rc14"
+        versionCode 8
+        versionName "1.0.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
@@ -17,13 +17,8 @@ android {
             //shrinkResources true
             minifyEnabled false
             //useProguard false // disable to use the built in shrinker
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-    }
-    packagingOptions {
-        /* Otherwise DuplicateFileException */
-        exclude 'LICENSE.Open-eCard'
-        exclude 'META-INF/DEPENDENCIES'
     }
     // make sure the dex compiler translates all java 8 constructs to be compatible with older APIs
     // https://developer.android.com/studio/write/java8-support
@@ -40,25 +35,26 @@ repositories {
     }
 }
 
-def OecVersion = "1.3.0-rc20"
+def OecVersion = "1.3.0"
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    testImplementation 'junit:junit:4.12'
 
-    implementation 'com.android.support:appcompat-v7:28.0.0-rc02'
-    implementation 'com.android.support:design:28.0.0-rc02'
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support:design:28.0.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
 
     // the actual Open eCard library
-    implementation (group:'org.openecard.clients', name:'android-lib', version:"${OecVersion}", ext: "aar")
+    implementation (group: 'org.openecard.clients', name: 'android-lib', version: "${OecVersion}", ext: "aar") {
+        transitive = false
+    }
     implementation 'xerces:xercesImpl:2.12.0'
     implementation 'org.slf4j:slf4j-api:1.7.25'
 
     // logging library, use whatever you like to output the slf4j log statements
-    implementation 'com.github.tony19:logback-android:1.1.1-12'
+    implementation 'com.github.tony19:logback-android:1.3.0-2'
 
-    testImplementation 'junit:junit:4.12'
 }
