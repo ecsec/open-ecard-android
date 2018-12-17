@@ -110,16 +110,40 @@ public class ServerDataFragment extends Fragment {
 
 	private String mapBoxItemNameToReadableValue(String boxItemName) {
 		switch (boxItemName) {
+			case "DG01":
+				return "Document Type";
+			case "DG02":
+				return "Issuing State";
+			case "DG03":
+				return "Date of Expiry";
 			case "DG04":
 				return "Given Names";
 			case "DG05":
 				return "Family Names";
+			case "DG06":
+				return "Nom de Plume";
 			case "DG07":
 				return "Academic Title";
 			case "DG08":
 				return "Date of Birth";
+			case "DG09":
+				return "Place of Birth";
+			case "DG10":
+				return "Nationality";
+			case "DG13":
+				return "Birth Name";
 			case "DG17":
 				return "Normal Place of Residence (multiple)";
+			case "DG19":
+				return "Residence Permit I";
+			case "AGE_VERIFICATION":
+				return "Age Verification";
+			case "COMMUNITY_ID_VERIFICATION":
+				return "Address Verification";
+			case "INSTALL_QUALIFIED_CERTIFICATE":
+				return "Install signature certificate";
+			case "RESTRICTED_IDENTIFICATION":
+				return "Restricted Identification";
 			default:
 				return null;
 		}
