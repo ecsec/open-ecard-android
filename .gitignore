@@ -1,5 +1,5 @@
-
 # Created by https://www.gitignore.io/api/androidstudio
+# Edit at https://www.gitignore.io/?templates=androidstudio
 
 ### AndroidStudio ###
 # Covers files to be ignored for android development using Android Studio.
@@ -63,7 +63,9 @@ obj/
 /out/
 
 # User-specific configurations
+.idea/caches/
 .idea/libraries/
+.idea/shelf/
 .idea/workspace.xml
 .idea/tasks.xml
 .idea/.name
@@ -81,6 +83,7 @@ obj/
 .idea/sqlDataSources.xml
 .idea/dynamic.xml
 .idea/uiDesigner.xml
+.idea/assetWizardSettings.xml
 
 # OS-specific files
 .DS_Store
@@ -94,6 +97,8 @@ Thumbs.db
 # Legacy Eclipse project files
 .classpath
 .project
+.cproject
+.settings/
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
