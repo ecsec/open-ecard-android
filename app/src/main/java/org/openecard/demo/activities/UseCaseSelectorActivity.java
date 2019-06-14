@@ -57,6 +57,7 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 	private static final Logger LOG = LoggerFactory.getLogger(UseCaseSelectorActivity.class);
 
 	private static final String DEFAULT_TC_TOKEN_URL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_20&redirect=true";
+	//private static final String DEFAULT_TC_TOKEN_URL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_can&redirect=true";
 
 	private OpeneCardServiceClientHandler serviceClient;
 	private Button stopBtn;

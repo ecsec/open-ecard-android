@@ -258,6 +258,8 @@ public class CustomActivationActivity extends AppCompatActivity {
 	/// Methods to exchange data with the fragments (aka the EAC process interaction)
 	///
 
+	private boolean isOnSite = false;
+
 	public void enterAttributes(List<BoxItem> readAccessAttributes, List<BoxItem> writeAccessAttributes) {
 		try {
 			// use eac gui service to select attributes
@@ -265,6 +267,8 @@ public class CustomActivationActivity extends AppCompatActivity {
 			// retrieve pin status from eac gui service
 			PinStatus status = eacGui.getPinStatus();
 			if (status.isOperational()) {
+				// determine if we have an On-Site process
+				isOnSite = isOnSiteProcess(readAccessAttributes);
 				// show PINInputFragment
 				onPINIsRequired(status);
 			} else if(status.equals(PinStatus.BLOCKED)) {
@@ -284,6 +288,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 	public void onPINIsRequired(PinStatus status) {
 		PINInputFragment fragment = new PINInputFragment();
 		fragment.setStatus(status);
+		fragment.setOnSite(isOnSite);
 
 		// show PINInputFragment
 		getFragmentManager().beginTransaction()
@@ -401,5 +406,14 @@ public class CustomActivationActivity extends AppCompatActivity {
         }
         return msg;
     }
+
+    private boolean isOnSiteProcess(List<BoxItem> readAccessAttributes) {
+		for (BoxItem next : readAccessAttributes) {
+			if ("CAN_ALLOWED".equals(next.getName())) {
+				return next.isSelected();
+			}
+		}
+		return false;
+	}
 
 }

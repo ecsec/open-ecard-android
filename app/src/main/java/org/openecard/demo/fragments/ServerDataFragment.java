@@ -144,6 +144,8 @@ public class ServerDataFragment extends Fragment {
 				return "Install signature certificate";
 			case "RESTRICTED_IDENTIFICATION":
 				return "Restricted Identification";
+			case "CAN_ALLOWED":
+				return "On-Site Verification";
 			default:
 				return null;
 		}
