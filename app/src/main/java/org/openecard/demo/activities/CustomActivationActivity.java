@@ -91,6 +91,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 		// Callback to receive the Eac Gui interface which is used to interact with the Open eCard library.
 		@Override
 		public void onGuiIfaceSet(EacGui eacGui) {
+			LOG.info("Persisting EAC gui callbacks.");
 			CustomActivationActivity.this.eacGui = eacGui;
 			try {
 				// this one blocks until the data is available, but it's ok as this is run in the background
@@ -108,6 +109,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 		// Callbacks where you can open a Dialog which says that the card should be removed.
 		@Override
 		public Dialog showCardRemoveDialog() {
+			LOG.info("Showing the card removal dialog.");
 			return new AlertDialog.Builder(CustomActivationActivity.this)
 					.setTitle("Remove the Card")
 					.setMessage("Please remove the identity card.")
@@ -117,7 +119,8 @@ public class CustomActivationActivity extends AppCompatActivity {
 
 		@Override
 		public void onAuthenticationSuccess(ActivationResult result) {
-        	if (! startPinManagementIfSet()) {
+			LOG.info("Handling authentication success.");
+			if (! startPinManagementIfSet()) {
 				super.onAuthenticationSuccess(result);
 			}
 		}
@@ -171,6 +174,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 
 	@Override
 	protected void onStart() {
+		LOG.info("Starting.");
 		super.onStart();
 		this.activationImpl = new ActivationImpl();
 		activationImpl.onStart();
@@ -178,6 +182,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 
 	@Override
 	protected void onStop() {
+		LOG.info("Stopping.");
 		super.onStop();
 		activationImpl.onStop();
 		this.startPinManagementDialog = null;
@@ -185,12 +190,14 @@ public class CustomActivationActivity extends AppCompatActivity {
 
 	@Override
 	protected void onPause() {
+		LOG.info("Pausing.");
 		super.onPause();
 		activationImpl.onPause();
 	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		LOG.info("Creating.");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_custom);
 
@@ -232,12 +239,14 @@ public class CustomActivationActivity extends AppCompatActivity {
 
 	@Override
 	protected void onResume() {
+		LOG.info("Resuming.");
 		super.onResume();
 		activationImpl.onResume();
 	}
 
 	@Override
 	protected void onNewIntent(Intent intent) {
+		LOG.info("On new intent.");
 		super.onNewIntent(intent);
 		activationImpl.onNewIntent(intent);
 		// if you receive a nfc tag, disable the cancel button until the next fragment comes in
@@ -261,6 +270,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 	private boolean isOnSite = false;
 
 	public void enterAttributes(List<BoxItem> readAccessAttributes, List<BoxItem> writeAccessAttributes) {
+		LOG.info("Enter attributes.");
 		try {
 			// use eac gui service to select attributes
 			eacGui.selectAttributes(readAccessAttributes, writeAccessAttributes);
@@ -286,6 +296,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 	}
 
 	public void onPINIsRequired(PinStatus status) {
+		LOG.info("Pin is required.");
 		PINInputFragment fragment = new PINInputFragment();
 		fragment.setStatus(status);
 		fragment.setOnSite(isOnSite);
@@ -296,6 +307,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 	}
 
 	public void enterPIN(String can, String pin) {
+		LOG.info("Enter pin.");
 		try {
 			// Retrieve PIN from PINInputFragment and send it to Eac Gui Service
 			boolean pinCorrect = eacGui.enterPin(can, pin);
@@ -325,6 +337,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 
 
 	public void cancelEacGui(){
+		LOG.info("Cancel EAC GUI.");
 		handleInterrupted = false;
 		if(eacGui != null){
 			eacGui.cancel();
@@ -338,6 +351,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 	}
 
 	public void onServerDataPresent(ServerData serverData, String txInfo) {
+		LOG.info("Server data is present.");
 		Fragment fragment = new ServerDataFragment();
 
 		Bundle bundle = new Bundle();
