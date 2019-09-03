@@ -348,6 +348,12 @@ public class CustomActivationActivity extends AppCompatActivity {
 		// show ServerDataFragment
 		getFragmentManager().beginTransaction()
 				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
+
+		if (cancelBtn.getVisibility() != View.VISIBLE) {
+			runOnUiThread(() -> {
+				cancelBtn.setVisibility(View.VISIBLE);
+			});
+		}
 	}
 
 	private void showFailureFragment(String errorMessage) {
