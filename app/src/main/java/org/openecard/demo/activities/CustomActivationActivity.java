@@ -159,6 +159,19 @@ public class CustomActivationActivity extends AppCompatActivity {
 			}
 		}
 
+		@Override
+		public void onCardInserted(String cardType) {
+			LOG.info("Card inserted: {}.", cardType);
+			if (findViewById(R.id.fragment) != null) {
+				runOnUiThread(() -> {
+					Fragment fragment = new WaitFragment();
+					cancelBtn.setVisibility(View.VISIBLE);
+					fragment.setArguments(getIntent().getExtras());
+					getFragmentManager().beginTransaction()
+							.replace(R.id.fragment, fragment).addToBackStack(null).commit();
+				});
+			}
+		}
 	}
 
 	@Override
