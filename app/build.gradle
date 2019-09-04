@@ -7,8 +7,8 @@ android {
         applicationId "org.openecard.demo"
         minSdkVersion 17
         targetSdkVersion 28
-        versionCode 11
-        versionName "1.0.3"
+        versionCode 12
+        versionName "1.0.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
@@ -35,7 +35,7 @@ repositories {
     }
 }
 
-def OecVersion = "1.4.0-rc.1"
+def OecVersion = "1.4.0-rc.3"
 
 dependencies {
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
