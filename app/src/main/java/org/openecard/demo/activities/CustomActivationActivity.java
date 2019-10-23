@@ -120,6 +120,8 @@ public class CustomActivationActivity extends AppCompatActivity {
 		@Override
 		public void onAuthenticationSuccess(ActivationResult result) {
 			LOG.info("Handling authentication success.");
+			LOG.debug("onAuthenticationSuccess ResultMinor={}", result.getProcessResultMinor());
+
 			if (! startPinManagementIfSet()) {
 				super.onAuthenticationSuccess(result);
 			}
@@ -127,12 +129,13 @@ public class CustomActivationActivity extends AppCompatActivity {
 
 		// Methods which indicate whether the authentication was successful or incorrectly.
 		@Override
-		public void onAuthenticationFailure(ActivationResult activationResult) {
-			LOG.info("Authentication failed: " + activationResult.getResultCode().name());
+		public void onAuthenticationFailure(ActivationResult result) {
+			LOG.info("Authentication failed: " + result.getResultCode().name());
+			LOG.debug("onAuthenticationFailure ResultMinor={}", result.getProcessResultMinor());
 
 			if (! startPinManagementIfSet()) {
 				// build error message
-				String errorMsg = buildAuthenticationFailedMsg(activationResult);
+				String errorMsg = buildAuthenticationFailedMsg(result);
 				showFailureFragment(errorMsg);
 			}
 		}
@@ -140,6 +143,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 		@Override
 		public void onAuthenticationInterrupted(ActivationResult result) {
 			LOG.info("Authentication interrupted.");
+			LOG.debug("onAuthenticationInterrupted ResultMinor={}", result.getProcessResultMinor());
 
 			if (! startPinManagementIfSet()) {
 				if (handleInterrupted) {
@@ -420,6 +424,9 @@ public class CustomActivationActivity extends AppCompatActivity {
         } else {
             msg = "During the authentication an unknown error occurred.";
         }
+		if (result.getProcessResultMinor() != null) {
+			msg = String.format("%s%nResultMinor=%s", msg, result.getProcessResultMinor());
+		}
         return msg;
     }
 
@@ -437,6 +444,9 @@ public class CustomActivationActivity extends AppCompatActivity {
             msg = "Authentication process was interrupted by the user or implicitly by a shutdown of a subsystem " +
                     "or the whole system.";
         }
+        if (result.getProcessResultMinor() != null) {
+        	msg = String.format("%s%nResultMinor=%s", msg, result.getProcessResultMinor());
+		}
         return msg;
     }
 
