@@ -30,7 +30,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import org.openecard.android.system.ServiceResponseStatusCodes;
-import org.openecard.android.system.OpeneCardContext;
 import org.openecard.android.system.OpeneCardServiceHandler;
 import org.openecard.android.system.OpeneCardServiceClientHandler;
 import org.openecard.common.util.TR03112Utils;
@@ -38,6 +37,7 @@ import org.openecard.demo.R;
 import org.openecard.android.system.ServiceErrorResponse;
 import org.openecard.android.system.ServiceWarningResponse;
 import org.openecard.android.utils.NfcUtils;
+import org.openecard.mobile.system.OpeneCardContext;
 
 
 /**

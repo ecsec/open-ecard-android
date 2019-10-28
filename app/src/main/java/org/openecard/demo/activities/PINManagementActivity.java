@@ -32,7 +32,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
-import org.openecard.android.activation.ActivationResult;
 import org.openecard.android.activation.PinMgmtActivationHandler;
 import org.openecard.demo.R;
 import org.openecard.demo.fragments.CANInputFragment;
@@ -44,6 +43,7 @@ import org.openecard.demo.fragments.PUKInputFragment;
 import org.openecard.demo.fragments.WaitFragment;
 import org.openecard.gui.android.pinmanagement.PINManagementGui;
 import org.openecard.gui.android.pinmanagement.PinStatus;
+import org.openecard.mobile.activation.ActivationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,6 +72,8 @@ public class PINManagementActivity extends AppCompatActivity {
             PINManagementActivity.this.pinMngGui = gui;
             initPinChangeGui();
         }
+
+
 
         @Override
         public void onAuthenticationFailure(ActivationResult result) {

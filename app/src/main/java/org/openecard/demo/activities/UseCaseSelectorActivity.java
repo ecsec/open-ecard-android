@@ -30,7 +30,7 @@ import android.view.View;
 import android.widget.Button;
 
 import org.openecard.android.activation.ActivationImplementationInterface;
-import org.openecard.android.system.OpeneCardContext;
+
 import org.openecard.android.system.OpeneCardServiceClientHandler;
 import org.openecard.android.system.OpeneCardServiceHandler;
 import org.openecard.android.system.ServiceErrorResponse;
@@ -39,6 +39,7 @@ import org.openecard.demo.R;
 import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.RedirectFragment;
 import org.openecard.demo.fragments.URLInputFragment;
+import org.openecard.mobile.system.OpeneCardContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

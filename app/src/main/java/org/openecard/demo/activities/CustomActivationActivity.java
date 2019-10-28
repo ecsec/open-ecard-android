@@ -31,8 +31,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
-import org.openecard.android.activation.ActivationResult;
 import org.openecard.android.activation.EacActivationHandler;
+
 import org.openecard.demo.R;
 import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.InitFragment;
@@ -44,6 +44,7 @@ import org.openecard.gui.android.eac.EacGui;
 import org.openecard.gui.android.eac.types.BoxItem;
 import org.openecard.gui.android.eac.types.PinStatus;
 import org.openecard.gui.android.eac.types.ServerData;
+import org.openecard.mobile.activation.ActivationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,6 +105,7 @@ public class CustomActivationActivity extends AppCompatActivity {
 				LOG.error(ex.getMessage(), ex);
 			}
 		}
+
 
 
 		// Callbacks where you can open a Dialog which says that the card should be removed.
