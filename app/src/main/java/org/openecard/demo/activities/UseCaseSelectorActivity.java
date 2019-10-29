@@ -125,7 +125,7 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 
 		// perform explicit URL Intent to the Activation Activity
 		Intent i = new Intent(Intent.ACTION_VIEW);
-		i.setClass(UseCaseSelectorActivity.this, CustomActivationActivity.class);
+		i.setClass(UseCaseSelectorActivity.this, EACActivity.class);
 		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		i.setData(Uri.parse(url));
 

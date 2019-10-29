@@ -35,7 +35,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import org.openecard.demo.R;
-import org.openecard.demo.activities.CustomActivationActivity;
+import org.openecard.demo.activities.EACActivity;
 import org.openecard.gui.android.eac.types.PinStatus;
 
 
@@ -148,7 +148,7 @@ public class PINInputFragment extends Fragment {
 
 		buttonContinue.setOnClickListener(v -> {
 			final Activity activity = getActivity();
-			if (activity instanceof CustomActivationActivity) {
+			if (activity instanceof EACActivity) {
 				final String pin = pinText.getText().toString();
 				final String can;
 				if (canText.getVisibility() == View.VISIBLE) {
@@ -166,10 +166,10 @@ public class PINInputFragment extends Fragment {
 					canText.setFocusable(false);
 					logLabel.setText(PERFORM_PIN_INPUT);
 					new Thread(() -> {
-						((CustomActivationActivity) activity).enterPIN(can, pin);
+						((EACActivity) activity).enterPIN(can, pin);
 						// disable cancel after PACE is successful
 						//PINInputFragment.super.getActivity().runOnUiThread(() -> {
-							//((CustomActivationActivity) activity).disableCancel();
+							//((EACActivity) activity).disableCancel();
 						//});
 					}).start();
 				}

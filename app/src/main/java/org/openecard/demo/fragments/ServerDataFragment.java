@@ -33,9 +33,11 @@ import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import org.openecard.demo.R;
-import org.openecard.demo.activities.CustomActivationActivity;
+import org.openecard.demo.activities.EACActivity;
 import org.openecard.gui.android.eac.types.BoxItem;
 import org.openecard.gui.android.eac.types.ServerData;
+import org.openecard.mobile.activation.ConfirmAttributeSelectionOperation;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,13 +47,18 @@ import java.util.Map;
  * @author Mike Prechtl
  */
 public class ServerDataFragment extends Fragment {
+	private ConfirmAttributeSelectionOperation op;
+
+	public void setServerDataFragment(ConfirmAttributeSelectionOperation op){
+		this.op = op;
+	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		final View view = inflater.inflate(R.layout.fragment_server_data, container, false);
 
-		final ServerData serverData = (ServerData) getArguments().getSerializable(CustomActivationActivity.BUNDLE_SERVER_DATA);
-		final String transactionInfo = getArguments().getString(CustomActivationActivity.BUNDLE_TRANSACTION_INFO);
+		final ServerData serverData = (ServerData) getArguments().getSerializable(EACActivity.BUNDLE_SERVER_DATA);
+		final String transactionInfo = getArguments().getString(EACActivity.BUNDLE_TRANSACTION_INFO);
 
 		final LinearLayout layout = view.findViewById(R.id.linearLayout);
 
@@ -97,10 +104,10 @@ public class ServerDataFragment extends Fragment {
 			}
 
 			Activity activity = getActivity();
-			if (activity instanceof CustomActivationActivity) {
+			if (activity instanceof EACActivity) {
 				// disable cancel if service is working
-				//((CustomActivationActivity) activity).disableCancel();
-				((CustomActivationActivity) activity).enterAttributes(readBoxes,
+				//((EACActivity) activity).disableCancel();
+				((EACActivity) activity).enterAttributes(readBoxes,
 						serverData.getWriteAccessAttributes());
 			}
 		});
