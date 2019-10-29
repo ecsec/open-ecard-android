@@ -74,9 +74,10 @@ public class EACActivity extends AppCompatActivity {
 
 	private static final Logger LOG = LoggerFactory.getLogger(EACActivity.class);
 
-	class ServerDataTransInfo{
-		public final String BUNDLE_SERVER_DATA = "ServerData";
-		public final String BUNDLE_TRANSACTION_INFO = "TransactionInfo";
+	public static final String BUNDLE_SERVER_DATA = "ServerData";
+	public static final String BUNDLE_TRANSACTION_INFO = "TransactionInfo";
+
+	public	class ServerDataTransInfo{
 		private final Bundle bundle;
 		private boolean ti_set;
 		private boolean sd_set;

@@ -34,9 +34,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import org.openecard.demo.R;
 import org.openecard.demo.activities.EACActivity;
-import org.openecard.gui.android.eac.types.BoxItem;
-import org.openecard.gui.android.eac.types.ServerData;
+import org.openecard.gui.definition.BoxItem;
 import org.openecard.mobile.activation.ConfirmAttributeSelectionOperation;
+import org.openecard.mobile.activation.SelectableItem;
+import org.openecard.mobile.activation.ServerData;
 
 import java.util.HashMap;
 import java.util.List;
@@ -80,36 +81,30 @@ public class ServerDataFragment extends Fragment {
 		TextView txInfoTxtView = view.findViewById(R.id.transactionInfo);
 		txInfoTxtView.setText(transactionInfo);
 
-		final Map<BoxItem, CheckBox> readAccessAttributes = new HashMap<>();
-		for (BoxItem boxItem : serverData.getReadAccessAttributes()) {
-			String readableValue = mapBoxItemNameToReadableValue(boxItem.getName());
+		final Map<SelectableItem, CheckBox> readAccessAttributes = new HashMap<>();
+		for (SelectableItem selItem : serverData.getReadAccessAttributes()) {
+			String readableValue = mapBoxItemNameToReadableValue( selItem.getName());
 			if (readableValue != null) {
 				CheckBox checkBox = new CheckBox(getActivity().getApplicationContext());
 				checkBox.setText(readableValue);
-				checkBox.setChecked(boxItem.isSelected());
-				checkBox.setEnabled(! boxItem.isDisabled());
-				readAccessAttributes.put(boxItem, checkBox);
+				checkBox.setChecked( selItem.isChecked());
+				checkBox.setEnabled(!  selItem.isRequired());
+				readAccessAttributes.put( selItem, checkBox);
 				layout.addView(checkBox);
 			}
 		}
 
 		Button button = view.findViewById(R.id.btnContinue);
 		button.setOnClickListener(view2 -> {
-			List<BoxItem> readBoxes = serverData.getReadAccessAttributes();
-			for (BoxItem boxItem : readBoxes) {
-				CheckBox next = readAccessAttributes.get(boxItem);
+			List<SelectableItem> readBoxes = serverData.getReadAccessAttributes();
+			for (SelectableItem selItem : readBoxes) {
+				CheckBox next = readAccessAttributes.get(selItem);
 				if (next != null) {
-					boxItem.setSelected(next.isChecked());
+					selItem.setChecked(next.isChecked());
 				}
 			}
 
-			Activity activity = getActivity();
-			if (activity instanceof EACActivity) {
-				// disable cancel if service is working
-				//((EACActivity) activity).disableCancel();
-				((EACActivity) activity).enterAttributes(readBoxes,
-						serverData.getWriteAccessAttributes());
-			}
+			op.enter(readBoxes, serverData.getWriteAccessAttributes());
 		});
 
 		return view;
