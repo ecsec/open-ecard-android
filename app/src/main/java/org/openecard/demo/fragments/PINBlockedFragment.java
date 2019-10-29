@@ -44,22 +44,22 @@ public class PINBlockedFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_pin_blocked, container, false);
 
-        final Button button = view.findViewById(R.id.btnStartOpeneCardService);
-        button.setOnClickListener(v -> ((EACActivity) getActivity()).cancelEacGui());
+       // final Button button = view.findViewById(R.id.btnStartOpeneCardService);
+       // button.setOnClickListener(v -> ((EACActivity) getActivity()).cancelEacGui());
 
-        final Button toPinManage = view.findViewById(R.id.btnPinManagement);
-        toPinManage.setOnClickListener(v -> {
-            EACActivity activity = ((EACActivity) getActivity());
-            activity.cancelEacGui();
-            activity.setStartPinManagementDialog(() -> {
-                Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setClass(getActivity(), PINManagementActivity.class);
-                i.setData(Uri.parse("/eID-Client?ShowUI=PINManagement"));
-                i.putExtra(ActivationImplementationInterface.RETURN_CLASS, UseCaseSelectorActivity.class.getName());
-                activity.startActivity(i);
-                activity.finish();
-            });
-        });
+       // final Button toPinManage = view.findViewById(R.id.btnPinManagement);
+       // toPinManage.setOnClickListener(v -> {
+       //     EACActivity activity = ((EACActivity) getActivity());
+       //     activity.cancelEacGui();
+       //     activity.setStartPinManagementDialog(() -> {
+       //         Intent i = new Intent(Intent.ACTION_VIEW);
+       //         i.setClass(getActivity(), PINManagementActivity.class);
+       //         i.setData(Uri.parse("/eID-Client?ShowUI=PINManagement"));
+       //         i.putExtra(ActivationImplementationInterface.RETURN_CLASS, UseCaseSelectorActivity.class.getName());
+       //         activity.startActivity(i);
+       //         activity.finish();
+       //     });
+       // });
 
         return view;
     }

@@ -33,7 +33,7 @@ public class CANInputFragment extends GenericInputFragment {
 
     @Override
     protected void enterNumber(String number, PINManagementActivity activity) {
-        activity.enterCan(number);
+//        activity.enterCan(number);
     }
 
     @Override

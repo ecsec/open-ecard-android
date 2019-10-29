@@ -36,7 +36,6 @@ import android.widget.TextView;
 
 import org.openecard.demo.R;
 import org.openecard.demo.activities.PINManagementActivity;
-import org.openecard.gui.android.pinmanagement.PinStatus;
 
 
 public class PINChangeFragment extends Fragment {
@@ -45,14 +44,9 @@ public class PINChangeFragment extends Fragment {
     private static final String WRONG_PIN = "The entered PIN was wrong, please try again.";
     private static final String MISMATCHING_PINS = "The two new PINs do not match.";
 
-    private PinStatus status;
     private EditText pinText;
     private EditText newPin;
     private EditText newPinConfirm;
-
-    public void setStatus(PinStatus status) {
-        this.status = status;
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -72,12 +66,12 @@ public class PINChangeFragment extends Fragment {
         final Button buttonContinue = view.findViewById(R.id.btnPINInput);
         buttonContinue.setEnabled(false);
 
-        if (status != null) {
-            if (status == PinStatus.RC2) {
-                logLabel.setVisibility(View.VISIBLE);
-                logLabel.setText(WRONG_PIN);
-            }
-        }
+//        if (status != null) {
+//            if (status == PinStatus.RC2) {
+//                logLabel.setVisibility(View.VISIBLE);
+//                logLabel.setText(WRONG_PIN);
+//            }
+//        }
 
         TextWatcher textChangeListener = new TextWatcher() {
             @Override
@@ -124,7 +118,7 @@ public class PINChangeFragment extends Fragment {
                     logLabel.setText(PERFORM_PIN_CHANGE);
                     logLabel.setVisibility(View.VISIBLE);
 
-                    new Thread(() -> ((PINManagementActivity) activity).changePin(pin, newPIN)).start();
+//                    new Thread(() -> ((PINManagementActivity) activity).changePin(pin, newPIN)).start();
                 }
             }
         });

@@ -33,7 +33,7 @@ public class PUKInputFragment extends GenericInputFragment {
 
     @Override
     protected void enterNumber(String number, PINManagementActivity activity) {
-        activity.enterPUK(number);
+//        activity.enterPUK(number);
     }
 
     @Override

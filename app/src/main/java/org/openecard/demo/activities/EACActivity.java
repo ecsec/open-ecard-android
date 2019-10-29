@@ -143,7 +143,6 @@ public class EACActivity extends AppCompatActivity {
 		public void onPinRequest(int i, ConfirmPasswordOperation confirmPasswordOperation) {
 			LOG.debug("eacInteractionHandler::onPinRequest");
 			PINInputFragment fragment = new PINInputFragment();
-			fragment.setOnSite(isOnSite);
 
 			// show PINInputFragment
 			getFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
