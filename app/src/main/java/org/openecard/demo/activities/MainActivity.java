@@ -61,7 +61,7 @@ public class MainActivity extends Activity {
 		startBtn = findViewById(R.id.btnStart);
 		startBtn.setOnClickListener(v -> {
 			startBtn.setEnabled(false);
-			// start Open eCard Stack
+			skipStartingStep();
 		});
 
 		stopBtn = findViewById(R.id.btnStop);
@@ -100,6 +100,7 @@ public class MainActivity extends Activity {
 	}
 
 	public void skipStartingStep() {
+
 		Intent i = new Intent(getApplicationContext(), UseCaseSelectorActivity.class);
 		if(getIntent().getData() != null){
 			i.setData(getIntent().getData());
@@ -107,10 +108,5 @@ public class MainActivity extends Activity {
 
 		startActivity(i);
 	}
-
-	///
-	/// Handler functions for the initialization or termination of the Open eCard Stack management Android Service
-	///
-
 
 }
