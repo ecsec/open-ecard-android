@@ -60,7 +60,7 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 	private static final String DEFAULT_TC_TOKEN_URL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_20&redirect=true";
 	//private static final String DEFAULT_TC_TOKEN_URL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_can&redirect=true";
 
-	private OpeneCardServiceClientHandler serviceClient;
+//	private OpeneCardServiceClientHandler serviceClient;
 	private Button stopBtn;
 
 	// indicates if activity stack is thrown away or not
@@ -70,11 +70,11 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 	@Override
 	public void onBackPressed() {
 		// stop OeC Service if it is running
-		if (serviceClient.isInitialized()) {
-			serviceClient.stopService();
-		} else {
+//		if (serviceClient.isInitialized()) {
+//			serviceClient.stopService();
+//		} else {
 			goToMainActivity();
-		}
+//		}
 	}
 
 	@Override
@@ -82,8 +82,8 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_use_case_selector);
 
-		serviceClient = new OpeneCardServiceClientHandler(this, new UseCaseSelectorActivity.InitServiceHandler());
-		serviceClient.startService();
+//		serviceClient = new OpeneCardServiceClientHandler(this, new UseCaseSelectorActivity.InitServiceHandler());
+//		serviceClient.startService();
 
 		stopBtn = findViewById(R.id.stopBtn);
 		stopBtn.setOnClickListener(v -> onBackPressed());
