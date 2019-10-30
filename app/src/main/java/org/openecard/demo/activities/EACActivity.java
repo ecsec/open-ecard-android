@@ -31,6 +31,7 @@ import android.view.View;
 import android.widget.Button;
 
 import org.openecard.android.activation.OpeneCard;
+import org.openecard.android.utils.NfcUtils;
 import org.openecard.demo.R;
 import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.InitFragment;
@@ -77,6 +78,8 @@ public class EACActivity extends AppCompatActivity {
 	public static final String BUNDLE_SERVER_DATA = "ServerData";
 	public static final String BUNDLE_TRANSACTION_INFO = "TransactionInfo";
 
+
+	//Hadle Serverdata Transinfo Bundle
 	public	class ServerDataTransInfo{
 		private final Bundle bundle;
 		private boolean ti_set;
@@ -129,6 +132,7 @@ public class EACActivity extends AppCompatActivity {
 		@Override
 		public void onStarted() {
 			LOG.info("ccb::onStarted was called");
+			NfcUtils.getInstance().enableNFCDispatch(EACActivity.this);
 		}
 
 		@Override
