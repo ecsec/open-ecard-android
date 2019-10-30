@@ -240,7 +240,8 @@ public class EACActivity extends AppCompatActivity {
 				@Override
 				public void onSuccess(ActivationSource activationSource) {
 					eacFactory = activationSource.eacFactory();
-					actController = eacFactory.create("URL",ccb, eacInteraction);
+					actController = eacFactory.create(String.valueOf(getIntent().getData()),ccb, eacInteraction);
+
 				}
 
 				@Override
