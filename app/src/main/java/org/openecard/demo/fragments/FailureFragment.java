@@ -33,7 +33,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import org.openecard.demo.R;
-import org.openecard.demo.activities.MainActivity;
+import org.openecard.demo.activities.UseCaseSelectorActivity;
 
 
 /**
@@ -55,7 +55,7 @@ public class FailureFragment extends Fragment {
 		final Button button = view.findViewById(R.id.btnStartOpeneCardService);
 		button.setOnClickListener(v -> {
 			Activity activity = getActivity();
-			Intent intent = new Intent(activity, MainActivity.class);
+			Intent intent = new Intent(activity, UseCaseSelectorActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 			startActivity(intent);
 			activity.finish();

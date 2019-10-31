@@ -15,20 +15,6 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name=".activities.MainActivity"
-            android:clearTaskOnLaunch="true"
-            android:configChanges="orientation|screenSize">
-
-            <!-- don't destroy activity if screen orientation has changed. -->
-            <!-- otherwise the service will be stopped cause Activity will be destroyed and reloaded. -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
-
-        <activity
             android:name=".activities.EACActivity"
             android:clearTaskOnLaunch="true"
             android:configChanges="orientation|screenSize" >
@@ -39,6 +25,11 @@
                   android:configChanges="orientation|screenSize" >
 
             <intent-filter>
+
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+
                 <action android:name="android.intent.action.VIEW"/>
 
                 <category android:name="android.intent.category.DEFAULT"/>

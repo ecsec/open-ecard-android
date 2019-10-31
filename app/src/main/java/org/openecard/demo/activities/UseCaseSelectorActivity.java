@@ -70,12 +70,8 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 
 	@Override
 	public void onBackPressed() {
-		// stop OeC Service if it is running
-//		if (serviceClient.isInitialized()) {
-//			serviceClient.stopService();
-//		} else {
-			goToMainActivity();
-//		}
+
+			goToUseCaseSelectorActivity();
 	}
 
 	@Override
@@ -162,8 +158,8 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 		stopBtn.setEnabled(true);
 	}
 
-	public void goToMainActivity() {
-		Intent intent = new Intent(UseCaseSelectorActivity.this, MainActivity.class);
+	public void goToUseCaseSelectorActivity() {
+		Intent intent = new Intent(UseCaseSelectorActivity.this, UseCaseSelectorActivity.class);
 		startActivity(intent);
 		finish();
 	}

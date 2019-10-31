@@ -40,7 +40,7 @@ import android.widget.Button;
 import org.openecard.android.activation.ActivationImplementationInterface;
 import org.openecard.demo.R;
 import org.openecard.demo.activities.UseCaseSelectorActivity;
-import org.openecard.demo.activities.MainActivity;
+import org.openecard.demo.activities.UseCaseSelectorActivity;
 import org.openecard.demo.activities.PINManagementActivity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,7 +109,7 @@ public class URLInputFragment extends Fragment {
 			Intent i = new Intent(Intent.ACTION_VIEW);
 			i.setClass(getActivity(), PINManagementActivity.class);
 			i.setData(Uri.parse("/eID-Client?ShowUI=PINManagement"));
-			i.putExtra(ActivationImplementationInterface.RETURN_CLASS, MainActivity.class.getName());
+			i.putExtra(ActivationImplementationInterface.RETURN_CLASS, UseCaseSelectorActivity.class.getName());
 			startActivity(i);
 		});
 

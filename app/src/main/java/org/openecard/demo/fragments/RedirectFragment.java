@@ -34,7 +34,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import org.openecard.demo.R;
-import org.openecard.demo.activities.MainActivity;
+import org.openecard.demo.activities.UseCaseSelectorActivity;
 
 
 /**
@@ -60,7 +60,7 @@ public class RedirectFragment extends Fragment {
 		backBtn.setOnClickListener(v -> {
 			Activity activity = getActivity();
 
-			Intent intent = new Intent(activity, MainActivity.class);
+			Intent intent = new Intent(activity, UseCaseSelectorActivity.class);
 			int flag = clearHistory ? Intent.FLAG_ACTIVITY_CLEAR_TOP : Intent.FLAG_ACTIVITY_REORDER_TO_FRONT;
 			intent.setFlags(flag);
 
