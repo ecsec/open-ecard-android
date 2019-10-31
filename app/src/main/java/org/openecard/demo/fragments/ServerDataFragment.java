@@ -103,6 +103,7 @@ public class ServerDataFragment extends Fragment {
 			}
 
 			op.enter(readBoxes, serverData.getWriteAccessAttributes());
+			getFragmentManager().beginTransaction().replace(R.id.fragment, new WaitFragment()).addToBackStack(null).commitAllowingStateLoss();
 		});
 
 		return view;

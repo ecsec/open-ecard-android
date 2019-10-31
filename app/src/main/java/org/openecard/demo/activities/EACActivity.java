@@ -25,6 +25,7 @@ package org.openecard.demo.activities;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Intent;
+import android.hardware.biometrics.BiometricPrompt;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
@@ -79,7 +80,7 @@ public class EACActivity extends AppCompatActivity {
 	public static final String BUNDLE_TRANSACTION_INFO = "TransactionInfo";
 
 
-	//Hadle Serverdata Transinfo Bundle
+	//Handle Serverdata Transinfo Bundle
 	public	class ServerDataTransInfo{
 		private final Bundle bundle;
 		private boolean ti_set;
@@ -92,7 +93,7 @@ public class EACActivity extends AppCompatActivity {
 			sd_set=false;
 		}
 		public void setServerData(ServerData sd, ConfirmAttributeSelectionOperation confirmAttributeSelectionOperation){
-			this.bundle.putSerializable(BUNDLE_SERVER_DATA, sd.toString());
+			this.bundle.putSerializable(BUNDLE_SERVER_DATA, sd);
 			this.confirmAttributeSelectionOperation = confirmAttributeSelectionOperation;
 			sd_set = true;
 			onComplete();
@@ -127,6 +128,7 @@ public class EACActivity extends AppCompatActivity {
 	private Button cancelBtn;
 	private OpeneCard oe;
 	private ActivationController actController;
+	private ActivationResult actResult = null;
 
 	private ControllerCallback ccb = new ControllerCallback() {
 		@Override
@@ -137,8 +139,8 @@ public class EACActivity extends AppCompatActivity {
 
 		@Override
 		public void onAuthenticationCompletion(ActivationResult activationResult) {
-			LOG.debug("onAuthenticationSuccess Result={}", activationResult.getResultCode());
-			LOG.debug("onAuthenticationSuccess ResultMinor={}", activationResult.getProcessResultMinor());
+			actResult = activationResult;
+			finish();
 		}
 	};
 
@@ -147,7 +149,9 @@ public class EACActivity extends AppCompatActivity {
 		public void onPinRequest(int i, ConfirmPasswordOperation confirmPasswordOperation) {
 			LOG.debug("eacInteractionHandler::onPinRequest");
 			PINInputFragment fragment = new PINInputFragment();
-
+			fragment.setNeedCan(false);
+			fragment.setAttempt(i);
+			fragment.setConfirmPasswordOperation(confirmPasswordOperation);
 			// show PINInputFragment
 			getFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 		}
@@ -155,7 +159,12 @@ public class EACActivity extends AppCompatActivity {
 		@Override
 		public void onPinCanRequest(ConfirmTwoPasswordsOperation confirmTwoPasswordsOperation) {
 			LOG.debug("eacInteractionHandler::onPinCanRequest");
-			showPINBlockedFragment();
+
+			PINInputFragment fragment = new PINInputFragment();
+			fragment.setNeedCan(true);
+			fragment.setConfirmTwoPasswordsOperation(confirmTwoPasswordsOperation);
+			// show PINInputFragment
+			getFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 		}
 
 		@Override
@@ -182,6 +191,7 @@ public class EACActivity extends AppCompatActivity {
 
 		@Override
 		public void onInteractionComplete() {
+
 			LOG.debug("eacInteractionHandler::onInteractionComplete");
 		}
 
@@ -223,12 +233,6 @@ public class EACActivity extends AppCompatActivity {
 	private ContextManager context;
 	private EacControllerFactory eacFactory;
 
-	private void showPINBlockedFragment(){
-		PINBlockedFragment fragment = new PINBlockedFragment();
-		getFragmentManager().beginTransaction()
-				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
-	}
-
 	@Override
 	public void onBackPressed() {
 		//deactivate
@@ -245,13 +249,11 @@ public class EACActivity extends AppCompatActivity {
 				public void onSuccess(ActivationSource activationSource) {
 					eacFactory = activationSource.eacFactory();
 					actController = eacFactory.create("http://localhost/eID-Client?tcTokenURL="+String.valueOf(getIntent().getData()),ccb, eacInteraction);
-
 				}
 
 				@Override
 				public void onFailure(ServiceErrorResponse serviceErrorResponse) {
 					LOG.error("Could not start OeC-Framework: {}", serviceErrorResponse);
-
 				}
 			});
 		} catch (UnableToInitialize unableToInitialize) {
@@ -269,18 +271,30 @@ public class EACActivity extends AppCompatActivity {
 
 	@Override
 	protected void onStop() {
-		LOG.info("Stopping.");
-		this.context.stop(new StopServiceHandler() {
+		context.stop(new StopServiceHandler() {
 			@Override
 			public void onSuccess() {
-				LOG.info("OeC Framework stopped successfully");
+				LOG.debug("OpenECard framework stopped succesfully");
+
+				if(actResult != null) {
+					LOG.debug("onAuthenticationSuccess Result={}", actResult.getResultCode());
+					LOG.debug("onAuthenticationSuccess ResultMinor={}", actResult.getProcessResultMinor());
+
+//					actController.cancelAuthentication();
+				}
+				finish();
 			}
 
 			@Override
 			public void onFailure(ServiceErrorResponse serviceErrorResponse) {
-				LOG.error("OeC Framework stopped with errors: {}", serviceErrorResponse);
+
+				LOG.debug("OpenECard framework stopped with error: {}", serviceErrorResponse);
+//					actController.cancelAuthentication();
+				finish();
+
 			}
 		});
+
 		super.onStop();
 	}
 
@@ -309,10 +323,11 @@ public class EACActivity extends AppCompatActivity {
 			getFragmentManager().beginTransaction()
 					.replace(R.id.fragment, fragment).addToBackStack(null).commit();
 
-			if(actController!=null) {
+			showFailureFragment("The User cancelled the authentication procedure, please wait for the process to end.");
+			if(actController != null) {
 				actController.cancelAuthentication();
 			}
-			showFailureFragment("The User cancelled the authentication procedure, please wait for the process to end.");
+
 
 		});
 

@@ -62,8 +62,8 @@ public class PINInputFragment extends Fragment {
 		this.confirmTwoPasswordsOperation = op;
 	}
 
-	public void setNeedCan(){
-		this.needCan = true;
+	public void setNeedCan(boolean needed){
+		this.needCan = needed;
 	}
 
 	public void setAttempt(int attempt){
@@ -154,6 +154,7 @@ public class PINInputFragment extends Fragment {
 					}else{
 						confirmTwoPasswordsOperation.enter(pin, can);
 					}
+					getFragmentManager().beginTransaction().replace(R.id.fragment, new WaitFragment()).addToBackStack(null).commitAllowingStateLoss();
 				}
 			}
 		});
