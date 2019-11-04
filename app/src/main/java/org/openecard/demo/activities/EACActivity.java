@@ -134,7 +134,6 @@ public class EACActivity extends AppCompatActivity {
 		@Override
 		public void onStarted() {
 			LOG.info("ccb::onStarted was called");
-			NfcUtils.getInstance().enableNFCDispatch(EACActivity.this);
 		}
 
 		@Override
@@ -197,6 +196,7 @@ public class EACActivity extends AppCompatActivity {
 
 		@Override
 		public void requestCardInsertion() {
+			NfcUtils.getInstance().enableNFCDispatch(EACActivity.this);
 			LOG.debug("eacInteractionHandler::requestCardInsertion");
 		}
 
