@@ -38,7 +38,6 @@ import org.openecard.demo.R;
 import org.openecard.demo.activities.EACActivity;
 import org.openecard.mobile.activation.ConfirmPasswordOperation;
 import org.openecard.mobile.activation.ConfirmTwoPasswordsOperation;
-import org.openecard.mobile.activation.PinStatus;
 
 
 /**
@@ -154,7 +153,7 @@ public class PINInputFragment extends Fragment {
 					}else{
 						confirmTwoPasswordsOperation.enter(pin, can);
 					}
-					getFragmentManager().beginTransaction().replace(R.id.fragment, new WaitFragment()).addToBackStack(null).commitAllowingStateLoss();
+					getFragmentManager().beginTransaction().replace(R.id.fragment, new UserInfoFragment()).addToBackStack(null).commitAllowingStateLoss();
 				}
 			}
 		});

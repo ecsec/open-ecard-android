@@ -20,7 +20,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|center_horizontal"
             android:text="TCToken URL: "
-            app:layout_anchorGravity="center_vertical|center_horizontal"/>
+            android:textSize="18sp"
+            app:layout_anchorGravity="center_vertical|center_horizontal" />
 
         <AutoCompleteTextView
             android:id="@+id/edt"
@@ -33,8 +34,8 @@
             android:id="@+id/btnContinue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:text="Activate"/>
+            android:layout_marginTop="75dp"
+            android:text="Activate" />
 
         <Button
             android:id="@+id/btnPinManagement"

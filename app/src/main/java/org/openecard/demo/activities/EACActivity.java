@@ -22,10 +22,7 @@
 
 package org.openecard.demo.activities;
 
-import android.app.AlertDialog;
-import android.app.Fragment;
 import android.content.Intent;
-import android.hardware.biometrics.BiometricPrompt;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
@@ -35,11 +32,9 @@ import org.openecard.android.activation.OpeneCard;
 import org.openecard.android.utils.NfcUtils;
 import org.openecard.demo.R;
 import org.openecard.demo.fragments.FailureFragment;
-import org.openecard.demo.fragments.InitFragment;
-import org.openecard.demo.fragments.PINBlockedFragment;
 import org.openecard.demo.fragments.PINInputFragment;
 import org.openecard.demo.fragments.ServerDataFragment;
-import org.openecard.demo.fragments.WaitFragment;
+import org.openecard.demo.fragments.UserInfoFragment;
 import org.openecard.mobile.activation.ActivationController;
 import org.openecard.mobile.activation.ActivationResult;
 import org.openecard.mobile.activation.ActivationSource;
@@ -80,8 +75,12 @@ public class EACActivity extends AppCompatActivity {
 	public static final String BUNDLE_TRANSACTION_INFO = "TransactionInfo";
 
 
+	private Button cancelBtn;
+	private OpeneCard oe;
+	private ActivationController actController;
+
 	//Handle Serverdata Transinfo Bundle
-	public	class ServerDataTransInfo{
+	class ServerDataTransInfo{
 		private final Bundle bundle;
 		private boolean ti_set;
 		private boolean sd_set;
@@ -125,11 +124,6 @@ public class EACActivity extends AppCompatActivity {
 	}
 	private ServerDataTransInfo serverDataTransInfo = new ServerDataTransInfo();
 
-	private Button cancelBtn;
-	private OpeneCard oe;
-	private ActivationController actController;
-	private ActivationResult actResult = null;
-
 	private ControllerCallback ccb = new ControllerCallback() {
 		@Override
 		public void onStarted() {
@@ -138,8 +132,25 @@ public class EACActivity extends AppCompatActivity {
 
 		@Override
 		public void onAuthenticationCompletion(ActivationResult activationResult) {
-			actResult = activationResult;
-			finish();
+			context.stop(new StopServiceHandler() {
+				@Override
+				public void onSuccess() {
+					LOG.debug("OpenECard framework stopped succesfully");
+					if(activationResult != null) {
+						LOG.debug("onAuthenticationSuccess Result={}", activationResult.getResultCode());
+						LOG.debug("onAuthenticationSuccess ResultMinor={}", activationResult.getProcessResultMinor());
+					}
+					showUserInfoFragmentWithMessage("Success", true, false);
+
+				}
+
+				@Override
+				public void onFailure(ServiceErrorResponse serviceErrorResponse) {
+					LOG.debug("OpenECard framework stopped with error: {}", serviceErrorResponse);
+					actController.cancelAuthentication();
+					showUserInfoFragmentWithMessage(serviceErrorResponse.getMessage(), true, false);
+				}
+			});
 		}
 	};
 
@@ -147,12 +158,16 @@ public class EACActivity extends AppCompatActivity {
 		@Override
 		public void onPinRequest(int i, ConfirmPasswordOperation confirmPasswordOperation) {
 			LOG.debug("eacInteractionHandler::onPinRequest");
+			confirmPasswordOperation.enter("123123");
+			/*
 			PINInputFragment fragment = new PINInputFragment();
 			fragment.setNeedCan(false);
 			fragment.setAttempt(i);
 			fragment.setConfirmPasswordOperation(confirmPasswordOperation);
 			// show PINInputFragment
 			getFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
+
+			 */
 		}
 
 		@Override
@@ -190,28 +205,24 @@ public class EACActivity extends AppCompatActivity {
 
 		@Override
 		public void onInteractionComplete() {
-
 			LOG.debug("eacInteractionHandler::onInteractionComplete");
 		}
 
 		@Override
 		public void requestCardInsertion() {
-			NfcUtils.getInstance().enableNFCDispatch(EACActivity.this);
 			LOG.debug("eacInteractionHandler::requestCardInsertion");
+			runOnUiThread(() -> {
+				showUserInfoFragmentWithMessage("Please provide card",false, false);
+			});
+			NfcUtils.getInstance().enableNFCDispatch(EACActivity.this);
 		}
 
 		@Override
 		public void onCardRecognized() {
 			LOG.info("Card inserted.");
-			if (findViewById(R.id.fragment) != null) {
-				runOnUiThread(() -> {
-					Fragment fragment = new WaitFragment();
-					cancelBtn.setVisibility(View.VISIBLE);
-					fragment.setArguments(getIntent().getExtras());
-					getFragmentManager().beginTransaction()
-							.replace(R.id.fragment, fragment).addToBackStack(null).commit();
-				});
-			}
+			runOnUiThread(() -> {
+				showUserInfoFragmentWithMessage("Please don't move device or card!",false, true);
+			});
 		}
 
 		@Override
@@ -222,12 +233,6 @@ public class EACActivity extends AppCompatActivity {
 		@Override
 		public void onCardRemoved() {
 			LOG.debug("eacInteractionHandler::onCardRemoved");
-			LOG.info("Showing the card removal dialog.");
-			new AlertDialog.Builder(EACActivity.this)
-					.setTitle("Remove the Card")
-					.setMessage("Please remove the identity card.")
-					.setNeutralButton("Proceed", (dialog, which) -> dialog.dismiss())
-					.create();
 		}
 	};
 	private ContextManager context;
@@ -271,29 +276,6 @@ public class EACActivity extends AppCompatActivity {
 
 	@Override
 	protected void onStop() {
-		context.stop(new StopServiceHandler() {
-			@Override
-			public void onSuccess() {
-				LOG.debug("OpenECard framework stopped succesfully");
-
-				if(actResult != null) {
-					LOG.debug("onAuthenticationSuccess Result={}", actResult.getResultCode());
-					LOG.debug("onAuthenticationSuccess ResultMinor={}", actResult.getProcessResultMinor());
-
-//					actController.cancelAuthentication();
-				}
-				finish();
-			}
-
-			@Override
-			public void onFailure(ServiceErrorResponse serviceErrorResponse) {
-
-				LOG.debug("OpenECard framework stopped with error: {}", serviceErrorResponse);
-//					actController.cancelAuthentication();
-				finish();
-
-			}
-		});
 
 		super.onStop();
 	}
@@ -317,24 +299,22 @@ public class EACActivity extends AppCompatActivity {
 			cancelBtn.setEnabled(false);
 			cancelBtn.setClickable(false);
 
-			WaitFragment fragment = new WaitFragment();
-			fragment.setWaitMessage("Cancelling authentication...");
-			fragment.setArguments(getIntent().getExtras());
-			getFragmentManager().beginTransaction()
-					.replace(R.id.fragment, fragment).addToBackStack(null).commit();
-
+			showUserInfoFragmentWithMessage("Cancelling authentication...", false, true);
 			showFailureFragment("The User cancelled the authentication procedure, please wait for the process to end.");
 			if(actController != null) {
 				actController.cancelAuthentication();
 			}
 
-
 		});
+		showUserInfoFragmentWithMessage("Please wait...", false, true);
+	}
 
+	private void showUserInfoFragmentWithMessage(String msg, boolean showConfirmBtn, boolean showSpinner){
 		if (findViewById(R.id.fragment) != null) {
-			// show InitFragment
-			Fragment fragment = new InitFragment();
-			cancelBtn.setVisibility(View.VISIBLE);
+			UserInfoFragment fragment = new UserInfoFragment();
+			fragment.setWaitMessage(msg);
+			fragment.setConfirmBtn(showConfirmBtn);
+			fragment.setSpinner(showSpinner);
 			fragment.setArguments(getIntent().getExtras());
 			getFragmentManager().beginTransaction()
 					.replace(R.id.fragment, fragment).addToBackStack(null).commit();
@@ -357,14 +337,8 @@ public class EACActivity extends AppCompatActivity {
 			LOG.error("Exception during start: {}", apduExtLengthNotSupported);
 		}
 
-		if (findViewById(R.id.fragment) != null) {
-			// show InitFragment
-			Fragment fragment = new WaitFragment();
-			cancelBtn.setVisibility(View.VISIBLE);
-			fragment.setArguments(getIntent().getExtras());
-			getFragmentManager().beginTransaction()
-					.replace(R.id.fragment, fragment).addToBackStack(null).commit();
-		}
+		showUserInfoFragmentWithMessage("Please wait...", false, true);
+
 	}
 
 	private void showFailureFragment(String errorMessage) {

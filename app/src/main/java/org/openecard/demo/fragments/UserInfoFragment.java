@@ -27,17 +27,61 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.Spinner;
+import android.widget.TextView;
+
 import org.openecard.demo.R;
 
 
 /**
  * @author Mike Prechtl
  */
-public class InitFragment extends Fragment {
+public class UserInfoFragment extends Fragment {
+
+	private String txtMsg;
+	private boolean confirmActive = false;
+	private boolean spinnerVisible = false;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.fragment_init, container, false);
+
+		final View view = inflater.inflate(R.layout.fragment_wait, container, false);
+		final Button confirm = view.findViewById(R.id.btnWaitConfirm);
+		confirm.setOnClickListener((v -> {
+			getActivity().finish();
+
+		}));
+		if(confirmActive) {
+			confirm.setVisibility(View.VISIBLE);
+		}else{
+			confirm.setVisibility(View.INVISIBLE);
+		}
+
+		final ProgressBar progressBar = view.findViewById(R.id.progressBar);
+		progressBar.setVisibility(spinnerVisible ? View.VISIBLE : View.INVISIBLE);
+
+
+
+		final TextView textView = view.findViewById(R.id.txtMsg);
+		if (txtMsg != null) {
+			textView.setText(txtMsg);
+		}
+
+		return view;
 	}
 
+	public void setSpinner(boolean active){
+		this.spinnerVisible = active;
+	}
+
+
+	public void setConfirmBtn(boolean active){
+		this.confirmActive = active;
+
+	}
+	public void setWaitMessage(String msg) {
+		txtMsg = msg;
+	}
 }

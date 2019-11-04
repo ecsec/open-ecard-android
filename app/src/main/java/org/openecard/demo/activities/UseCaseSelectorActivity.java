@@ -79,9 +79,6 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_use_case_selector);
 
-//		serviceClient = new OpeneCardServiceClientHandler(this, new UseCaseSelectorActivity.InitServiceHandler());
-//		serviceClient.startService();
-
 		stopBtn = findViewById(R.id.stopBtn);
 		stopBtn.setOnClickListener(v -> onBackPressed());
 
@@ -129,16 +126,12 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 		// add class name for explicit redirect Intent
 		i.putExtra(ActivationImplementationInterface.RETURN_CLASS, UseCaseSelectorActivity.class.getName());
 		startActivity(i);
-
-		enableCancel();
 	}
 
 	private void showRedirectAddress(Uri address) {
 		RedirectFragment fragment = new RedirectFragment();
 		fragment.setRedirectUrl(address.toString());
 		fragment.clearHistory(clearActivityHistory);
-
-		stopBtn.setVisibility(View.INVISIBLE);
 
 		getFragmentManager().beginTransaction()
 				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
@@ -151,11 +144,6 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 		getFragmentManager().beginTransaction()
 				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 
-		enableCancel();
-	}
-
-	public void enableCancel() {
-		stopBtn.setEnabled(true);
 	}
 
 	public void goToUseCaseSelectorActivity() {
