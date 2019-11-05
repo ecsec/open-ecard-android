@@ -116,8 +116,7 @@ public class EACActivity extends AppCompatActivity {
 		@Override
 		public void onPinRequest(int i, ConfirmPasswordOperation confirmPasswordOperation) {
 			LOG.debug("eacInteractionHandler::onPinRequest");
-			confirmPasswordOperation.enter("123123");
-			/*
+//			confirmPasswordOperation.enter("123123");
 			PINInputFragment fragment = new PINInputFragment();
 			fragment.setNeedCan(false);
 			fragment.setAttempt(i);
@@ -125,7 +124,6 @@ public class EACActivity extends AppCompatActivity {
 			// show PINInputFragment
 			getFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 
-			 */
 		}
 
 		@Override
