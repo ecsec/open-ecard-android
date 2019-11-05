@@ -62,8 +62,6 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 
 	private static final String DEFAULT_TC_TOKEN_URL = "https://service.dev.skidentity.de:443/tctoken";
 
-	private Button stopBtn;
-
 	// indicates if activity stack is thrown away or not
     // because activation URL from outside can only be used once
 	private static boolean clearActivityHistory = false;
@@ -79,8 +77,6 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_use_case_selector);
 
-		stopBtn = findViewById(R.id.stopBtn);
-		stopBtn.setOnClickListener(v -> onBackPressed());
 
 		if (findViewById(R.id.fragment) != null) {
 			Intent intent = getIntent();
@@ -160,40 +156,5 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 	}
 
 
-	///
-	/// Handler functions for the initialization or termination of the Open eCard Stack management Android Service
-	///
 
-	private class InitServiceHandler implements OpeneCardServiceHandler {
-
-		@Override
-		public void onConnectionSuccess(OpeneCardContext ctx) { }
-
-		@Override
-		public void onConnectionFailure(ServiceErrorResponse serviceErrorResponse) { }
-
-		@Override
-		public void onConnectionFailure(ServiceWarningResponse serviceWarningResponse) { }
-
-		@Override
-		public void onDisconnectionSuccess() {
-			goToMainActivity();
-		}
-
-		@Override
-		public void onDisconnectionFailure(ServiceErrorResponse serviceErrorResponse) {
-			// should not occur
-			String errorMsg = serviceErrorResponse.getMessage();
-			LOG.error("Disconnecting from Oec Service failed: {}", errorMsg);
-			showFailureFragment(errorMsg);
-		}
-
-		@Override
-		public void onDisconnectionFailure(ServiceWarningResponse serviceWarningResponse) {
-			String warnMsg = serviceWarningResponse.getMessage();
-			LOG.warn("Disconnecting from Oec Service failed: {}", warnMsg);
-			goToMainActivity();
-		}
-
-	}
 }
