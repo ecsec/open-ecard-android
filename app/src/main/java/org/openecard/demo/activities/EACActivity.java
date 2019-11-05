@@ -37,6 +37,7 @@ import org.openecard.demo.fragments.ServerDataFragment;
 import org.openecard.demo.fragments.UserInfoFragment;
 import org.openecard.mobile.activation.ActivationController;
 import org.openecard.mobile.activation.ActivationResult;
+import org.openecard.mobile.activation.ActivationResultCode;
 import org.openecard.mobile.activation.ActivationSource;
 import org.openecard.mobile.activation.ConfirmAttributeSelectionOperation;
 import org.openecard.mobile.activation.ConfirmPasswordOperation;
@@ -97,8 +98,13 @@ public class EACActivity extends AppCompatActivity {
 					if(activationResult != null) {
 						LOG.debug("onAuthenticationSuccess Result={}", activationResult.getResultCode());
 						LOG.debug("onAuthenticationSuccess ResultMinor={}", activationResult.getProcessResultMinor());
+
+						if(activationResult.getResultCode()== ActivationResultCode.OK) {
+							showUserInfoFragmentWithMessage("Success", true, false);
+						}else{
+							showUserInfoFragmentWithMessage("Fail - " + activationResult.getResultCode().toString(), true, false);
+						}
 					}
-					showUserInfoFragmentWithMessage("Success", true, false);
 
 				}
 
