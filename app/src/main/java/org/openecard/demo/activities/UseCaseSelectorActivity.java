@@ -115,7 +115,7 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 		i.setData(Uri.parse(url));
 
 		// add class name for explicit redirect Intent
-		i.putExtra(EACActivity.class.getName() , UseCaseSelectorActivity.class.getName());
+//)		i.putExtra(EACActivity.class.getName() , UseCaseSelectorActivity.class.getName());
 		startActivity(i);
 	}
 
