@@ -78,51 +78,9 @@ public class EACActivity extends AppCompatActivity {
 	private Button cancelBtn;
 	private OpeneCard oe;
 	private ActivationController actController;
+	private ContextManager context;
+	private EacControllerFactory eacFactory;
 
-	//Handle Serverdata Transinfo Bundle
-	class ServerDataTransInfo{
-		private final Bundle bundle;
-		private boolean ti_set;
-		private boolean sd_set;
-		private ConfirmAttributeSelectionOperation confirmAttributeSelectionOperation;
-
-		public ServerDataTransInfo(){
-			this.bundle = new Bundle();
-			ti_set=false;
-			sd_set=false;
-		}
-		public void setServerData(ServerData sd, ConfirmAttributeSelectionOperation confirmAttributeSelectionOperation){
-			this.bundle.putSerializable(BUNDLE_SERVER_DATA, sd);
-			this.confirmAttributeSelectionOperation = confirmAttributeSelectionOperation;
-			sd_set = true;
-			onComplete();
-		}
-		public void setTransactionInfo(String transactionInfo){
-			this.bundle.putSerializable(BUNDLE_TRANSACTION_INFO, transactionInfo);
-			ti_set = true;
-			onComplete();
-		}
-
-		void onComplete(){
-			if(ti_set && sd_set) {
-
-				ServerDataFragment f = new ServerDataFragment();
-				f.setArguments(this.bundle);
-				f.setServerDataFragment(this.confirmAttributeSelectionOperation);
-
-				getFragmentManager().beginTransaction().replace(R.id.fragment, f).addToBackStack(null).commitAllowingStateLoss();
-				if (cancelBtn.getVisibility() != View.VISIBLE) {
-					runOnUiThread(() -> {
-						cancelBtn.setVisibility(View.VISIBLE);
-					});
-				}
-
-			}
-		}
-
-
-	}
-	private ServerDataTransInfo serverDataTransInfo = new ServerDataTransInfo();
 
 	private ControllerCallback ccb = new ControllerCallback() {
 		@Override
@@ -192,19 +150,33 @@ public class EACActivity extends AppCompatActivity {
 		}
 
 		@Override
-		public void onServerData(org.openecard.mobile.activation.ServerData serverData, ConfirmAttributeSelectionOperation confirmAttributeSelectionOperation) {
+		public void onServerData(ServerData serverData, String s, ConfirmAttributeSelectionOperation confirmAttributeSelectionOperation) {
 			LOG.info("Server data is present.");
-			serverDataTransInfo.setServerData(serverData,confirmAttributeSelectionOperation);
+
+			Bundle bundle = new Bundle();
+			bundle.putSerializable(BUNDLE_SERVER_DATA, serverData);
+			bundle.putSerializable(BUNDLE_TRANSACTION_INFO, s);
+
+			ServerDataFragment f = new ServerDataFragment();
+			f.setArguments(bundle);
+			f.setServerDataFragment(confirmAttributeSelectionOperation);
+
+			getFragmentManager().beginTransaction().replace(R.id.fragment, f).addToBackStack(null).commitAllowingStateLoss();
+			if (cancelBtn.getVisibility() != View.VISIBLE) {
+				runOnUiThread(() -> {
+					cancelBtn.setVisibility(View.VISIBLE);
+				});
+			}
+
 		}
 
 		@Override
-		public void onTransactionInfo(String s) {
-			LOG.debug("eacInteractionHandler::onTransactionInfo");
-			serverDataTransInfo.setTransactionInfo(s);
+		public void onCardInteractionComplete() {
+			LOG.debug("eacInteractionHandler::onInteractionComplete");
 		}
 
 		@Override
-		public void onInteractionComplete() {
+		public void onCardAuthenticationSuccessful() {
 			LOG.debug("eacInteractionHandler::onInteractionComplete");
 		}
 
@@ -235,8 +207,6 @@ public class EACActivity extends AppCompatActivity {
 			LOG.debug("eacInteractionHandler::onCardRemoved");
 		}
 	};
-	private ContextManager context;
-	private EacControllerFactory eacFactory;
 
 	@Override
 	public void onBackPressed() {
@@ -276,7 +246,6 @@ public class EACActivity extends AppCompatActivity {
 
 	@Override
 	protected void onStop() {
-
 		super.onStop();
 	}
 
@@ -323,7 +292,6 @@ public class EACActivity extends AppCompatActivity {
 
 	@Override
 	protected void onResume() {
-		LOG.info("Resuming.");
 		super.onResume();
 	}
 
