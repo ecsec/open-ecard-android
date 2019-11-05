@@ -29,12 +29,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
-import org.openecard.android.activation.ActivationImplementationInterface;
 
-import org.openecard.android.system.OpeneCardServiceClientHandler;
-import org.openecard.android.system.OpeneCardServiceHandler;
-import org.openecard.android.system.ServiceErrorResponse;
-import org.openecard.android.system.ServiceWarningResponse;
 import org.openecard.demo.R;
 import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.RedirectFragment;
@@ -120,7 +115,7 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 		i.setData(Uri.parse(url));
 
 		// add class name for explicit redirect Intent
-		i.putExtra(ActivationImplementationInterface.RETURN_CLASS, UseCaseSelectorActivity.class.getName());
+		i.putExtra(EACActivity.class.getName() , UseCaseSelectorActivity.class.getName());
 		startActivity(i);
 	}
 

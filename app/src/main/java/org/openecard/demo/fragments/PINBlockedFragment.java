@@ -31,7 +31,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import org.openecard.android.activation.ActivationImplementationInterface;
 import org.openecard.demo.R;
 import org.openecard.demo.activities.EACActivity;
 import org.openecard.demo.activities.PINManagementActivity;
