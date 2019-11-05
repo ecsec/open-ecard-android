@@ -30,6 +30,7 @@ import android.widget.Button;
 
 import org.openecard.android.activation.OpeneCard;
 import org.openecard.android.utils.NfcUtils;
+import org.openecard.common.util.UrlEncoder;
 import org.openecard.demo.R;
 import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.PINInputFragment;
@@ -57,6 +58,10 @@ import org.openecard.mobile.ex.NfcUnavailable;
 import org.openecard.mobile.ex.UnableToInitialize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLEncoder;
 
 
 /**
@@ -227,7 +232,8 @@ public class EACActivity extends AppCompatActivity {
 				@Override
 				public void onSuccess(ActivationSource activationSource) {
 					eacFactory = activationSource.eacFactory();
-					actController = eacFactory.create("http://localhost/eID-Client?tcTokenURL="+String.valueOf(getIntent().getData()),ccb, eacInteraction);
+					String encodedURL = "http://localhost/eID-Client?tcTokenURL="+ String.valueOf(getIntent().getData());
+					actController = eacFactory.create(encodedURL,ccb, eacInteraction);
 				}
 
 				@Override

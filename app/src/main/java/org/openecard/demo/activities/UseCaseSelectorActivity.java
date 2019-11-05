@@ -94,10 +94,9 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 	public void onUrlSelection(String url) {
 		try {
 			String encoded = URLEncoder.encode(url, "UTF-8");
-			String actUrl = "/eID-Client?tcTokenURL=" + encoded;
 
 			clearActivityHistory = false;
-			activate(actUrl);
+			activate(encoded);
 		} catch (UnsupportedEncodingException ex) {
 			String msg = "The character encoding is not supported!";
 			LOG.warn(msg, ex);
