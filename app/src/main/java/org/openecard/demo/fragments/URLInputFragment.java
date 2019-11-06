@@ -24,8 +24,6 @@ package org.openecard.demo.fragments;
 
 import android.app.Fragment;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -39,7 +37,6 @@ import android.widget.Button;
 
 import org.openecard.demo.R;
 import org.openecard.demo.activities.UseCaseSelectorActivity;
-import org.openecard.demo.activities.PINManagementActivity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

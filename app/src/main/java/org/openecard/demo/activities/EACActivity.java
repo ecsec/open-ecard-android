@@ -25,6 +25,7 @@ package org.openecard.demo.activities;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.nfc.NfcAdapter;
+import android.media.MediaController2;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
@@ -58,6 +59,7 @@ import org.openecard.mobile.ex.ApduExtLengthNotSupported;
 import org.openecard.mobile.ex.NfcDisabled;
 import org.openecard.mobile.ex.NfcUnavailable;
 import org.openecard.mobile.ex.UnableToInitialize;
+import org.openecard.mobile.ui.ConfirmTwoPasswordsOperationImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,7 +94,7 @@ public class EACActivity extends AppCompatActivity {
 	private boolean shouldTriggerNfc = false;
 	private boolean hasTriggeredNfcDispatch = false;
 
-	private ControllerCallback ccb = new ControllerCallback() {
+	class EACControllerCallback implements ControllerCallback {
 		@Override
 		public void onStarted() {
 			LOG.info("ccb::onStarted was called");
@@ -120,9 +122,9 @@ public class EACActivity extends AppCompatActivity {
 				}
 			}
 		}
-	};
+	}
 
-	private EacInteraction eacInteraction = new EacInteraction() {
+	class EACInteractionImp implements EacInteraction {
 		@Override
 		public void onCanRequest(ConfirmPasswordOperation confirmPasswordOperation) {
 			LOG.debug("eacInteractionHandler::onCanRequest");
@@ -207,8 +209,8 @@ public class EACActivity extends AppCompatActivity {
 
 		@Override
 		public void requestCardInsertion(NFCOverlayMessageHandler nfcOverlayMessageHandler) {
-			LOG.debug("eacInteractionHandler::requestCardInsertion");
 		}
+
 
 		@Override
 		public void onCardRecognized() {
@@ -222,11 +224,11 @@ public class EACActivity extends AppCompatActivity {
 		public void onCardRemoved() {
 			LOG.debug("eacInteractionHandler::onCardRemoved");
 		}
-	};
+	}
 
 	@Override
 	public void onBackPressed() {
-		//deactivate
+		finish();
 	}
 
 	@Override
@@ -240,7 +242,7 @@ public class EACActivity extends AppCompatActivity {
 				public void onSuccess(ActivationSource activationSource) {
 					eacFactory = activationSource.eacFactory();
 					String encodedURL = "http://localhost/eID-Client?tcTokenURL="+ String.valueOf(getIntent().getData());
-					actController = eacFactory.create(encodedURL,ccb, eacInteraction);
+					actController = eacFactory.create(encodedURL,new EACControllerCallback(), new EACInteractionImp());
 				}
 
 				@Override
@@ -287,7 +289,25 @@ public class EACActivity extends AppCompatActivity {
 
 	@Override
 	protected void onStop() {
+		LOG.info("Stopping");
+		stopCancelOeC();
 		super.onStop();
+		finish();
+	}
+
+	public void stopCancelOeC(){
+		actController.cancelAuthentication();
+		context.stop(new StopServiceHandler() {
+			@Override
+			public void onSuccess() {
+				LOG.debug("Paused - oec framework stopped succesfully");
+			}
+
+			@Override
+			public void onFailure(ServiceErrorResponse serviceErrorResponse) {
+				LOG.debug("Paused - oec framework stopped with error");
+			}
+		});
 	}
 
 	@Override
@@ -353,7 +373,7 @@ public class EACActivity extends AppCompatActivity {
 		} catch (ApduExtLengthNotSupported apduExtLengthNotSupported) {
 			LOG.error("Exception during start: {}", apduExtLengthNotSupported);
 		} catch (IOException e) {
-			LOG.error("Exception during start: {}", e);
+			LOG.error("exception during start: {}", e);
 		}
 
 		showUserInfoFragmentWithMessage("Please wait...", false, true);
