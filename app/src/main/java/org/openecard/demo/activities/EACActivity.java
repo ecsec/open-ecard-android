@@ -125,6 +125,11 @@ public class EACActivity extends AppCompatActivity {
 
 	private EacInteraction eacInteraction = new EacInteraction() {
 		@Override
+		public void onCanRequest(ConfirmPasswordOperation confirmPasswordOperation) {
+			LOG.debug("eacInteractionHandler::onCanRequest");
+		}
+
+		@Override
 		public void onPinRequest(int i, ConfirmPasswordOperation confirmPasswordOperation) {
 			LOG.debug("eacInteractionHandler::onPinRequest");
 //			confirmPasswordOperation.enter("123123");
