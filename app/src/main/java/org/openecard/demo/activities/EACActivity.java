@@ -22,7 +22,9 @@
 
 package org.openecard.demo.activities;
 
+import android.app.PendingIntent;
 import android.content.Intent;
+import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
@@ -59,6 +61,7 @@ import org.openecard.mobile.ex.UnableToInitialize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -86,7 +89,8 @@ public class EACActivity extends AppCompatActivity {
 	private ActivationController actController;
 	private ContextManager context;
 	private EacControllerFactory eacFactory;
-
+	private boolean shouldTriggerNfc = false;
+	private boolean hasTriggeredNfcDispatch = false;
 
 	private ControllerCallback ccb = new ControllerCallback() {
 		@Override
@@ -96,30 +100,17 @@ public class EACActivity extends AppCompatActivity {
 
 		@Override
 		public void onAuthenticationCompletion(ActivationResult activationResult) {
-			context.stop(new StopServiceHandler() {
-				@Override
-				public void onSuccess() {
-					LOG.debug("OpenECard framework stopped succesfully");
-					if(activationResult != null) {
-						LOG.debug("onAuthenticationSuccess Result={}", activationResult.getResultCode());
-						LOG.debug("onAuthenticationSuccess ResultMinor={}", activationResult.getProcessResultMinor());
+			actController = null;
+			if(activationResult != null) {
+				LOG.debug("onAuthenticationSuccess Result={}", activationResult.getResultCode());
+				LOG.debug("onAuthenticationSuccess ResultMinor={}", activationResult.getProcessResultMinor());
 
-						if(activationResult.getResultCode()== ActivationResultCode.OK) {
-							showUserInfoFragmentWithMessage("Success", true, false);
-						}else{
-							showUserInfoFragmentWithMessage("Fail - " + activationResult.getResultCode().toString(), true, false);
-						}
-					}
-
+				if(activationResult.getResultCode()== ActivationResultCode.OK) {
+					showUserInfoFragmentWithMessage("Success", true, false);
+				}else{
+					showUserInfoFragmentWithMessage("Fail - " + activationResult.getResultCode().toString(), true, false);
 				}
-
-				@Override
-				public void onFailure(ServiceErrorResponse serviceErrorResponse) {
-					LOG.debug("OpenECard framework stopped with error: {}", serviceErrorResponse);
-					actController.cancelAuthentication();
-					showUserInfoFragmentWithMessage(serviceErrorResponse.getMessage(), true, false);
-				}
-			});
+			}
 		}
 	};
 
@@ -127,6 +118,7 @@ public class EACActivity extends AppCompatActivity {
 		@Override
 		public void onCanRequest(ConfirmPasswordOperation confirmPasswordOperation) {
 			LOG.debug("eacInteractionHandler::onCanRequest");
+
 		}
 
 		@Override
@@ -200,7 +192,14 @@ public class EACActivity extends AppCompatActivity {
 			runOnUiThread(() -> {
 				showUserInfoFragmentWithMessage("Please provide card",false, false);
 			});
+			shouldTriggerNfc = true;
 			NfcUtils.getInstance().enableNFCDispatch(EACActivity.this);
+			hasTriggeredNfcDispatch = true;
+		}
+
+		@Override
+		public void requestCardInsertion(NFCOverlayMessageHandler nfcOverlayMessageHandler) {
+			LOG.debug("eacInteractionHandler::requestCardInsertion");
 		}
 
 		@Override
@@ -209,11 +208,6 @@ public class EACActivity extends AppCompatActivity {
 			runOnUiThread(() -> {
 				showUserInfoFragmentWithMessage("Please don't move device or card!",false, true);
 			});
-		}
-
-		@Override
-		public void onCardRecognized(NFCOverlayMessageHandler nfcOverlayMessageHandler) {
-			LOG.debug("eacInteractionHandler::onCardRecognized");
 		}
 
 		@Override
@@ -260,6 +254,30 @@ public class EACActivity extends AppCompatActivity {
 	}
 
 	@Override
+	protected void onDestroy() {
+		LOG.info("Destroying.");
+		if (context != null) {
+			if (actController != null) {
+				actController.cancelAuthentication();
+			}
+			context.stop(new StopServiceHandler() {
+				@Override
+				public void onSuccess() {
+					LOG.debug("OpenECard framework stopped successfully");
+				}
+
+				@Override
+				public void onFailure(ServiceErrorResponse serviceErrorResponse) {
+					LOG.debug("OpenECard framework stopped with error: {}", serviceErrorResponse);
+					actController.cancelAuthentication();
+					showUserInfoFragmentWithMessage(serviceErrorResponse.getMessage(), true, false);
+				}
+			});
+		}
+		super.onDestroy();
+	}
+
+	@Override
 	protected void onStop() {
 		super.onStop();
 	}
@@ -267,6 +285,10 @@ public class EACActivity extends AppCompatActivity {
 	@Override
 	protected void onPause() {
 		LOG.info("Pausing.");
+		if (hasTriggeredNfcDispatch) {
+			NfcUtils.getInstance().disableNFCDispatch(this);
+			hasTriggeredNfcDispatch = false;
+		}
 		super.onPause();
 	}
 
@@ -307,6 +329,10 @@ public class EACActivity extends AppCompatActivity {
 
 	@Override
 	protected void onResume() {
+		if (shouldTriggerNfc) {
+			NfcUtils.getInstance().enableNFCDispatch(EACActivity.this);
+			hasTriggeredNfcDispatch = true;
+		}
 		super.onResume();
 	}
 
@@ -315,9 +341,11 @@ public class EACActivity extends AppCompatActivity {
 		LOG.info("On new intent.");
 		super.onNewIntent(intent);
 		try {
-			oe.onNewIntent(intent);
+			oe.onNewIntent(this, intent);
 		} catch (ApduExtLengthNotSupported apduExtLengthNotSupported) {
 			LOG.error("Exception during start: {}", apduExtLengthNotSupported);
+		} catch (IOException e) {
+			LOG.error("Exception during start: {}", e);
 		}
 
 		showUserInfoFragmentWithMessage("Please wait...", false, true);
