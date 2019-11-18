@@ -25,6 +25,8 @@ package org.openecard.demo.activities;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.widget.Button;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 
@@ -86,6 +88,17 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 				init();
 			}
 		}
+
+	}
+
+	public void onStart() {
+		super.onStart();
+		Button btnPinMgmt = findViewById(R.id.btnPinManagement);
+		if(btnPinMgmt!=null) {
+			btnPinMgmt.setOnClickListener(v -> {
+				pinManagement();
+			});
+		}
 	}
 
 	public void onUrlSelection(String url) {
@@ -113,6 +126,16 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 		// add class name for explicit redirect Intent
 //)		i.putExtra(EACActivity.class.getName() , UseCaseSelectorActivity.class.getName());
 		startActivity(i);
+	}
+
+	private void pinManagement(){
+		LOG.debug("Activating pin management.");
+
+		Intent i = new Intent(Intent.ACTION_VIEW);
+		i.setClass(UseCaseSelectorActivity.this, PINManagementActivity.class);
+		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		startActivity(i);
+
 	}
 
 	private void showRedirectAddress(Uri address) {

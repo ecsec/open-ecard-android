@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import org.openecard.android.activation.OpeneCard;
+import org.openecard.android.utils.NfcUtils;
 import org.openecard.demo.R;
 import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.UserInfoFragment;
@@ -71,90 +72,33 @@ public class PINManagementActivity extends AppCompatActivity {
 	private ContextManager context;
 
 	private PinManagementControllerFactory pinMgmtFactory;
+	private boolean shouldTriggerNfc;
+	private boolean hasTriggeredNfcDispatch;
 
-	//
-//    private final PinMgmtActivationHandler<PINManagementActivity> activationImpl;
-//    private PINManagementGui pinMngGui;
-//    private Button cancelBtn;
-//
-//    public PINManagementActivity() {
-//        this.activationImpl = new ActivationImpl();
-//    }
-//
-//
-//    private class ActivationImpl extends PinMgmtActivationHandler<PINManagementActivity> {
-//
-//        ActivationImpl() {
-//            super(PINManagementActivity.this);
-//        }
-//
-//        @Override
-//        public void onGuiIfaceSet(PINManagementGui gui) {
-//            PINManagementActivity.this.pinMngGui = gui;
-//            initPinChangeGui();
-//        }
-//
-//
-//
-//        @Override
-//        public void onAuthenticationFailure(ActivationResult result) {
-//            LOG.info("Authentication failure: {}", result);
-//
-//            // show error
-//            String errorMsg = buildErrorMsg(result);
-//            showMessageFragment(errorMsg);
-//        }
-//
-//        @Override
-//        public void onAuthenticationInterrupted(ActivationResult result) {
-//            LOG.info("Authentication interrupted: {}", result);
-//
-//            // show error message
-//            String errorMsg = buildInterruptedMsg(result);
-//            showMessageFragment(errorMsg);
-//        }
-//
-//        @Nullable
-//        @Override
-//        public Dialog showCardRemoveDialog() {
-//            return new AlertDialog.Builder(PINManagementActivity.this)
-//                    .setTitle("Remove the Card")
-//                    .setMessage("Please remove the identity card.")
-//                    .setNeutralButton("Proceed", (dialog, which) -> dialog.dismiss())
-//                    .create();
-//        }
-//    }
-//
-//
-//    @Override
-//    public void onBackPressed() {
-//        activationImpl.cancelAuthentication();
-//    }
-//
-//
-//
-//    ///
-//    /// Callback handlers from Activity which have to be forwarded to the Activation implementation
-//    ///
-//
-//    @Override
-//    protected void onStart() {
-//        super.onStart();
-//        activationImpl.onStart();
-//    }
-//
-//    @Override
-//    protected void onStop() {
-//        super.onStop();
-//        activationImpl.onStop();
-//    }
-//
-//    @Override
-//    protected void onPause() {
-//        super.onPause();
-//        activationImpl.onPause();
-//    }
-//
+
+    @Override
+    public void onBackPressed() {
+    	finish();
+    }
+	@Override
+	protected void onPause() {
+		LOG.info("Pausing.");
+		if (hasTriggeredNfcDispatch) {
+			NfcUtils.getInstance().disableNFCDispatch(this);
+			hasTriggeredNfcDispatch = false;
+		}
+		super.onPause();
+	}
+
+	@Override
+	protected void onResume() {
+		if (shouldTriggerNfc) {
+			NfcUtils.getInstance().enableNFCDispatch(PINManagementActivity.this);
+			hasTriggeredNfcDispatch = true;
+		}
+		super.onResume();
+	}
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
     	LOG.info("Creating");
@@ -274,6 +218,7 @@ public class PINManagementActivity extends AppCompatActivity {
 
 	private class PINMgmtInteractionImp implements PinManagementInteraction {
 
+
 		@Override
 		public void onPinChangeable(int i, ConfirmOldSetNewPasswordOperation confirmOldSetNewPasswordOperation) {
 			LOG.debug("onPinChangeable");
@@ -283,23 +228,28 @@ public class PINManagementActivity extends AppCompatActivity {
 		@Override
 		public void onCanRequired(ConfirmPasswordOperation confirmPasswordOperation) {
 			LOG.debug("onCanRequired");
-
 		}
 
 		@Override
 		public void onPinBlocked(ConfirmPasswordOperation confirmPasswordOperation) {
 			LOG.debug("onPinBlocked");
-
 		}
 
 		@Override
 		public void requestCardInsertion() {
 			LOG.debug("requestCardInsertion");
-
+			LOG.debug("eacInteractionHandler::requestCardInsertion");
+			runOnUiThread(() -> {
+				showUserInfoFragmentWithMessage("Please provide card",false, false);
+			});
+			shouldTriggerNfc = true;
+			NfcUtils.getInstance().enableNFCDispatch(PINManagementActivity.this);
+			hasTriggeredNfcDispatch = true;
 		}
 
 		@Override
 		public void requestCardInsertion(NFCOverlayMessageHandler nfcOverlayMessageHandler) {
+			//this is for ios and should not be called
 			LOG.debug("requestCardInsertion");
 
 		}
@@ -312,8 +262,10 @@ public class PINManagementActivity extends AppCompatActivity {
 
 		@Override
 		public void onCardRecognized() {
-			LOG.debug("onCardRecognized");
-
+			LOG.info("Card inserted.");
+			runOnUiThread(() -> {
+				showUserInfoFragmentWithMessage("Please don't move device or card!",false, true);
+			});
 		}
 
 		@Override
