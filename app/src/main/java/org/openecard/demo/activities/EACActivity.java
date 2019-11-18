@@ -107,6 +107,14 @@ public class EACActivity extends AppCompatActivity {
 
 				if(activationResult.getResultCode()== ActivationResultCode.OK) {
 					showUserInfoFragmentWithMessage("Success", true, false);
+				}
+				else if (activationResult.getResultCode() == ActivationResultCode.REDIRECT) {
+					if (activationResult.getRedirectUrl().contains("ResultMajor=error")) {
+						showUserInfoFragmentWithMessage("Fail with redirect - " + activationResult.getRedirectUrl(), true, false);
+					} else {
+						showUserInfoFragmentWithMessage("Success with redirect - " + activationResult.getRedirectUrl() , true, false);
+					}
+
 				}else{
 					showUserInfoFragmentWithMessage("Fail - " + activationResult.getResultCode().toString(), true, false);
 				}
