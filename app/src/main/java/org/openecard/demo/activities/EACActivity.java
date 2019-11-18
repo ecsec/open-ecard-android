@@ -209,8 +209,8 @@ public class EACActivity extends AppCompatActivity {
 
 		@Override
 		public void requestCardInsertion(NFCOverlayMessageHandler nfcOverlayMessageHandler) {
+			LOG.debug("requestCardInsertion");
 		}
-
 
 		@Override
 		public void onCardRecognized() {

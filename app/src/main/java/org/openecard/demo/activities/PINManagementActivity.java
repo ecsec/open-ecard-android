@@ -22,13 +22,57 @@
 
 package org.openecard.demo.activities;
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+
+import org.openecard.android.activation.OpeneCard;
+import org.openecard.demo.R;
+import org.openecard.demo.fragments.FailureFragment;
+import org.openecard.demo.fragments.UserInfoFragment;
+import org.openecard.mobile.activation.ActivationController;
+import org.openecard.mobile.activation.ActivationResult;
+import org.openecard.mobile.activation.ActivationResultCode;
+import org.openecard.mobile.activation.ActivationSource;
+import org.openecard.mobile.activation.ConfirmAttributeSelectionOperation;
+import org.openecard.mobile.activation.ConfirmOldSetNewPasswordOperation;
+import org.openecard.mobile.activation.ConfirmPasswordOperation;
+import org.openecard.mobile.activation.ConfirmTwoPasswordsOperation;
+import org.openecard.mobile.activation.ContextManager;
+import org.openecard.mobile.activation.ControllerCallback;
+import org.openecard.mobile.activation.EacControllerFactory;
+import org.openecard.mobile.activation.EacInteraction;
+import org.openecard.mobile.activation.NFCOverlayMessageHandler;
+import org.openecard.mobile.activation.PinManagementControllerFactory;
+import org.openecard.mobile.activation.PinManagementInteraction;
+import org.openecard.mobile.activation.ServerData;
+import org.openecard.mobile.activation.ServiceErrorResponse;
+import org.openecard.mobile.activation.StartServiceHandler;
+import org.openecard.mobile.ex.ApduExtLengthNotSupported;
+import org.openecard.mobile.ex.NfcDisabled;
+import org.openecard.mobile.ex.NfcUnavailable;
+import org.openecard.mobile.ex.UnableToInitialize;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
 
 public class PINManagementActivity extends AppCompatActivity {
 
-//    private static final Logger LOG = LoggerFactory.getLogger(PINManagementActivity.class);
-//
+    private static final Logger LOG = LoggerFactory.getLogger(PINManagementActivity.class);
+	private View cancelBtn;
+
+	private ActivationController actController;
+	private OpeneCard oe;
+	private ContextManager context;
+
+	private PinManagementControllerFactory pinMgmtFactory;
+
+	//
 //    private final PinMgmtActivationHandler<PINManagementActivity> activationImpl;
 //    private PINManagementGui pinMngGui;
 //    private Button cancelBtn;
@@ -111,34 +155,174 @@ public class PINManagementActivity extends AppCompatActivity {
 //        activationImpl.onPause();
 //    }
 //
-//    @Override
-//    protected void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_custom);
-//
-//        cancelBtn = findViewById(R.id.cancelBtn);
-//        cancelBtn.setOnClickListener(view -> {
-//			LOG.info("Cancel pressed");
-//			cancelBtn.setEnabled(false);
-//			cancelBtn.setClickable(false);
-//
-//			new Thread(() -> {
-//				if (pinMngGui != null) {
-//					pinMngGui.cancel();
-//				}
-//				activationImpl.cancelAuthentication();
-//			}).start();
-//        });
-//
-//        if (findViewById(R.id.fragment) != null) {
-//            // show InitFragment
-//            Fragment fragment = new InitFragment();
-//            cancelBtn.setVisibility(View.VISIBLE);
-//            fragment.setArguments(getIntent().getExtras());
-//            getFragmentManager().beginTransaction()
-//                    .replace(R.id.fragment, fragment).addToBackStack(null).commit();
-//        }
-//    }
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    	LOG.info("Creating");
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_custom);
+
+        cancelBtn = findViewById(R.id.cancelBtn);
+        cancelBtn.setOnClickListener(view -> {
+			LOG.info("Cancel pressed");
+			cancelBtn.setEnabled(false);
+			cancelBtn.setClickable(false);
+
+			showUserInfoFragmentWithMessage("Cancelling authentication...", false, true);
+			showFailureFragment("The User cancelled the authentication procedure, please wait for the process to end.");
+			if(actController != null) {
+				actController.cancelAuthentication();
+			}
+
+        });
+		showUserInfoFragmentWithMessage("Please wait...", false, true);
+    }
+	@Override
+	protected void onStart() {
+		LOG.info("Starting.");
+		this.oe = OpeneCard.createInstance();
+		this.context = oe.context(this);
+		try {
+			this.context.start(new StartServiceHandler() {
+				@Override
+				public void onSuccess(ActivationSource activationSource) {
+					pinMgmtFactory = activationSource.pinManagementFactory();
+					actController = pinMgmtFactory.create(new PINManagementActivity.PINMgmtControllerCallback(), new PINManagementActivity.PINMgmtInteractionImp());
+				}
+
+				@Override
+				public void onFailure(ServiceErrorResponse serviceErrorResponse) {
+					LOG.error("Could not start OeC-Framework: {}", serviceErrorResponse);
+				}
+			});
+		} catch (UnableToInitialize unableToInitialize) {
+			LOG.error("Exception during start: {}", unableToInitialize);
+		} catch (NfcUnavailable nfcUnavailable) {
+			LOG.error("Exception during start: {}", nfcUnavailable);
+		} catch (NfcDisabled nfcDisabled) {
+			LOG.error("Exception during start: {}", nfcDisabled);
+		} catch (ApduExtLengthNotSupported apduExtLengthNotSupported) {
+			LOG.error("Exception during start: {}", apduExtLengthNotSupported);
+		}
+
+		super.onStart();
+	}
+
+	private void showFailureFragment(String errorMessage) {
+		FailureFragment fragment = new FailureFragment();
+		fragment.setErrorMessage(errorMessage);
+
+		runOnUiThread(() -> {
+			cancelBtn.setVisibility(View.INVISIBLE);
+		});
+
+		// show ServerDataFragment
+		LOG.debug("Replace fragment with FailureFragment.");
+		getFragmentManager().beginTransaction()
+				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
+
+	}
+
+    private void showUserInfoFragmentWithMessage(String msg, boolean showConfirmBtn, boolean showSpinner){
+		if (findViewById(R.id.fragment) != null) {
+			UserInfoFragment fragment = new UserInfoFragment();
+			fragment.setWaitMessage(msg);
+			fragment.setConfirmBtn(showConfirmBtn);
+			fragment.setSpinner(showSpinner);
+			fragment.setArguments(getIntent().getExtras());
+			getFragmentManager().beginTransaction()
+					.replace(R.id.fragment, fragment).addToBackStack(null).commit();
+		}
+	}
+	@Override
+	protected void onNewIntent(Intent intent) {
+		LOG.info("On new intent.");
+		super.onNewIntent(intent);
+		try {
+			oe.onNewIntent(this, intent);
+		} catch (ApduExtLengthNotSupported apduExtLengthNotSupported) {
+			LOG.error("Exception during start: {}", apduExtLengthNotSupported);
+		} catch (IOException e) {
+			LOG.error("exception during start: {}", e);
+		}
+
+		showUserInfoFragmentWithMessage("Please wait...", false, true);
+
+	}
+	private class PINMgmtControllerCallback implements ControllerCallback {
+		@Override
+		public void onStarted() {
+			LOG.debug("onStarted");
+
+		}
+
+		@Override
+		public void onAuthenticationCompletion(ActivationResult activationResult) {
+			LOG.debug("onAuthenticationCompletion");
+			actController = null;
+			if(activationResult != null) {
+				LOG.debug("onAuthenticationSuccess Result={}", activationResult.getResultCode());
+				LOG.debug("onAuthenticationSuccess ResultMinor={}", activationResult.getProcessResultMinor());
+
+				if(activationResult.getResultCode()== ActivationResultCode.OK) {
+					showUserInfoFragmentWithMessage("Success", true, false);
+				}else{
+					showUserInfoFragmentWithMessage("Fail - " + activationResult.getResultCode().toString(), true, false);
+				}
+			}
+		}
+	}
+
+	private class PINMgmtInteractionImp implements PinManagementInteraction {
+
+		@Override
+		public void onPinChangeable(int i, ConfirmOldSetNewPasswordOperation confirmOldSetNewPasswordOperation) {
+			LOG.debug("onPinChangeable");
+
+		}
+
+		@Override
+		public void onCanRequired(ConfirmPasswordOperation confirmPasswordOperation) {
+			LOG.debug("onCanRequired");
+
+		}
+
+		@Override
+		public void onPinBlocked(ConfirmPasswordOperation confirmPasswordOperation) {
+			LOG.debug("onPinBlocked");
+
+		}
+
+		@Override
+		public void requestCardInsertion() {
+			LOG.debug("requestCardInsertion");
+
+		}
+
+		@Override
+		public void requestCardInsertion(NFCOverlayMessageHandler nfcOverlayMessageHandler) {
+			LOG.debug("requestCardInsertion");
+
+		}
+
+		@Override
+		public void onCardInteractionComplete() {
+			LOG.debug("onCardInteractionComplete");
+
+		}
+
+		@Override
+		public void onCardRecognized() {
+			LOG.debug("onCardRecognized");
+
+		}
+
+		@Override
+		public void onCardRemoved() {
+			LOG.debug("onCardRemoved");
+
+		}
+	}
+
 //
 //    @Override
 //    protected void onResume() {
