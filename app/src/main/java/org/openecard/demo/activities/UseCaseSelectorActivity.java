@@ -88,7 +88,6 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 				init();
 			}
 		}
-
 	}
 
 	public void onStart() {

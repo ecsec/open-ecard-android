@@ -29,7 +29,9 @@ import android.view.View;
 import org.openecard.android.activation.OpeneCard;
 import org.openecard.android.utils.NfcUtils;
 import org.openecard.demo.R;
+import org.openecard.demo.fragments.CANInputFragment;
 import org.openecard.demo.fragments.FailureFragment;
+import org.openecard.demo.fragments.PINInputFragment;
 import org.openecard.demo.fragments.UserInfoFragment;
 import org.openecard.mobile.activation.ActivationController;
 import org.openecard.mobile.activation.ActivationResult;
@@ -228,6 +230,10 @@ public class PINManagementActivity extends AppCompatActivity {
 		@Override
 		public void onCanRequired(ConfirmPasswordOperation confirmPasswordOperation) {
 			LOG.debug("onCanRequired");
+			CANInputFragment fragment = new CANInputFragment();
+			fragment.setConfirmPasswordOperation(confirmPasswordOperation);
+			// show PINInputFragment
+			getFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 		}
 
 		@Override
