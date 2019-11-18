@@ -31,6 +31,7 @@ import org.openecard.android.utils.NfcUtils;
 import org.openecard.demo.R;
 import org.openecard.demo.fragments.CANInputFragment;
 import org.openecard.demo.fragments.FailureFragment;
+import org.openecard.demo.fragments.PINChangeFragment;
 import org.openecard.demo.fragments.PINInputFragment;
 import org.openecard.demo.fragments.UserInfoFragment;
 import org.openecard.mobile.activation.ActivationController;
@@ -225,6 +226,11 @@ public class PINManagementActivity extends AppCompatActivity {
 		public void onPinChangeable(int i, ConfirmOldSetNewPasswordOperation confirmOldSetNewPasswordOperation) {
 			LOG.debug("onPinChangeable");
 
+			PINChangeFragment fragment = new PINChangeFragment();
+			fragment.setConfirmPasswordOperation(confirmOldSetNewPasswordOperation);
+			fragment.setAttempt(i);
+			// show PINInputFragment
+			getFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 		}
 
 		@Override

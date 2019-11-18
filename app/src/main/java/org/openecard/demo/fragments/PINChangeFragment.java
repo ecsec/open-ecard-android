@@ -36,6 +36,7 @@ import android.widget.TextView;
 
 import org.openecard.demo.R;
 import org.openecard.demo.activities.PINManagementActivity;
+import org.openecard.mobile.activation.ConfirmOldSetNewPasswordOperation;
 
 
 public class PINChangeFragment extends Fragment {
@@ -47,6 +48,8 @@ public class PINChangeFragment extends Fragment {
     private EditText pinText;
     private EditText newPin;
     private EditText newPinConfirm;
+    private int attempt;
+    private ConfirmOldSetNewPasswordOperation op;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -65,13 +68,6 @@ public class PINChangeFragment extends Fragment {
 
         final Button buttonContinue = view.findViewById(R.id.btnPINInput);
         buttonContinue.setEnabled(false);
-
-//        if (status != null) {
-//            if (status == PinStatus.RC2) {
-//                logLabel.setVisibility(View.VISIBLE);
-//                logLabel.setText(WRONG_PIN);
-//            }
-//        }
 
         TextWatcher textChangeListener = new TextWatcher() {
             @Override
@@ -118,7 +114,8 @@ public class PINChangeFragment extends Fragment {
                     logLabel.setText(PERFORM_PIN_CHANGE);
                     logLabel.setVisibility(View.VISIBLE);
 
-//                    new Thread(() -> ((PINManagementActivity) activity).changePin(pin, newPIN)).start();
+                    op.enter(pinText.getText().toString(), newPIN);
+                    getFragmentManager().beginTransaction().replace(R.id.fragment, new UserInfoFragment()).addToBackStack(null).commitAllowingStateLoss();
                 }
             }
         });
@@ -134,5 +131,13 @@ public class PINChangeFragment extends Fragment {
                 && newPinConfirm.getText().toString().length() == 6);
 
         return pinLengthCorrect && newPinLengthCorrect;
+    }
+
+    public void setAttempt(int i) {
+        this.attempt = i;
+    }
+
+    public void setConfirmPasswordOperation(ConfirmOldSetNewPasswordOperation confirmOldSetNewPasswordOperation) {
+        this.op = confirmOldSetNewPasswordOperation;
     }
 }
