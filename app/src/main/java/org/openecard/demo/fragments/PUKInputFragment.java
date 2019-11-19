@@ -22,22 +22,75 @@
 
 package org.openecard.demo.fragments;
 
+import android.app.Activity;
+import android.app.Fragment;
+import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+
+import org.openecard.demo.R;
+import org.openecard.demo.activities.EACActivity;
 import org.openecard.demo.activities.PINManagementActivity;
+import org.openecard.mobile.activation.ConfirmPasswordOperation;
 
 
-public class PUKInputFragment extends GenericInputFragment {
+public class PUKInputFragment extends Fragment {
+
+    private ConfirmPasswordOperation op;
 
     public PUKInputFragment(){
-        super("Enter PUK:", "PUK");
     }
 
     @Override
-    protected void enterNumber(String number, PINManagementActivity activity) {
-//        activity.enterPUK(number);
-    }
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
+		final View view = inflater.inflate(R.layout.fragment_puk_input, container, false);
 
-    @Override
-    protected int lengthOfNumber() {
-        return 10;
-    }
+		final EditText pukText = view.findViewById(R.id.pukInput);
+		pukText.setEnabled(true);
+		pukText.setFocusable(true);
+
+		final Button buttonContinue = view.findViewById(R.id.btnPINInput);
+		buttonContinue.setEnabled(false);
+
+		pukText.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				boolean canContinue = pukText.getText().toString().length() == 10;
+				buttonContinue.setEnabled(canContinue);
+			}
+
+			@Override
+			public void afterTextChanged(Editable s) { }
+		});
+
+		buttonContinue.setOnClickListener(v -> {
+			final Activity activity = getActivity();
+			if (activity instanceof EACActivity) {
+				final String puk = pukText.getText().toString();
+
+				if (puk.length() == 6) {
+					buttonContinue.setEnabled(false);
+					pukText.setEnabled(false);
+					pukText.setFocusable(false);
+
+					op.enter(puk);
+					getFragmentManager().beginTransaction().replace(R.id.fragment, new UserInfoFragment()).addToBackStack(null).commitAllowingStateLoss();
+				}
+			}
+		});
+
+		return view;
+	}
+
+	public void setConfirmPasswordOperation(ConfirmPasswordOperation confirmPasswordOperation) {
+        this.op = confirmPasswordOperation;
+	}
 }

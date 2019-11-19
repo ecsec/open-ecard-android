@@ -33,6 +33,7 @@ import org.openecard.demo.fragments.CANInputFragment;
 import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.PINChangeFragment;
 import org.openecard.demo.fragments.PINInputFragment;
+import org.openecard.demo.fragments.PUKInputFragment;
 import org.openecard.demo.fragments.UserInfoFragment;
 import org.openecard.mobile.activation.ActivationController;
 import org.openecard.mobile.activation.ActivationResult;
@@ -56,6 +57,7 @@ import org.openecard.mobile.ex.ApduExtLengthNotSupported;
 import org.openecard.mobile.ex.NfcDisabled;
 import org.openecard.mobile.ex.NfcUnavailable;
 import org.openecard.mobile.ex.UnableToInitialize;
+import org.openecard.mobile.ui.PINManagementNavigator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,6 +134,7 @@ public class PINManagementActivity extends AppCompatActivity {
 			this.context.start(new StartServiceHandler() {
 				@Override
 				public void onSuccess(ActivationSource activationSource) {
+					LOG.debug("onSuccess");
 					pinMgmtFactory = activationSource.pinManagementFactory();
 					actController = pinMgmtFactory.create(new PINManagementActivity.PINMgmtControllerCallback(), new PINManagementActivity.PINMgmtInteractionImp());
 				}
@@ -204,6 +207,7 @@ public class PINManagementActivity extends AppCompatActivity {
 
 		@Override
 		public void onAuthenticationCompletion(ActivationResult activationResult) {
+			PINManagementNavigator d;
 			LOG.debug("onAuthenticationCompletion");
 			actController = null;
 			if(activationResult != null) {
@@ -244,7 +248,11 @@ public class PINManagementActivity extends AppCompatActivity {
 
 		@Override
 		public void onPinBlocked(ConfirmPasswordOperation confirmPasswordOperation) {
-			LOG.debug("onPinBlocked");
+			LOG.debug("onCanRequired");
+			PUKInputFragment fragment = new PUKInputFragment();
+			fragment.setConfirmPasswordOperation(confirmPasswordOperation);
+			// show PINInputFragment
+			getFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 		}
 
 		@Override
@@ -288,17 +296,6 @@ public class PINManagementActivity extends AppCompatActivity {
 	}
 
 
-//    public void onPUKIsRequired(boolean triedBefore) {
-//        GenericInputFragment fragment = new PUKInputFragment();
-//
-//        if (triedBefore) {
-//            fragment.setMessage("The entered PUK was wrong, please try again.");
-//        }
-//
-//        // show PUKInput
-//        getFragmentManager().beginTransaction()
-//                .replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
-//    }
-//
+
 
 }
