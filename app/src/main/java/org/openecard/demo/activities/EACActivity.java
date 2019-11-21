@@ -22,18 +22,15 @@
 
 package org.openecard.demo.activities;
 
-import android.app.PendingIntent;
 import android.content.Intent;
-import android.nfc.NfcAdapter;
-import android.media.MediaController2;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
 import org.openecard.android.activation.OpeneCard;
 import org.openecard.android.utils.NfcUtils;
-import org.openecard.common.util.UrlEncoder;
+import org.openecard.apache.http.HttpClientConnection;
+import org.openecard.apache.http.HttpRequest;
 import org.openecard.demo.R;
 import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.PINInputFragment;
@@ -59,14 +56,26 @@ import org.openecard.mobile.ex.ApduExtLengthNotSupported;
 import org.openecard.mobile.ex.NfcDisabled;
 import org.openecard.mobile.ex.NfcUnavailable;
 import org.openecard.mobile.ex.UnableToInitialize;
-import org.openecard.mobile.ui.ConfirmTwoPasswordsOperationImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.CertPathValidator;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 
 /**
@@ -113,6 +122,8 @@ public class EACActivity extends AppCompatActivity {
 				else if (activationResult.getResultCode() == ActivationResultCode.REDIRECT) {
 					if (activationResult.getRedirectUrl().contains("ResultMajor=error")) {
 						showUserInfoFragmentWithMessage("Fail with redirect - " + activationResult.getRedirectUrl(), true, false);
+						callURL(activationResult.getRedirectUrl());
+
 					} else {
 						showUserInfoFragmentWithMessage("Success with redirect - " + activationResult.getRedirectUrl() , true, false);
 					}
@@ -121,6 +132,43 @@ public class EACActivity extends AppCompatActivity {
 					showUserInfoFragmentWithMessage("Fail - " + activationResult.getResultCode().toString(), true, false);
 				}
 			}
+		}
+
+		private void callURL(String redirectUrl) {
+			try {
+				URL url = new URL(redirectUrl);
+				HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+
+				SSLContext sc = SSLContext.getInstance("SSL");
+				sc.init(null, new TrustManager[]{
+					new X509TrustManager() {
+          				public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+          				 return null;
+          				}
+          				@Override
+          				public void checkClientTrusted(X509Certificate[] arg0, String arg1)
+          				 throws CertificateException {}
+
+          				@Override
+          				public void checkServerTrusted(X509Certificate[] arg0, String arg1)
+          				  throws CertificateException {}
+          				}
+				}, new SecureRandom());
+
+				con.setSSLSocketFactory(sc.getSocketFactory());
+				int t = con.getInputStream().read();
+				LOG.debug("{}",t);
+
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			} catch (KeyManagementException e) {
+				e.printStackTrace();
+			}
+
 		}
 	}
 
@@ -169,6 +217,7 @@ public class EACActivity extends AppCompatActivity {
 		public void onServerData(ServerData serverData, String s, ConfirmAttributeSelectionOperation confirmAttributeSelectionOperation) {
 			LOG.info("Server data is present.");
 
+//			confirmAttributeSelectionOperation.enter(serverData.getReadAccessAttributes(), serverData.getWriteAccessAttributes());
 			Bundle bundle = new Bundle();
 			bundle.putSerializable(BUNDLE_SERVER_DATA, serverData);
 			bundle.putSerializable(BUNDLE_TRANSACTION_INFO, s);
@@ -266,6 +315,19 @@ public class EACActivity extends AppCompatActivity {
 	@Override
 	protected void onDestroy() {
 		LOG.info("Destroying.");
+
+		super.onDestroy();
+	}
+
+	@Override
+	protected void onStop() {
+		LOG.info("Stopping");
+		stopCancelOeC();
+		super.onStop();
+		finish();
+	}
+
+	public void stopCancelOeC(){
 		if (context != null) {
 			if (actController != null) {
 				actController.cancelAuthentication();
@@ -279,35 +341,13 @@ public class EACActivity extends AppCompatActivity {
 				@Override
 				public void onFailure(ServiceErrorResponse serviceErrorResponse) {
 					LOG.debug("OpenECard framework stopped with error: {}", serviceErrorResponse);
-					actController.cancelAuthentication();
-					showUserInfoFragmentWithMessage(serviceErrorResponse.getMessage(), true, false);
+					if (actController != null) {
+						actController.cancelAuthentication();
+					}
+					//		showUserInfoFragmentWithMessage(serviceErrorResponse.getMessage(), true, false);
 				}
 			});
 		}
-		super.onDestroy();
-	}
-
-	@Override
-	protected void onStop() {
-		LOG.info("Stopping");
-		stopCancelOeC();
-		super.onStop();
-		finish();
-	}
-
-	public void stopCancelOeC(){
-		actController.cancelAuthentication();
-		context.stop(new StopServiceHandler() {
-			@Override
-			public void onSuccess() {
-				LOG.debug("Paused - oec framework stopped succesfully");
-			}
-
-			@Override
-			public void onFailure(ServiceErrorResponse serviceErrorResponse) {
-				LOG.debug("Paused - oec framework stopped with error");
-			}
-		});
 	}
 
 	@Override
