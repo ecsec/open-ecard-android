@@ -37,7 +37,7 @@ import android.widget.TextView;
 import org.openecard.demo.R;
 import org.openecard.demo.activities.EACActivity;
 import org.openecard.mobile.activation.ConfirmPasswordOperation;
-import org.openecard.mobile.activation.ConfirmTwoPasswordsOperation;
+import org.openecard.mobile.activation.ConfirmPinCanOperation;
 
 
 /**
@@ -50,14 +50,14 @@ public class PINInputFragment extends Fragment {
 	private static final String PROVIDE_CAN = "Please provide the CAN to the corresponding identity card.";
 
 	private ConfirmPasswordOperation confirmPasswordOperation = null;
-	private ConfirmTwoPasswordsOperation confirmTwoPasswordsOperation = null;
+	private ConfirmPinCanOperation confirmTwoPasswordsOperation = null;
 	private boolean needCan;
 	private int attempt;
 
 	public void setConfirmPasswordOperation(ConfirmPasswordOperation op){
 		this.confirmPasswordOperation = op;
 	}
-	public void setConfirmTwoPasswordsOperation(ConfirmTwoPasswordsOperation op){
+	public void setConfirmTwoPasswordsOperation(ConfirmPinCanOperation op){
 		this.confirmTwoPasswordsOperation = op;
 	}
 

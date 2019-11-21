@@ -29,8 +29,6 @@ import android.widget.Button;
 
 import org.openecard.android.activation.OpeneCard;
 import org.openecard.android.utils.NfcUtils;
-import org.openecard.apache.http.HttpClientConnection;
-import org.openecard.apache.http.HttpRequest;
 import org.openecard.demo.R;
 import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.PINInputFragment;
@@ -42,7 +40,7 @@ import org.openecard.mobile.activation.ActivationResultCode;
 import org.openecard.mobile.activation.ActivationSource;
 import org.openecard.mobile.activation.ConfirmAttributeSelectionOperation;
 import org.openecard.mobile.activation.ConfirmPasswordOperation;
-import org.openecard.mobile.activation.ConfirmTwoPasswordsOperation;
+import org.openecard.mobile.activation.ConfirmPinCanOperation;
 import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.ControllerCallback;
 import org.openecard.mobile.activation.EacControllerFactory;
@@ -60,13 +58,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.cert.CertPathValidator;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
@@ -193,12 +189,12 @@ public class EACActivity extends AppCompatActivity {
 		}
 
 		@Override
-		public void onPinCanRequest(ConfirmTwoPasswordsOperation confirmTwoPasswordsOperation) {
+		public void onPinCanRequest(ConfirmPinCanOperation confirmPinCanOperation) {
 			LOG.debug("eacInteractionHandler::onPinCanRequest");
 
 			PINInputFragment fragment = new PINInputFragment();
 			fragment.setNeedCan(true);
-			fragment.setConfirmTwoPasswordsOperation(confirmTwoPasswordsOperation);
+			fragment.setConfirmTwoPasswordsOperation(confirmPinCanOperation);
 			// show PINInputFragment
 			getFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 		}
