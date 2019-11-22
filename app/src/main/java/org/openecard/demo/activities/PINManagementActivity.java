@@ -288,8 +288,18 @@ public class PINManagementActivity extends AppCompatActivity {
 		@Override
 		public void onCardRemoved() {
 			LOG.debug("onCardRemoved");
+		}
+
+		@Override
+		public void onCardDeactivated(){
+			LOG.debug("onCardDeactivated");
+		}
+		@Override
+		public void onCardPukBlocked() {
+			LOG.debug("onCardPUKBlocked");
 
 		}
+
 	}
 
 
