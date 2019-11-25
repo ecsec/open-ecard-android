@@ -37,6 +37,7 @@ import android.widget.TextView;
 import org.openecard.demo.R;
 import org.openecard.demo.activities.PINManagementActivity;
 import org.openecard.mobile.activation.ConfirmOldSetNewPasswordOperation;
+import org.openecard.mobile.activation.ConfirmPinCanNewPinOperation;
 
 
 public class PINChangeFragment extends Fragment {
@@ -45,11 +46,15 @@ public class PINChangeFragment extends Fragment {
     private static final String WRONG_PIN = "The entered PIN was wrong, please try again.";
     private static final String MISMATCHING_PINS = "The two new PINs do not match.";
 
+
+    private boolean needCan = false;
     private EditText pinText;
     private EditText newPin;
+    private EditText canText;
     private EditText newPinConfirm;
     private int attempt;
     private ConfirmOldSetNewPasswordOperation op;
+    private ConfirmPinCanNewPinOperation confirmPinCanNewPinOperation;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -69,6 +74,15 @@ public class PINChangeFragment extends Fragment {
         final Button buttonContinue = view.findViewById(R.id.btnPINInput);
         buttonContinue.setEnabled(false);
 
+        pinText = view.findViewById(R.id.pinInput);
+        canText = view.findViewById(R.id.canInput);
+        if (!needCan) {
+            canText.setVisibility(View.GONE);
+        } else {
+            canText.setEnabled(true);
+            canText.setFocusable(true);
+        }
+
         TextWatcher textChangeListener = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -87,36 +101,43 @@ public class PINChangeFragment extends Fragment {
         pinText.addTextChangedListener(textChangeListener);
         newPin.addTextChangedListener(textChangeListener);
         newPinConfirm.addTextChangedListener(textChangeListener);
+        canText.addTextChangedListener(textChangeListener);
 
         buttonContinue.setOnClickListener(v -> {
-            final Activity activity = getActivity();
-            if (activity instanceof PINManagementActivity) {
+            final String newPIN = newPin.getText().toString();
+            final String newPIN2 = newPinConfirm.getText().toString();
 
-                final String newPIN = newPin.getText().toString();
-                final String newPIN2 = newPinConfirm.getText().toString();
+            if (! newPIN.equals(newPIN2)) {
+                logLabel.setText(MISMATCHING_PINS);
+                logLabel.setVisibility(View.VISIBLE);
+                return;
+            }
 
-                if (! newPIN.equals(newPIN2)) {
-                    logLabel.setText(MISMATCHING_PINS);
-                    logLabel.setVisibility(View.VISIBLE);
-                    return;
-                }
+            final String pin = pinText.getText().toString();
 
-                final String pin = pinText.getText().toString();
+            if (pin.length() == 6 || pin.length() == 5) { // for transport PIN
+                buttonContinue.setEnabled(false);
+                pinText.setEnabled(false);
+                pinText.setFocusable(false);
+                newPin.setEnabled(false);
+                newPin.setFocusable(false);
+                newPinConfirm.setEnabled(false);
+                newPinConfirm.setFocusable(false);
+                canText.setEnabled(false);
+                canText.setFocusable(false);
+                logLabel.setText(PERFORM_PIN_CHANGE);
+                logLabel.setVisibility(View.VISIBLE);
 
-                if (pin.length() == 6 || pin.length() == 5) { // for transport PIN
-                    buttonContinue.setEnabled(false);
-                    pinText.setEnabled(false);
-                    pinText.setFocusable(false);
-                    newPin.setEnabled(false);
-                    newPin.setFocusable(false);
-                    newPinConfirm.setEnabled(false);
-                    newPinConfirm.setFocusable(false);
-                    logLabel.setText(PERFORM_PIN_CHANGE);
-                    logLabel.setVisibility(View.VISIBLE);
-
+                if (needCan) {
+                    confirmPinCanNewPinOperation.enter(
+                            pinText.getText().toString(),
+                            canText.getText().toString(),
+                            newPIN);
+                } else {
                     op.enter(pinText.getText().toString(), newPIN);
-                    getFragmentManager().beginTransaction().replace(R.id.fragment, new UserInfoFragment()).addToBackStack(null).commitAllowingStateLoss();
                 }
+
+                getFragmentManager().beginTransaction().replace(R.id.fragment, new UserInfoFragment()).addToBackStack(null).commitAllowingStateLoss();
             }
         });
 
@@ -139,5 +160,13 @@ public class PINChangeFragment extends Fragment {
 
     public void setConfirmPasswordOperation(ConfirmOldSetNewPasswordOperation confirmOldSetNewPasswordOperation) {
         this.op = confirmOldSetNewPasswordOperation;
+    }
+
+    public void setNeedCan(boolean needCan) {
+        this.needCan = needCan;
+    }
+
+    public void setConfirmPinCanNewPinOperation(ConfirmPinCanNewPinOperation confirmPinCanNewPinOperation) {
+        this.confirmPinCanNewPinOperation = confirmPinCanNewPinOperation;
     }
 }

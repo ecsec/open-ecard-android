@@ -40,6 +40,7 @@ import org.openecard.mobile.activation.ActivationResultCode;
 import org.openecard.mobile.activation.ActivationSource;
 import org.openecard.mobile.activation.ConfirmOldSetNewPasswordOperation;
 import org.openecard.mobile.activation.ConfirmPasswordOperation;
+import org.openecard.mobile.activation.ConfirmPinCanNewPinOperation;
 import org.openecard.mobile.activation.ConfirmPinCanOperation;
 import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.ControllerCallback;
@@ -53,6 +54,8 @@ import org.openecard.mobile.ex.NfcDisabled;
 import org.openecard.mobile.ex.NfcUnavailable;
 import org.openecard.mobile.ex.UnableToInitialize;
 import org.openecard.mobile.ui.PINManagementNavigator;
+import org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction;
+import org.openecard.scio.NFCCardWatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -219,10 +222,9 @@ public class PINManagementActivity extends AppCompatActivity {
 
 	private class PINMgmtInteractionImp implements PinManagementInteraction {
 
-
 		@Override
 		public void onPinChangeable(int i, ConfirmOldSetNewPasswordOperation confirmOldSetNewPasswordOperation) {
-			LOG.debug("onPinChangeable");
+			LOG.debug("onPinChangeable, count: {}", i);
 
 			PINChangeFragment fragment = new PINChangeFragment();
 			fragment.setConfirmPasswordOperation(confirmOldSetNewPasswordOperation);
@@ -232,20 +234,19 @@ public class PINManagementActivity extends AppCompatActivity {
 		}
 
 		@Override
-		public void onPinCanRequired(ConfirmPinCanOperation confirmPinCanOperation) {
-			LOG.debug("eacInteractionHandler::onPinCanRequest");
+		public void onPinCanNewPinRequired(ConfirmPinCanNewPinOperation confirmPinCanNewPinOperation) {
+			LOG.debug("eacInteractionHandler::onPinCanNewPinRequired");
 
-			PINInputFragment fragment = new PINInputFragment();
+			PINChangeFragment fragment = new PINChangeFragment();
 			fragment.setNeedCan(true);
-			fragment.setConfirmTwoPasswordsOperation(confirmPinCanOperation);
+			fragment.setConfirmPinCanNewPinOperation(confirmPinCanNewPinOperation);
 			// show PINInputFragment
 			getFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 		}
 
-
 		@Override
 		public void onPinBlocked(ConfirmPasswordOperation confirmPasswordOperation) {
-			LOG.debug("onCanRequired");
+			LOG.debug("onPinBlocked");
 			PUKInputFragment fragment = new PUKInputFragment();
 			fragment.setConfirmPasswordOperation(confirmPasswordOperation);
 			// show PINInputFragment

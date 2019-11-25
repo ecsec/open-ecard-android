@@ -36,6 +36,7 @@ import android.widget.TextView;
 
 import org.openecard.demo.R;
 import org.openecard.demo.activities.EACActivity;
+import org.openecard.demo.activities.PINManagementActivity;
 import org.openecard.mobile.activation.ConfirmPasswordOperation;
 import org.openecard.mobile.activation.ConfirmPinCanOperation;
 
@@ -131,30 +132,28 @@ public class PINInputFragment extends Fragment {
 
 		buttonContinue.setOnClickListener(v -> {
 			final Activity activity = getActivity();
-			if (activity instanceof EACActivity) {
-				final String pin = pinText.getText().toString();
-				final String can;
-				if (canText.getVisibility() == View.VISIBLE) {
-					can = canText.getText().toString();
-				} else {
-					can = null;
-				}
+			final String pin = pinText.getText().toString();
+			final String can;
+			if (canText.getVisibility() == View.VISIBLE) {
+				can = canText.getText().toString();
+			} else {
+				can = null;
+			}
 
-				if (pin.length() == 6) {
-					buttonContinue.setEnabled(false);
-					pinText.setEnabled(false);
-					pinText.setFocusable(false);
-					canText.setEnabled(false);
-					canText.setFocusable(false);
-					logLabel.setText(PERFORM_PIN_INPUT);
+			if (pin.length() == 6) {
+				buttonContinue.setEnabled(false);
+				pinText.setEnabled(false);
+				pinText.setFocusable(false);
+				canText.setEnabled(false);
+				canText.setFocusable(false);
+				logLabel.setText(PERFORM_PIN_INPUT);
 
-					if(!needCan){
-						confirmPasswordOperation.enter(pin);
-					}else{
-						confirmTwoPasswordsOperation.enter(pin, can);
-					}
-					getFragmentManager().beginTransaction().replace(R.id.fragment, new UserInfoFragment()).addToBackStack(null).commitAllowingStateLoss();
+				if(!needCan){
+					confirmPasswordOperation.enter(pin);
+				}else{
+					confirmTwoPasswordsOperation.enter(pin, can);
 				}
+				getFragmentManager().beginTransaction().replace(R.id.fragment, new UserInfoFragment()).addToBackStack(null).commitAllowingStateLoss();
 			}
 		});
 
