@@ -54,7 +54,7 @@ public class PUKInputFragment extends Fragment {
 		pukText.setEnabled(true);
 		pukText.setFocusable(true);
 
-		final Button buttonContinue = view.findViewById(R.id.btnPINInput);
+		final Button buttonContinue = view.findViewById(R.id.btnPUKInput);
 		buttonContinue.setEnabled(false);
 
 		pukText.addTextChangedListener(new TextWatcher() {
@@ -63,7 +63,8 @@ public class PUKInputFragment extends Fragment {
 
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				boolean canContinue = pukText.getText().toString().length() == 10;
+				final String puk = getPuk(pukText);
+				boolean canContinue = isValidPuk(puk);
 				buttonContinue.setEnabled(canContinue);
 			}
 
@@ -72,22 +73,27 @@ public class PUKInputFragment extends Fragment {
 		});
 
 		buttonContinue.setOnClickListener(v -> {
-			final Activity activity = getActivity();
-			if (activity instanceof EACActivity) {
-				final String puk = pukText.getText().toString();
+			final String puk = getPuk(pukText);
 
-				if (puk.length() == 6) {
-					buttonContinue.setEnabled(false);
-					pukText.setEnabled(false);
-					pukText.setFocusable(false);
+			if (isValidPuk(puk)) {
+				buttonContinue.setEnabled(false);
+				pukText.setEnabled(false);
+				pukText.setFocusable(false);
 
-					op.enter(puk);
-					getFragmentManager().beginTransaction().replace(R.id.fragment, new UserInfoFragment()).addToBackStack(null).commitAllowingStateLoss();
-				}
+				op.enter(puk);
+				getFragmentManager().beginTransaction().replace(R.id.fragment, new UserInfoFragment()).addToBackStack(null).commitAllowingStateLoss();
 			}
 		});
 
 		return view;
+	}
+
+	private boolean isValidPuk(String puk) {
+		return puk.length() == 10;
+	}
+
+	private String getPuk(EditText pukText) {
+		return pukText.getText().toString();
 	}
 
 	public void setConfirmPasswordOperation(ConfirmPasswordOperation confirmPasswordOperation) {
