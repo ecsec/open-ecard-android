@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        package="org.openecard.demo">
-
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.openecard.demo">
     <!-- Other permissions -->
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.NFC"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.NFC" />
 
     <application
         android:allowBackup="false"
@@ -14,41 +12,39 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <activity
             android:name=".activities.EACActivity"
             android:clearTaskOnLaunch="true"
-            android:configChanges="orientation|screenSize" >
-        </activity>
-
-        <activity android:name="org.openecard.demo.activities.UseCaseSelectorActivity"
-                  android:clearTaskOnLaunch="true"
-                  android:configChanges="orientation|screenSize" >
-
+            android:configChanges="orientation|screenSize"></activity>
+        <activity
+            android:name=".activities.UseCaseSelectorActivity"
+            android:clearTaskOnLaunch="true"
+            android:configChanges="orientation|screenSize">
             <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.VIEW" />
 
-                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-
-                <data android:scheme="eid"/>
-                <data android:scheme="http"/>
-                <data android:host="127.0.0.1" android:port="24727"/>
-                <data android:host="localhost" android:port="24727"/>
-                <data android:pathPattern="/eID-Client.*"/>
+                <data android:scheme="eid" />
+                <data android:scheme="http" />
+                <data
+                    android:host="127.0.0.1"
+                    android:port="24727" />
+                <data
+                    android:host="localhost"
+                    android:port="24727" />
+                <data android:pathPattern="/eID-Client.*" />
             </intent-filter>
         </activity>
-
-        <activity android:name="org.openecard.demo.activities.PINManagementActivity"
+        <activity
+            android:name=".activities.PINManagementActivity"
             android:clearTaskOnLaunch="true"
-            android:configChanges="orientation|screenSize" >
-        </activity>
-
+            android:configChanges="orientation|screenSize"></activity>
     </application>
 
 </manifest>

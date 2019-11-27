@@ -38,7 +38,7 @@ repositories {
     }
 }
 
-def OecVersion = "2.0.0-rc.2"
+def OecVersion = "2.0.0-rc.3-SNAPSHOT"
 
 dependencies {
     androidTestImplementation('androidx.test.espresso:espresso-core:3.2.0', {

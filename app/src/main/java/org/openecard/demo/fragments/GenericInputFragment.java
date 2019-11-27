@@ -23,7 +23,6 @@
 package org.openecard.demo.fragments;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -36,6 +35,8 @@ import android.widget.TextView;
 
 import org.openecard.demo.R;
 import org.openecard.demo.activities.PINManagementActivity;
+
+import androidx.fragment.app.Fragment;
 
 
 public abstract class GenericInputFragment extends Fragment {

@@ -23,7 +23,6 @@
 package org.openecard.demo.fragments;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -37,6 +36,8 @@ import org.openecard.demo.R;
 import org.openecard.demo.activities.EACActivity;
 import org.openecard.demo.activities.PINManagementActivity;
 import org.openecard.mobile.activation.ConfirmPasswordOperation;
+
+import androidx.fragment.app.Fragment;
 
 
 public class PUKInputFragment extends Fragment {

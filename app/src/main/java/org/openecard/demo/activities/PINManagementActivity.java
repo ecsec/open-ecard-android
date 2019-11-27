@@ -26,12 +26,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
+import org.openecard.android.activation.AndroidContextManager;
 import org.openecard.android.activation.OpeneCard;
-import org.openecard.android.utils.NfcUtils;
+import org.openecard.android.utils.NfcIntentHelper;
 import org.openecard.demo.R;
 import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.PINChangeFragment;
-import org.openecard.demo.fragments.PINInputFragment;
 import org.openecard.demo.fragments.PUKInputFragment;
 import org.openecard.demo.fragments.UserInfoFragment;
 import org.openecard.mobile.activation.ActivationController;
@@ -41,8 +41,6 @@ import org.openecard.mobile.activation.ActivationSource;
 import org.openecard.mobile.activation.ConfirmOldSetNewPasswordOperation;
 import org.openecard.mobile.activation.ConfirmPasswordOperation;
 import org.openecard.mobile.activation.ConfirmPinCanNewPinOperation;
-import org.openecard.mobile.activation.ConfirmPinCanOperation;
-import org.openecard.mobile.activation.ContextManager;
 import org.openecard.mobile.activation.ControllerCallback;
 import org.openecard.mobile.activation.NFCOverlayMessageHandler;
 import org.openecard.mobile.activation.PinManagementControllerFactory;
@@ -54,8 +52,6 @@ import org.openecard.mobile.ex.NfcDisabled;
 import org.openecard.mobile.ex.NfcUnavailable;
 import org.openecard.mobile.ex.UnableToInitialize;
 import org.openecard.mobile.ui.PINManagementNavigator;
-import org.openecard.plugins.pinplugin.GetCardsAndPINStatusAction;
-import org.openecard.scio.NFCCardWatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,15 +59,17 @@ import java.io.IOException;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
-public class PINManagementActivity extends AppCompatActivity {
+public class PINManagementActivity extends FragmentActivity {
 
     private static final Logger LOG = LoggerFactory.getLogger(PINManagementActivity.class);
 	private View cancelBtn;
 
 	private ActivationController actController;
 	private OpeneCard oe;
-	private ContextManager context;
+	private AndroidContextManager context;
+	private NfcIntentHelper nfcIntentHelper;
 
 	private PinManagementControllerFactory pinMgmtFactory;
 	private boolean shouldTriggerNfc;
@@ -86,7 +84,7 @@ public class PINManagementActivity extends AppCompatActivity {
 	protected void onPause() {
 		LOG.info("Pausing.");
 		if (hasTriggeredNfcDispatch) {
-			NfcUtils.getInstance().disableNFCDispatch(this);
+			nfcIntentHelper.disableNFCDispatch();
 			hasTriggeredNfcDispatch = false;
 		}
 		super.onPause();
@@ -95,7 +93,7 @@ public class PINManagementActivity extends AppCompatActivity {
 	@Override
 	protected void onResume() {
 		if (shouldTriggerNfc) {
-			NfcUtils.getInstance().enableNFCDispatch(PINManagementActivity.this);
+			nfcIntentHelper.enableNFCDispatch();
 			hasTriggeredNfcDispatch = true;
 		}
 		super.onResume();
@@ -106,6 +104,8 @@ public class PINManagementActivity extends AppCompatActivity {
     	LOG.info("Creating");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_custom);
+
+        this.nfcIntentHelper = NfcIntentHelper.create(this);
 
         cancelBtn = findViewById(R.id.cancelBtn);
         cancelBtn.setOnClickListener(view -> {
@@ -164,7 +164,7 @@ public class PINManagementActivity extends AppCompatActivity {
 
 		// show ServerDataFragment
 		LOG.debug("Replace fragment with FailureFragment.");
-		getFragmentManager().beginTransaction()
+		getSupportFragmentManager().beginTransaction()
 				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 
 	}
@@ -176,7 +176,7 @@ public class PINManagementActivity extends AppCompatActivity {
 			fragment.setConfirmBtn(showConfirmBtn);
 			fragment.setSpinner(showSpinner);
 			fragment.setArguments(getIntent().getExtras());
-			getFragmentManager().beginTransaction()
+			getSupportFragmentManager().beginTransaction()
 					.replace(R.id.fragment, fragment).addToBackStack(null).commit();
 		}
 	}
@@ -185,7 +185,7 @@ public class PINManagementActivity extends AppCompatActivity {
 		LOG.info("On new intent.");
 		super.onNewIntent(intent);
 		try {
-			oe.onNewIntent(this, intent);
+			this.context.onNewIntent(intent);
 		} catch (ApduExtLengthNotSupported apduExtLengthNotSupported) {
 			LOG.error("Exception during start: {}", apduExtLengthNotSupported);
 		} catch (IOException e) {
@@ -230,7 +230,7 @@ public class PINManagementActivity extends AppCompatActivity {
 			fragment.setConfirmPasswordOperation(confirmOldSetNewPasswordOperation);
 			fragment.setAttempt(i);
 			// show PINInputFragment
-			getFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
+			getSupportFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 		}
 
 		@Override
@@ -241,7 +241,7 @@ public class PINManagementActivity extends AppCompatActivity {
 			fragment.setNeedCan(true);
 			fragment.setConfirmPinCanNewPinOperation(confirmPinCanNewPinOperation);
 			// show PINInputFragment
-			getFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
+			getSupportFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 		}
 
 		@Override
@@ -250,7 +250,7 @@ public class PINManagementActivity extends AppCompatActivity {
 			PUKInputFragment fragment = new PUKInputFragment();
 			fragment.setConfirmPasswordOperation(confirmPasswordOperation);
 			// show PINInputFragment
-			getFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
+			getSupportFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 		}
 
 		@Override
@@ -261,7 +261,7 @@ public class PINManagementActivity extends AppCompatActivity {
 				showUserInfoFragmentWithMessage("Please provide card",false, false);
 			});
 			shouldTriggerNfc = true;
-			NfcUtils.getInstance().enableNFCDispatch(PINManagementActivity.this);
+			nfcIntentHelper.enableNFCDispatch();
 			hasTriggeredNfcDispatch = true;
 		}
 

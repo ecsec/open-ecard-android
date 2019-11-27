@@ -27,11 +27,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Button;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentActivity;
 
 
 import org.openecard.demo.R;
-import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.RedirectFragment;
 import org.openecard.demo.fragments.URLInputFragment;
 import org.slf4j.Logger;
@@ -47,14 +46,14 @@ import java.net.URLEncoder;
  * @author Mike Prechtl
  * @author Sebastian Schuberth
  */
-public class UseCaseSelectorActivity extends AppCompatActivity {
+public class UseCaseSelectorActivity extends FragmentActivity {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UseCaseSelectorActivity.class);
 
-//	private static final String DEFAULT_TC_TOKEN_URL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_20&redirect=true";
-	//private static final String DEFAULT_TC_TOKEN_URL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_can&redirect=true";
+//	private static final String TEST_SERVICE_URL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_20&redirect=true";
+	//private static final String TEST_SERVICE_URL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_can&redirect=true";
 
-	private static final String DEFAULT_TC_TOKEN_URL = "https://service.dev.skidentity.de:443/tctoken";
+	private static final String TEST_SERVICE_URL = "https://service.dev.skidentity.de:443";
 
 	// indicates if activity stack is thrown away or not
     // because activation URL from outside can only be used once
@@ -98,19 +97,8 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 				pinManagement();
 			});
 		}
-	}
 
-	public void onUrlSelection(String url) {
-		try {
-			String encoded = URLEncoder.encode(url, "UTF-8");
 
-			clearActivityHistory = false;
-			activate(encoded);
-		} catch (UnsupportedEncodingException ex) {
-			String msg = "The character encoding is not supported!";
-			LOG.warn(msg, ex);
-			throw new RuntimeException(msg, ex);
-		}
 	}
 
 	private void activate(String url) {
@@ -142,15 +130,15 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 		fragment.setRedirectUrl(address.toString());
 		fragment.clearHistory(clearActivityHistory);
 
-		getFragmentManager().beginTransaction()
+		getSupportFragmentManager().beginTransaction()
 				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 	}
 
 	public void init() {
 		URLInputFragment fragment = new URLInputFragment();
-		fragment.setDefaultUrl(DEFAULT_TC_TOKEN_URL);
+		fragment.setDefaultUrl(TEST_SERVICE_URL);
 
-		getFragmentManager().beginTransaction()
+		getSupportFragmentManager().beginTransaction()
 				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 
 	}
@@ -161,13 +149,18 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 		finish();
 	}
 
-	private void showFailureFragment(String errorMessage) {
-		FailureFragment fragment = new FailureFragment();
-		fragment.setErrorMessage(errorMessage);
-		getFragmentManager().beginTransaction()
-				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
-	}
+	public void onUrlSelection(String url) {
+		try {
+			String encoded = URLEncoder.encode(url, "UTF-8");
 
+			clearActivityHistory = false;
+			activate(url);
+		} catch (UnsupportedEncodingException ex) {
+			String msg = "The character encoding is not supported!";
+			LOG.warn(msg, ex);
+			throw new RuntimeException(msg, ex);
+		}
+	}
 
 
 }

@@ -22,7 +22,6 @@
 
 package org.openecard.demo.fragments;
 
-import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,6 +39,8 @@ import org.openecard.mobile.activation.ServerData;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import androidx.fragment.app.Fragment;
 
 
 /**

@@ -27,8 +27,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import org.openecard.android.activation.AndroidContextManager;
 import org.openecard.android.activation.OpeneCard;
-import org.openecard.android.utils.NfcUtils;
+import org.openecard.android.utils.NfcIntentHelper;
 import org.openecard.demo.R;
 import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.PINInputFragment;
@@ -72,6 +73,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentActivity;
 
 
 /**
@@ -83,7 +85,7 @@ import androidx.appcompat.app.AppCompatActivity;
  * @author Tobias Wich
  * @author Florian Otto
  */
-public class EACActivity extends AppCompatActivity {
+public class EACActivity extends FragmentActivity {
 
 	private static final Logger LOG = LoggerFactory.getLogger(EACActivity.class);
 
@@ -91,10 +93,12 @@ public class EACActivity extends AppCompatActivity {
 	public static final String BUNDLE_TRANSACTION_INFO = "TransactionInfo";
 
 
+
 	private Button cancelBtn;
 	private OpeneCard oe;
+	private NfcIntentHelper intentHelper;
 	private ActivationController actController;
-	private ContextManager context;
+	private AndroidContextManager context;
 	private EacControllerFactory eacFactory;
 	private boolean shouldTriggerNfc = false;
 	private boolean hasTriggeredNfcDispatch = false;
@@ -169,6 +173,7 @@ public class EACActivity extends AppCompatActivity {
 	}
 
 	class EACInteractionImp implements EacInteraction {
+
 		@Override
 		public void onCanRequest(ConfirmPasswordOperation confirmPasswordOperation) {
 			LOG.debug("eacInteractionHandler::onCanRequest");
@@ -184,7 +189,7 @@ public class EACActivity extends AppCompatActivity {
 			fragment.setAttempt(i);
 			fragment.setConfirmPasswordOperation(confirmPasswordOperation);
 			// show PINInputFragment
-			getFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
+			getSupportFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 
 		}
 
@@ -196,7 +201,7 @@ public class EACActivity extends AppCompatActivity {
 			fragment.setNeedCan(true);
 			fragment.setConfirmTwoPasswordsOperation(confirmPinCanOperation);
 			// show PINInputFragment
-			getFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
+			getSupportFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 		}
 
 		@Override
@@ -222,7 +227,7 @@ public class EACActivity extends AppCompatActivity {
 			f.setArguments(bundle);
 			f.setServerDataFragment(confirmAttributeSelectionOperation);
 
-			getFragmentManager().beginTransaction().replace(R.id.fragment, f).addToBackStack(null).commitAllowingStateLoss();
+			getSupportFragmentManager().beginTransaction().replace(R.id.fragment, f).addToBackStack(null).commitAllowingStateLoss();
 			if (cancelBtn.getVisibility() != View.VISIBLE) {
 				runOnUiThread(() -> {
 					cancelBtn.setVisibility(View.VISIBLE);
@@ -248,7 +253,7 @@ public class EACActivity extends AppCompatActivity {
 				showUserInfoFragmentWithMessage("Please provide card",false, false);
 			});
 			shouldTriggerNfc = true;
-			NfcUtils.getInstance().enableNFCDispatch(EACActivity.this);
+			intentHelper.enableNFCDispatch();
 			hasTriggeredNfcDispatch = true;
 		}
 
@@ -286,7 +291,8 @@ public class EACActivity extends AppCompatActivity {
 				@Override
 				public void onSuccess(ActivationSource activationSource) {
 					eacFactory = activationSource.eacFactory();
-					String encodedURL = "http://localhost/eID-Client?tcTokenURL="+ String.valueOf(getIntent().getData());
+					String encodedURL = String.valueOf(getIntent().getData());
+					LOG.debug("URL IS: {}", encodedURL);
 					actController = eacFactory.create(encodedURL,new EACControllerCallback(), new EACInteractionImp());
 				}
 
@@ -350,7 +356,7 @@ public class EACActivity extends AppCompatActivity {
 	protected void onPause() {
 		LOG.info("Pausing.");
 		if (hasTriggeredNfcDispatch) {
-			NfcUtils.getInstance().disableNFCDispatch(this);
+			intentHelper.disableNFCDispatch();
 			hasTriggeredNfcDispatch = false;
 		}
 		super.onPause();
@@ -361,6 +367,7 @@ public class EACActivity extends AppCompatActivity {
 		LOG.info("Creating.");
 		super.onCreate(savedInstanceState);
 
+		this.intentHelper = NfcIntentHelper.create(this);
 		setContentView(R.layout.activity_custom);
 
 		cancelBtn = findViewById(R.id.cancelBtn);
@@ -386,7 +393,7 @@ public class EACActivity extends AppCompatActivity {
 			fragment.setConfirmBtn(showConfirmBtn);
 			fragment.setSpinner(showSpinner);
 			fragment.setArguments(getIntent().getExtras());
-			getFragmentManager().beginTransaction()
+			getSupportFragmentManager().beginTransaction()
 					.replace(R.id.fragment, fragment).addToBackStack(null).commit();
 		}
 	}
@@ -394,7 +401,7 @@ public class EACActivity extends AppCompatActivity {
 	@Override
 	protected void onResume() {
 		if (shouldTriggerNfc) {
-			NfcUtils.getInstance().enableNFCDispatch(EACActivity.this);
+			intentHelper.enableNFCDispatch();
 			hasTriggeredNfcDispatch = true;
 		}
 		super.onResume();
@@ -405,7 +412,7 @@ public class EACActivity extends AppCompatActivity {
 		LOG.info("On new intent.");
 		super.onNewIntent(intent);
 		try {
-			oe.onNewIntent(this, intent);
+			context.onNewIntent(intent);
 		} catch (ApduExtLengthNotSupported apduExtLengthNotSupported) {
 			LOG.error("Exception during start: {}", apduExtLengthNotSupported);
 		} catch (IOException e) {
@@ -426,7 +433,7 @@ public class EACActivity extends AppCompatActivity {
 
 		// show ServerDataFragment
 		LOG.debug("Replace fragment with FailureFragment.");
-		getFragmentManager().beginTransaction()
+		getSupportFragmentManager().beginTransaction()
 				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 	}
 
