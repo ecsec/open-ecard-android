@@ -34,6 +34,7 @@ import org.openecard.demo.R;
 import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.RedirectFragment;
 import org.openecard.demo.fragments.URLInputFragment;
+import org.openecard.demo.fragments.WebViewFragment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,6 +97,14 @@ public class UseCaseSelectorActivity extends AppCompatActivity {
 		if(btnPinMgmt!=null) {
 			btnPinMgmt.setOnClickListener(v -> {
 				pinManagement();
+			});
+		}
+
+		Button btnWebView = findViewById(R.id.btnWebView);
+		if(btnWebView != null){
+			btnWebView.setOnClickListener(v->{
+				WebViewFragment wvFragment = WebViewFragment.newInstance("hackzogtum-coburg.de");
+				getFragmentManager().beginTransaction().replace(R.id.fragment, wvFragment).addToBackStack(null).commitAllowingStateLoss();
 			});
 		}
 	}
