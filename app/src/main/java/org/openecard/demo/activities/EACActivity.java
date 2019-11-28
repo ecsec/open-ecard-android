@@ -61,6 +61,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -137,27 +138,38 @@ public class EACActivity extends FragmentActivity {
 		private void callURL(String redirectUrl) {
 			try {
 				URL url = new URL(redirectUrl);
-				HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+				try{
+					HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+					SSLContext sc = SSLContext.getInstance("SSL");
+					sc.init(null, new TrustManager[]{
+							new X509TrustManager() {
+								public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+									return null;
+								}
 
-				SSLContext sc = SSLContext.getInstance("SSL");
-				sc.init(null, new TrustManager[]{
-					new X509TrustManager() {
-          				public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-          				 return null;
-          				}
-          				@Override
-          				public void checkClientTrusted(X509Certificate[] arg0, String arg1)
-          				 throws CertificateException {}
+								@Override
+								public void checkClientTrusted(X509Certificate[] arg0, String arg1)
+										throws CertificateException {
+								}
 
-          				@Override
-          				public void checkServerTrusted(X509Certificate[] arg0, String arg1)
-          				  throws CertificateException {}
-          				}
-				}, new SecureRandom());
+								@Override
+								public void checkServerTrusted(X509Certificate[] arg0, String arg1)
+										throws CertificateException {
+								}
+							}
+					}, new SecureRandom());
 
-				con.setSSLSocketFactory(sc.getSocketFactory());
-				int t = con.getInputStream().read();
-				LOG.debug("{}",t);
+					con.setSSLSocketFactory(sc.getSocketFactory());
+					int t = con.getInputStream().read();
+					LOG.debug("{}", t);
+
+				}catch (ClassCastException e){
+
+					URLConnection con = url.openConnection();
+					int t = con.getInputStream().read();
+					LOG.debug("{}", t);
+
+				}
 
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
