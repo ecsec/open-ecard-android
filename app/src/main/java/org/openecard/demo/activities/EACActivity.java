@@ -193,6 +193,11 @@ public class EACActivity extends FragmentActivity {
 		}
 
 		@Override
+		public void onPinRequest(ConfirmPasswordOperation confirmPasswordOperation) {
+			onPinRequest(-1, confirmPasswordOperation);
+		}
+
+		@Override
 		public void onPinRequest(int i, ConfirmPasswordOperation confirmPasswordOperation) {
 			LOG.debug("eacInteractionHandler::onPinRequest");
 //			confirmPasswordOperation.enter("123123");
