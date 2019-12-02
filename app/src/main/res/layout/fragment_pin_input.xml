@@ -9,7 +9,7 @@
 
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="294dp"
         android:layout_gravity="center_vertical|center_horizontal"
         android:orientation="vertical"
         app:layout_anchorGravity="center_vertical|center_horizontal">
@@ -20,40 +20,57 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|center_horizontal"
             android:text="PIN Input: "
-            app:layout_anchorGravity="center_vertical|center_horizontal"/>
+            app:layout_anchorGravity="center_vertical|center_horizontal" />
 
         <EditText
             android:id="@+id/pinInput"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ems="15"
-            android:hint="PIN"
             android:gravity="center"
-            android:inputType="numberPassword"/>
+            android:hint="PIN"
+            android:inputType="numberPassword" />
 
         <EditText
             android:id="@+id/canInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="15"
-            android:hint="CAN"
             android:gravity="center"
-            android:inputType="numberPassword"/>
+            android:hint="CAN"
+            android:inputType="numberPassword" />
 
         <Button
             android:id="@+id/btnPINInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:text="Continue"/>
+            android:text="Continue" />
 
         <TextView
             android:id="@+id/txtLog"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="91dp"
+            android:layout_height="36dp"
             android:layout_gravity="center_vertical|center_horizontal"
             android:layout_marginTop="15dp"
-            app:layout_anchorGravity="center_vertical|center_horizontal"/>
+            app:layout_anchorGravity="center_vertical|center_horizontal" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Remaining attempts" />
+
+        <EditText
+            android:id="@+id/tf_attempts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:editable="false"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:singleLine="true"
+            android:text="unkown"
+            android:textAlignment="center" />
 
     </LinearLayout>
 

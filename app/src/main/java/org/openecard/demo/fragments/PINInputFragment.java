@@ -34,8 +34,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import org.openecard.demo.R;
-import org.openecard.demo.activities.EACActivity;
-import org.openecard.demo.activities.PINManagementActivity;
 import org.openecard.mobile.activation.ConfirmPasswordOperation;
 import org.openecard.mobile.activation.ConfirmPinCanOperation;
 
@@ -79,7 +77,9 @@ public class PINInputFragment extends Fragment {
 		logLabel.setVisibility(View.INVISIBLE);
 
 		final TextView titleLabel = view.findViewById(R.id.pinInputTxtView);
-
+		final TextView attemptsField = view.findViewById(R.id.tf_attempts);
+		attemptsField.setText(this.attempt >= 0 ? this.attempt+"" : "unknown");
+		
 		final EditText pinText = view.findViewById(R.id.pinInput);
 		pinText.setEnabled(true);
 		pinText.setFocusable(true);
