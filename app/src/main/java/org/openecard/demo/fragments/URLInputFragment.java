@@ -22,7 +22,6 @@
 
 package org.openecard.demo.fragments;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -30,7 +29,6 @@ import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 
@@ -39,13 +37,8 @@ import org.openecard.demo.activities.UseCaseSelectorActivity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 import androidx.fragment.app.Fragment;
 
@@ -57,47 +50,58 @@ public class URLInputFragment extends Fragment {
 
     private static final Logger LOG = LoggerFactory.getLogger(URLInputFragment.class);
 
-	private String defaultUrl;
+	private String defaultDirectUrl;
+	private String defaultTestServerUrl;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		final View view = inflater.inflate(R.layout.fragment_url_input, container, false);
 
-		final AutoCompleteTextView urlInput = view.findViewById(R.id.edt);
+		final AutoCompleteTextView testServerUrlInput = view.findViewById(R.id.testServiceURL);
 		Button btnWebView = view.findViewById(R.id.btnWebView);
-		btnWebView.setEnabled(false);
 
-		urlInput.addTextChangedListener(new TextWatcher() {
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				btnWebView.setEnabled(isValidUrl(s.toString()));
-			}
-
-			@Override
-			public void afterTextChanged(Editable s) { }
-		});
-
-		if (defaultUrl != null) {
-			urlInput.setText(defaultUrl);
+		if (defaultTestServerUrl!= null) {
+			testServerUrlInput.setText(defaultTestServerUrl);
 		}
 
 		if(btnWebView != null){
 			btnWebView.setOnClickListener(v->{
-				String url = urlInput.getText().toString();
+				String url = testServerUrlInput.getText().toString();
 				WebViewFragment wvFragment = WebViewFragment.newInstance(url);
 				getFragmentManager().beginTransaction().replace(R.id.fragment, wvFragment).addToBackStack(null).commitAllowingStateLoss();
 			});
 		}
 
+		final AutoCompleteTextView directUrlInput = view.findViewById(R.id.directURL);
+		Button directEAC = view.findViewById(R.id.directEAC);
+
+		if (defaultDirectUrl!= null) {
+			directUrlInput.setText(defaultDirectUrl);
+		}
+
+		if(directEAC!= null){
+			directEAC.setOnClickListener(v->{
+				String url = null;
+				try {
+					url = "http://localhost/eID-Client?tcTokenURL="+ URLEncoder.encode(directUrlInput.getText().toString(), "UTF-8");
+					((UseCaseSelectorActivity)getActivity()).onUrlSelection(url);
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
+			});
+		}
+
 		return view;
 	}
-
-	public void setDefaultUrl(String url) {
+	public void setDefaultDirectUrl(String url) {
 		if (isValidUrl(url)) {
-			defaultUrl = url;
+			defaultDirectUrl = url;
+		}
+	}
+
+	public void setDefaultTestServerUrl(String url) {
+		if (isValidUrl(url)) {
+			defaultTestServerUrl = url;
 		}
 	}
 

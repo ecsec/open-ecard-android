@@ -54,6 +54,7 @@ public class UseCaseSelectorActivity extends FragmentActivity {
 	//private static final String TEST_SERVICE_URL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_can&redirect=true";
 
 	private static final String TEST_SERVICE_URL = "https://service.dev.skidentity.de:443";
+	private static final String DIRECT_ACTIVATION_URL = "https://service.dev.skidentity.de:443/tctoken";
 
 	// indicates if activity stack is thrown away or not
     // because activation URL from outside can only be used once
@@ -136,7 +137,8 @@ public class UseCaseSelectorActivity extends FragmentActivity {
 
 	public void init() {
 		URLInputFragment fragment = new URLInputFragment();
-		fragment.setDefaultUrl(TEST_SERVICE_URL);
+		fragment.setDefaultTestServerUrl(TEST_SERVICE_URL);
+		fragment.setDefaultDirectUrl(DIRECT_ACTIVATION_URL);
 
 		getSupportFragmentManager().beginTransaction()
 				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();

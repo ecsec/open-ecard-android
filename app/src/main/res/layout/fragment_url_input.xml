@@ -11,51 +11,72 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/linearLayout2"
         android:layout_width="wrap_content"
-        android:layout_height="276dp"
+        android:layout_height="510dp"
         android:layout_gravity="center_vertical|center_horizontal"
-        app:layout_anchorGravity="center_vertical|center_horizontal">
+        app:layout_anchorGravity="center_vertical|center_horizontal"
+        tools:layout_editor_absoluteX="46dp"
+        tools:layout_editor_absoluteY="110dp">
 
         <TextView
             android:id="@+id/pinInputTxtView"
-            android:layout_width="0dp"
+            android:layout_width="320dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="56dp"
             android:text="TestServiceURL: "
             android:textSize="18sp"
             app:layout_anchorGravity="center_vertical|center_horizontal"
-            app:layout_constraintBottom_toTopOf="@+id/edt"
-            app:layout_constraintEnd_toEndOf="@+id/edt"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/edt"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.286" />
+            app:layout_constraintTop_toBottomOf="@+id/directEAC"
+            tools:layout_editor_absoluteX="0dp" />
 
         <AutoCompleteTextView
-            android:id="@+id/edt"
+            android:id="@+id/testServiceURL"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="17dp"
             android:ems="15"
             android:inputType="textWebEmailAddress"
-            tools:layout_editor_absoluteX="0dp"
-            tools:layout_editor_absoluteY="61dp" />
+            app:layout_constraintTop_toBottomOf="@+id/pinInputTxtView"
+            tools:layout_editor_absoluteX="0dp" />
+
+        <AutoCompleteTextView
+            android:id="@+id/directURL"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:ems="15"
+            android:inputType="textWebEmailAddress"
+            app:layout_constraintTop_toBottomOf="@+id/pinInputTxtView2"
+            tools:layout_editor_absoluteX="0dp" />
 
         <Button
             android:id="@+id/btnWebView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="52dp"
-            android:text="EAC"
-            app:layout_constraintEnd_toEndOf="@+id/edt"
+            android:text="EAC with Test server"
+            app:layout_constraintEnd_toEndOf="@+id/testServiceURL"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/edt"
-            app:layout_constraintTop_toBottomOf="@+id/edt" />
+            app:layout_constraintStart_toStartOf="@+id/testServiceURL"
+            app:layout_constraintTop_toBottomOf="@+id/testServiceURL" />
+
+        <Button
+            android:id="@+id/directEAC"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="EAC with direct url"
+            app:layout_constraintEnd_toEndOf="@+id/testServiceURL"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/testServiceURL"
+            app:layout_constraintTop_toBottomOf="@+id/directURL" />
 
         <Button
             android:id="@+id/btnPinManagement"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="36dp"
             android:text="PIN Management"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/btnWebView" />
 
@@ -69,6 +90,17 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/pinInputTxtView" />
+
+        <TextView
+            android:id="@+id/pinInputTxtView2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="DirectActivationURL: "
+            android:textSize="18sp"
+            app:layout_anchorGravity="center_vertical|center_horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
