@@ -101,7 +101,8 @@ public class EACActivity extends FragmentActivity {
 				LOG.debug("onAuthenticationSuccess Result={}", activationResult.getResultCode());
 				LOG.debug("onAuthenticationSuccess ResultMinor={}", activationResult.getProcessResultMinor());
 
-				if(!activationResult.getRedirectUrl().isEmpty()) {
+
+				if(activationResult.getRedirectUrl() != null && !activationResult.getRedirectUrl().isEmpty()) {
 					String url = activationResult.getRedirectUrl();
 
 					WebViewFragment wvFragment = WebViewFragment.newInstance(url);
