@@ -51,16 +51,6 @@ public class WebViewFragment extends Fragment {
 		wv = v.findViewById(R.id.wbViewID);
 
 
-		Button btn  = v.findViewById(R.id.btnWebViewCancel);
-		btn.setOnClickListener(__->{
-			Activity activity = getActivity();
-
-			Intent intent = new Intent(activity, UseCaseSelectorActivity.class);
-			int flag = Intent.FLAG_ACTIVITY_CLEAR_TOP;
-			intent.setFlags(flag);
-			startActivity(intent);
-			activity.finish();
-		});
 
 
 		wv.setWebViewClient(new WebViewClient(){

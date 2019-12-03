@@ -106,6 +106,7 @@ public class EACActivity extends FragmentActivity {
 
 					WebViewFragment wvFragment = WebViewFragment.newInstance(url);
 					getSupportFragmentManager().beginTransaction().replace(R.id.fragment, wvFragment).addToBackStack(null).commitAllowingStateLoss();
+
 				}
 
 			}

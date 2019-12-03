@@ -68,8 +68,22 @@ public class UseCaseSelectorActivity extends FragmentActivity {
 		if(btnWebView != null){
 			btnWebView.setOnClickListener(v->{
 				String url = testServerUrlInput.getText().toString();
+				setContentView(R.layout.activity_custom);
 				WebViewFragment wvFragment = WebViewFragment.newInstance(url);
 				getSupportFragmentManager().beginTransaction().replace(R.id.fragment, wvFragment).addToBackStack(null).commitAllowingStateLoss();
+
+				Button btn  = findViewById(R.id.cancelBtn);
+				if(btn != null) {
+					btn.setOnClickListener(__ -> {
+
+						Intent intent = new Intent(this, UseCaseSelectorActivity.class);
+						int flag = Intent.FLAG_ACTIVITY_CLEAR_TOP;
+						intent.setFlags(flag);
+						startActivity(intent);
+						this.finish();
+					});
+				}
+
 			});
 		}
 
