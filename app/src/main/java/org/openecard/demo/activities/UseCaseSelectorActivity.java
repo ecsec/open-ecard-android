@@ -50,14 +50,11 @@ public class UseCaseSelectorActivity extends FragmentActivity {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UseCaseSelectorActivity.class);
 
-//	private static final String TEST_SERVICE_URL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_20&redirect=true";
-	//private static final String TEST_SERVICE_URL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_can&redirect=true";
+	private static final String DIRECT_ACTIVATION_URL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_20&redirect=true";
+	private static final String TEST_SERVICE_URL = "https://eid.mtg.de/eid-server-demo-app/index.html";
 
-	private static final String TEST_SERVICE_URL = "https://service.dev.skidentity.de:443";
-	private static final String DIRECT_ACTIVATION_URL = "https://service.dev.skidentity.de:443/tctoken";
-
-	// indicates if activity stack is thrown away or not
-    // because activation URL from outside can only be used once
+	//indicates if activity stack is thrown away or not
+    //because activation URL from outside can only be used once
 	private static boolean clearActivityHistory = false;
 
 	@Override
