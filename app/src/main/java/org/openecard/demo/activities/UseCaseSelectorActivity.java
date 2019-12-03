@@ -82,16 +82,7 @@ public class UseCaseSelectorActivity extends FragmentActivity {
 		}
 	}
 
-	public void activate(String url) {
-        LOG.debug("Activation URL: {}", url);
 
-		Intent i = new Intent(Intent.ACTION_VIEW);
-		i.setClass(UseCaseSelectorActivity.this, EACActivity.class);
-		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		i.setData(Uri.parse(url));
-
-		startActivity(i);
-	}
 
 	public void initEACURLInputFragmet() {
 		URLInputFragment fragment = new URLInputFragment();

@@ -22,6 +22,8 @@
 
 package org.openecard.demo.fragments;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.view.LayoutInflater;
@@ -31,7 +33,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 
 import org.openecard.demo.R;
-import org.openecard.demo.activities.UseCaseSelectorActivity;
+import org.openecard.demo.activities.EACActivity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,10 +81,9 @@ public class URLInputFragment extends Fragment {
 
 		if(directEAC!= null){
 			directEAC.setOnClickListener(v->{
-				String url = null;
 				try {
-					url = "http://localhost/eID-Client?tcTokenURL="+ URLEncoder.encode(directUrlInput.getText().toString(), "UTF-8");
-					((UseCaseSelectorActivity)getActivity()).activate(url);
+					String url = "http://localhost/eID-Client?tcTokenURL="+ URLEncoder.encode(directUrlInput.getText().toString(), "UTF-8");
+					performEACWithURL(url);
 				} catch (UnsupportedEncodingException e) {
 					e.printStackTrace();
 				}
@@ -90,6 +91,17 @@ public class URLInputFragment extends Fragment {
 		}
 
 		return view;
+	}
+
+	public void performEACWithURL(String url) {
+		LOG.debug("Activation URL: {}", url);
+
+		Intent i = new Intent(Intent.ACTION_VIEW);
+		i.setClass(getActivity(), EACActivity.class);
+		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		i.setData(Uri.parse(url));
+
+		startActivity(i);
 	}
 	public void setDefaultDirectUrl(String url) {
 		if (isValidUrl(url)) {
