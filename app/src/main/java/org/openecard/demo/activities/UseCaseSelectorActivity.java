@@ -65,24 +65,9 @@ public class UseCaseSelectorActivity extends FragmentActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_use_case_selector);
 
+		initEACURLInputFragmet();
+		registerPinMgmtHandler();
 
-		if (findViewById(R.id.fragment) != null) {
-			Intent intent = getIntent();
-			Uri intentUri = intent.getData();
-
-			if(intentUri != null) {
-				if((intentUri.getHost().equals("localhost") || intentUri.getHost().equals("127.0.0.1"))
-						&& intentUri.getPort() == 24727) {
-					clearActivityHistory = true;
-					activate(intentUri.toString());
-				} else {
-					showRedirectAddress(intentUri);
-				}
-			} else {
-				initEACURLInputFragmet();
-				registerPinMgmtHandler();
-			}
-		}
 	}
 
 	private void registerPinMgmtHandler(){
@@ -106,16 +91,6 @@ public class UseCaseSelectorActivity extends FragmentActivity {
 		i.setData(Uri.parse(url));
 
 		startActivity(i);
-	}
-
-
-	private void showRedirectAddress(Uri address) {
-		RedirectFragment fragment = new RedirectFragment();
-		fragment.setRedirectUrl(address.toString());
-		fragment.clearHistory(clearActivityHistory);
-
-		getSupportFragmentManager().beginTransaction()
-				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 	}
 
 	public void initEACURLInputFragmet() {
