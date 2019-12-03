@@ -94,8 +94,6 @@ public class EACActivity extends FragmentActivity {
 	public static final String BUNDLE_SERVER_DATA = "ServerData";
 	public static final String BUNDLE_TRANSACTION_INFO = "TransactionInfo";
 
-
-
 	private Button cancelBtn;
 	private OpeneCard oe;
 	private NfcIntentHelper intentHelper;
@@ -125,70 +123,7 @@ public class EACActivity extends FragmentActivity {
 					getSupportFragmentManager().beginTransaction().replace(R.id.fragment, wvFragment).addToBackStack(null).commitAllowingStateLoss();
 				}
 
-//				if(activationResult.getResultCode()== ActivationResultCode.OK) {
-//					showUserInfoFragmentWithMessage("Success", true, false);
-//				}
-//				else if (activationResult.getResultCode() == ActivationResultCode.REDIRECT) {
-//					if (activationResult.getRedirectUrl().contains("ResultMajor=error")) {
-//						showUserInfoFragmentWithMessage("Fail with redirect - " + activationResult.getRedirectUrl(), true, false);
-//						callURL(activationResult.getRedirectUrl());
-//
-//					} else {
-//						showUserInfoFragmentWithMessage("Success with redirect - " + activationResult.getRedirectUrl() , true, false);
-//					}
-//
-//				}else{
-//					showUserInfoFragmentWithMessage("Fail - " + activationResult.getResultCode().toString(), true, false);
-//				}
 			}
-		}
-
-		private void callURL(String redirectUrl) {
-			try {
-				URL url = new URL(redirectUrl);
-				try{
-					HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-					SSLContext sc = SSLContext.getInstance("SSL");
-					sc.init(null, new TrustManager[]{
-							new X509TrustManager() {
-								public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-									return null;
-								}
-
-								@Override
-								public void checkClientTrusted(X509Certificate[] arg0, String arg1)
-										throws CertificateException {
-								}
-
-								@Override
-								public void checkServerTrusted(X509Certificate[] arg0, String arg1)
-										throws CertificateException {
-								}
-							}
-					}, new SecureRandom());
-
-					con.setSSLSocketFactory(sc.getSocketFactory());
-					int t = con.getInputStream().read();
-					LOG.debug("{}", t);
-
-				}catch (ClassCastException e){
-
-					URLConnection con = url.openConnection();
-					int t = con.getInputStream().read();
-					LOG.debug("{}", t);
-
-				}
-
-			} catch (MalformedURLException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (NoSuchAlgorithmException e) {
-				e.printStackTrace();
-			} catch (KeyManagementException e) {
-				e.printStackTrace();
-			}
-
 		}
 	}
 
@@ -208,12 +143,10 @@ public class EACActivity extends FragmentActivity {
 		@Override
 		public void onPinRequest(int i, ConfirmPasswordOperation confirmPasswordOperation) {
 			LOG.debug("eacInteractionHandler::onPinRequest");
-//			confirmPasswordOperation.enter("123123");
 			PINInputFragment fragment = new PINInputFragment();
 			fragment.setNeedCan(false);
 			fragment.setAttempt(i);
 			fragment.setConfirmPasswordOperation(confirmPasswordOperation);
-			// show PINInputFragment
 			getSupportFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 
 		}
