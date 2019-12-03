@@ -71,7 +71,7 @@ public class WebViewFragment extends Fragment {
 			public boolean shouldOverrideUrlLoading(WebView view, String url){
 				System.out.println("URLS: " + url);
 				if(url.contains("127.0.0.1") || url.contains("localhost")) {
-					((UseCaseSelectorActivity)getActivity()).onUrlSelection(url);
+					((UseCaseSelectorActivity)getActivity()).activate(url);
 					return true;
 				}
 				else{

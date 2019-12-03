@@ -23,8 +23,6 @@
 package org.openecard.demo.fragments;
 
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -84,7 +82,7 @@ public class URLInputFragment extends Fragment {
 				String url = null;
 				try {
 					url = "http://localhost/eID-Client?tcTokenURL="+ URLEncoder.encode(directUrlInput.getText().toString(), "UTF-8");
-					((UseCaseSelectorActivity)getActivity()).onUrlSelection(url);
+					((UseCaseSelectorActivity)getActivity()).activate(url);
 				} catch (UnsupportedEncodingException e) {
 					e.printStackTrace();
 				}

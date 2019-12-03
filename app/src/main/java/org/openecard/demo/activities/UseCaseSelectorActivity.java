@@ -36,9 +36,6 @@ import org.openecard.demo.fragments.URLInputFragment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
 
 /**
  * Activity which provides an UI to choose what the next step would be, e.g. example authentication or PIN management.
@@ -82,46 +79,35 @@ public class UseCaseSelectorActivity extends FragmentActivity {
 					showRedirectAddress(intentUri);
 				}
 			} else {
-				init();
+				initEACURLInputFragmet();
+				registerPinMgmtHandler();
 			}
 		}
 	}
 
-	public void onStart() {
-		super.onStart();
+	private void registerPinMgmtHandler(){
 		Button btnPinMgmt = findViewById(R.id.btnPinManagement);
 		if(btnPinMgmt!=null) {
 			btnPinMgmt.setOnClickListener(v -> {
-				pinManagement();
+				Intent i = new Intent(Intent.ACTION_VIEW);
+				i.setClass(UseCaseSelectorActivity.this, PINManagementActivity.class);
+				i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				startActivity(i);
 			});
 		}
-
-
 	}
 
-	private void activate(String url) {
+	public void activate(String url) {
         LOG.debug("Activation URL: {}", url);
 
-		// perform explicit URL Intent to the Activation Activity
 		Intent i = new Intent(Intent.ACTION_VIEW);
 		i.setClass(UseCaseSelectorActivity.this, EACActivity.class);
 		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		i.setData(Uri.parse(url));
 
-		// add class name for explicit redirect Intent
-//)		i.putExtra(EACActivity.class.getName() , UseCaseSelectorActivity.class.getName());
 		startActivity(i);
 	}
 
-	private void pinManagement(){
-		LOG.debug("Activating pin management.");
-
-		Intent i = new Intent(Intent.ACTION_VIEW);
-		i.setClass(UseCaseSelectorActivity.this, PINManagementActivity.class);
-		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		startActivity(i);
-
-	}
 
 	private void showRedirectAddress(Uri address) {
 		RedirectFragment fragment = new RedirectFragment();
@@ -132,7 +118,7 @@ public class UseCaseSelectorActivity extends FragmentActivity {
 				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 	}
 
-	public void init() {
+	public void initEACURLInputFragmet() {
 		URLInputFragment fragment = new URLInputFragment();
 		fragment.setDefaultTestServerUrl(TEST_SERVICE_URL);
 		fragment.setDefaultDirectUrl(DIRECT_ACTIVATION_URL);
@@ -146,19 +132,6 @@ public class UseCaseSelectorActivity extends FragmentActivity {
 		Intent intent = new Intent(UseCaseSelectorActivity.this, UseCaseSelectorActivity.class);
 		startActivity(intent);
 		finish();
-	}
-
-	public void onUrlSelection(String url) {
-		try {
-			String encoded = URLEncoder.encode(url, "UTF-8");
-
-			clearActivityHistory = false;
-			activate(url);
-		} catch (UnsupportedEncodingException ex) {
-			String msg = "The character encoding is not supported!";
-			LOG.warn(msg, ex);
-			throw new RuntimeException(msg, ex);
-		}
 	}
 
 
