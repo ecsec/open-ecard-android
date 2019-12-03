@@ -35,6 +35,7 @@ import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.PINInputFragment;
 import org.openecard.demo.fragments.ServerDataFragment;
 import org.openecard.demo.fragments.UserInfoFragment;
+import org.openecard.demo.fragments.WebViewFragment;
 import org.openecard.mobile.activation.ActivationController;
 import org.openecard.mobile.activation.ActivationResult;
 import org.openecard.mobile.activation.ActivationResultCode;
@@ -117,21 +118,28 @@ public class EACActivity extends FragmentActivity {
 				LOG.debug("onAuthenticationSuccess Result={}", activationResult.getResultCode());
 				LOG.debug("onAuthenticationSuccess ResultMinor={}", activationResult.getProcessResultMinor());
 
-				if(activationResult.getResultCode()== ActivationResultCode.OK) {
-					showUserInfoFragmentWithMessage("Success", true, false);
-				}
-				else if (activationResult.getResultCode() == ActivationResultCode.REDIRECT) {
-					if (activationResult.getRedirectUrl().contains("ResultMajor=error")) {
-						showUserInfoFragmentWithMessage("Fail with redirect - " + activationResult.getRedirectUrl(), true, false);
-						callURL(activationResult.getRedirectUrl());
+				if(!activationResult.getRedirectUrl().isEmpty()) {
+					String url = activationResult.getRedirectUrl();
 
-					} else {
-						showUserInfoFragmentWithMessage("Success with redirect - " + activationResult.getRedirectUrl() , true, false);
-					}
-
-				}else{
-					showUserInfoFragmentWithMessage("Fail - " + activationResult.getResultCode().toString(), true, false);
+					WebViewFragment wvFragment = WebViewFragment.newInstance(url);
+					getSupportFragmentManager().beginTransaction().replace(R.id.fragment, wvFragment).addToBackStack(null).commitAllowingStateLoss();
 				}
+
+//				if(activationResult.getResultCode()== ActivationResultCode.OK) {
+//					showUserInfoFragmentWithMessage("Success", true, false);
+//				}
+//				else if (activationResult.getResultCode() == ActivationResultCode.REDIRECT) {
+//					if (activationResult.getRedirectUrl().contains("ResultMajor=error")) {
+//						showUserInfoFragmentWithMessage("Fail with redirect - " + activationResult.getRedirectUrl(), true, false);
+//						callURL(activationResult.getRedirectUrl());
+//
+//					} else {
+//						showUserInfoFragmentWithMessage("Success with redirect - " + activationResult.getRedirectUrl() , true, false);
+//					}
+//
+//				}else{
+//					showUserInfoFragmentWithMessage("Fail - " + activationResult.getResultCode().toString(), true, false);
+//				}
 			}
 		}
 
