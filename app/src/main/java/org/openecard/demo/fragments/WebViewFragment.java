@@ -22,12 +22,12 @@ import androidx.fragment.app.Fragment;
 
 
 public class WebViewFragment extends Fragment {
-	private static final Logger LOG = LoggerFactory.getLogger(URLInputFragment.class);
+	private static final Logger LOG = LoggerFactory.getLogger(WebViewFragment.class);
 
 	private WebView wv;
 	private String URL;
 
-	public WebViewFragment() {
+	private WebViewFragment() {
 	}
 
 	public static WebViewFragment newInstance(String url) {
