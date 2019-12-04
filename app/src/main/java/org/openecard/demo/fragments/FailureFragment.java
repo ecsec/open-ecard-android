@@ -57,7 +57,7 @@ public class FailureFragment extends Fragment {
 		button.setOnClickListener(v -> {
 			Activity activity = getActivity();
 			Intent intent = new Intent(activity, UseCaseSelectorActivity.class);
-			intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 			activity.finish();
 		});
