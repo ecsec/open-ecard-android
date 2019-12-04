@@ -25,7 +25,6 @@ package org.openecard.demo.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-
 import org.openecard.android.activation.AndroidContextManager;
 import org.openecard.android.activation.OpeneCard;
 import org.openecard.android.utils.NfcIntentHelper;
@@ -54,11 +53,7 @@ import org.openecard.mobile.ex.UnableToInitialize;
 import org.openecard.mobile.ui.PINManagementNavigator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 public class PINManagementActivity extends FragmentActivity {
@@ -197,10 +192,7 @@ public class PINManagementActivity extends FragmentActivity {
 	}
 	private class PINMgmtControllerCallback implements ControllerCallback {
 		@Override
-		public void onStarted() {
-			LOG.debug("onStarted");
-
-		}
+		public void onStarted() { LOG.debug("onStarted"); }
 
 		@Override
 		public void onAuthenticationCompletion(ActivationResult activationResult) {
@@ -273,12 +265,6 @@ public class PINManagementActivity extends FragmentActivity {
 		}
 
 		@Override
-		public void onCardInteractionComplete() {
-			LOG.debug("onCardInteractionComplete");
-
-		}
-
-		@Override
 		public void onCardRecognized() {
 			LOG.info("Card inserted.");
 			runOnUiThread(() -> {
@@ -290,20 +276,14 @@ public class PINManagementActivity extends FragmentActivity {
 		public void onCardRemoved() {
 			LOG.debug("onCardRemoved");
 		}
-
+		@Override
+		public void onCardInteractionComplete() { LOG.debug("onCardInteractionComplete"); }
 		@Override
 		public void onCardDeactivated(){
 			LOG.debug("onCardDeactivated");
 		}
 		@Override
-		public void onCardPukBlocked() {
-			LOG.debug("onCardPUKBlocked");
-
-		}
-
+		public void onCardPukBlocked() { LOG.debug("onCardPUKBlocked");	}
 	}
-
-
-
 
 }
