@@ -117,12 +117,6 @@ public class EACActivity extends FragmentActivity {
 	class EACInteractionImp implements EacInteraction {
 
 		@Override
-		public void onCanRequest(ConfirmPasswordOperation confirmPasswordOperation) {
-			LOG.debug("eacInteractionHandler::onCanRequest");
-
-		}
-
-		@Override
 		public void onPinRequest(ConfirmPasswordOperation confirmPasswordOperation) {
 			onPinRequest(-1, confirmPasswordOperation);
 		}
@@ -149,15 +143,6 @@ public class EACActivity extends FragmentActivity {
 			getSupportFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 		}
 
-		@Override
-		public void onCardBlocked() {
-			LOG.debug("eacInteractionHandler::onCardBlocked");
-		}
-
-		@Override
-		public void onCardDeactivated() {
-			LOG.debug("eacInteractionHandler::onCardDeactivated");
-		}
 
 		@Override
 		public void onServerData(ServerData serverData, String s, ConfirmAttributeSelectionOperation confirmAttributeSelectionOperation) {
@@ -182,16 +167,6 @@ public class EACActivity extends FragmentActivity {
 		}
 
 		@Override
-		public void onCardInteractionComplete() {
-			LOG.debug("eacInteractionHandler::onInteractionComplete");
-		}
-
-		@Override
-		public void onCardAuthenticationSuccessful() {
-			LOG.debug("eacInteractionHandler::onInteractionComplete");
-		}
-
-		@Override
 		public void requestCardInsertion() {
 			LOG.debug("eacInteractionHandler::requestCardInsertion");
 			runOnUiThread(() -> {
@@ -203,11 +178,6 @@ public class EACActivity extends FragmentActivity {
 		}
 
 		@Override
-		public void requestCardInsertion(NFCOverlayMessageHandler nfcOverlayMessageHandler) {
-			LOG.debug("requestCardInsertion");
-		}
-
-		@Override
 		public void onCardRecognized() {
 			LOG.info("Card inserted.");
 			runOnUiThread(() -> {
@@ -216,9 +186,39 @@ public class EACActivity extends FragmentActivity {
 		}
 
 		@Override
+		public void requestCardInsertion(NFCOverlayMessageHandler nfcOverlayMessageHandler) {
+			LOG.debug("requestCardInsertion");
+		}
+
+		@Override
 		public void onCardRemoved() {
 			LOG.debug("eacInteractionHandler::onCardRemoved");
 		}
+
+		@Override
+		public void onCardBlocked() {
+			LOG.debug("eacInteractionHandler::onCardBlocked");
+		}
+
+		@Override
+		public void onCardDeactivated() {
+			LOG.debug("eacInteractionHandler::onCardDeactivated");
+		}
+
+		@Override
+		public void onCanRequest(ConfirmPasswordOperation confirmPasswordOperation) {
+			LOG.debug("eacInteractionHandler::onCanRequest");
+		}
+		@Override
+		public void onCardInteractionComplete() {
+			LOG.debug("eacInteractionHandler::onInteractionComplete");
+		}
+
+		@Override
+		public void onCardAuthenticationSuccessful() {
+			LOG.debug("eacInteractionHandler::onInteractionComplete");
+		}
+
 	}
 
 	@Override
@@ -376,7 +376,6 @@ public class EACActivity extends FragmentActivity {
 			cancelBtn.setVisibility(View.INVISIBLE);
 		});
 
-		// show ServerDataFragment
 		LOG.debug("Replace fragment with FailureFragment.");
 		getSupportFragmentManager().beginTransaction()
 				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
