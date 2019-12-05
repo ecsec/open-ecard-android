@@ -22,6 +22,7 @@
 
 package org.openecard.demo.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -108,9 +109,13 @@ public class EACActivity extends FragmentActivity {
 					WebViewFragment wvFragment = WebViewFragment.newInstance(url);
 					getSupportFragmentManager().beginTransaction().replace(R.id.fragment, wvFragment).addToBackStack(null).commitAllowingStateLoss();
 
+				} else {
+					showUserInfoFragmentWithMessage(String.format("Process ended without redirect: ResultCode: %s, ErrorMsg: %s", activationResult.getResultCode().toString(), activationResult.getErrorMessage()), true, false);
+
 				}
 
 			}
+
 		}
 	}
 
