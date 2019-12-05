@@ -23,7 +23,6 @@
 package org.openecard.demo.fragments;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -33,7 +32,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import org.openecard.demo.R;
-import org.openecard.demo.activities.MainActivity;
+import org.openecard.demo.activities.UseCaseSelectorActivity;
+
+import androidx.fragment.app.Fragment;
 
 
 /**
@@ -55,8 +56,8 @@ public class FailureFragment extends Fragment {
 		final Button button = view.findViewById(R.id.btnStartOpeneCardService);
 		button.setOnClickListener(v -> {
 			Activity activity = getActivity();
-			Intent intent = new Intent(activity, MainActivity.class);
-			intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+			Intent intent = new Intent(activity, UseCaseSelectorActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 			activity.finish();
 		});

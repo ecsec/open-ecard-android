@@ -22,8 +22,6 @@
 
 package org.openecard.demo.fragments;
 
-import android.app.Activity;
-import android.app.Fragment;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -35,8 +33,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import org.openecard.demo.R;
-import org.openecard.demo.activities.PINManagementActivity;
-import org.openecard.gui.android.pinmanagement.PinStatus;
+import org.openecard.mobile.activation.ConfirmOldSetNewPasswordOperation;
+import org.openecard.mobile.activation.ConfirmPinCanNewPinOperation;
+
+import androidx.fragment.app.Fragment;
 
 
 public class PINChangeFragment extends Fragment {
@@ -45,14 +45,15 @@ public class PINChangeFragment extends Fragment {
     private static final String WRONG_PIN = "The entered PIN was wrong, please try again.";
     private static final String MISMATCHING_PINS = "The two new PINs do not match.";
 
-    private PinStatus status;
+
+    private boolean needCan = false;
     private EditText pinText;
     private EditText newPin;
+    private EditText canText;
     private EditText newPinConfirm;
-
-    public void setStatus(PinStatus status) {
-        this.status = status;
-    }
+    private int attempt;
+    private ConfirmOldSetNewPasswordOperation op;
+    private ConfirmPinCanNewPinOperation confirmPinCanNewPinOperation;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -72,11 +73,16 @@ public class PINChangeFragment extends Fragment {
         final Button buttonContinue = view.findViewById(R.id.btnPINInput);
         buttonContinue.setEnabled(false);
 
-        if (status != null) {
-            if (status == PinStatus.RC2) {
-                logLabel.setVisibility(View.VISIBLE);
-                logLabel.setText(WRONG_PIN);
-            }
+        TextView tv_attempts = view.findViewById(R.id.txtView_attempt);
+        tv_attempts.append(String.valueOf(attempt));
+
+        pinText = view.findViewById(R.id.pinInput);
+        canText = view.findViewById(R.id.canInput);
+        if (!needCan) {
+            canText.setVisibility(View.GONE);
+        } else {
+            canText.setEnabled(true);
+            canText.setFocusable(true);
         }
 
         TextWatcher textChangeListener = new TextWatcher() {
@@ -97,35 +103,43 @@ public class PINChangeFragment extends Fragment {
         pinText.addTextChangedListener(textChangeListener);
         newPin.addTextChangedListener(textChangeListener);
         newPinConfirm.addTextChangedListener(textChangeListener);
+        canText.addTextChangedListener(textChangeListener);
 
         buttonContinue.setOnClickListener(v -> {
-            final Activity activity = getActivity();
-            if (activity instanceof PINManagementActivity) {
+            final String newPIN = newPin.getText().toString();
+            final String newPIN2 = newPinConfirm.getText().toString();
 
-                final String newPIN = newPin.getText().toString();
-                final String newPIN2 = newPinConfirm.getText().toString();
+            if (! newPIN.equals(newPIN2)) {
+                logLabel.setText(MISMATCHING_PINS);
+                logLabel.setVisibility(View.VISIBLE);
+                return;
+            }
 
-                if (! newPIN.equals(newPIN2)) {
-                    logLabel.setText(MISMATCHING_PINS);
-                    logLabel.setVisibility(View.VISIBLE);
-                    return;
+            final String pin = pinText.getText().toString();
+
+            if (pin.length() == 6 || pin.length() == 5) { // for transport PIN
+                buttonContinue.setEnabled(false);
+                pinText.setEnabled(false);
+                pinText.setFocusable(false);
+                newPin.setEnabled(false);
+                newPin.setFocusable(false);
+                newPinConfirm.setEnabled(false);
+                newPinConfirm.setFocusable(false);
+                canText.setEnabled(false);
+                canText.setFocusable(false);
+                logLabel.setText(PERFORM_PIN_CHANGE);
+                logLabel.setVisibility(View.VISIBLE);
+
+                if (needCan) {
+                    confirmPinCanNewPinOperation.enter(
+                            pinText.getText().toString(),
+                            canText.getText().toString(),
+                            newPIN);
+                } else {
+                    op.enter(pinText.getText().toString(), newPIN);
                 }
 
-                final String pin = pinText.getText().toString();
-
-                if (pin.length() == 6 || pin.length() == 5) { // for transport PIN
-                    buttonContinue.setEnabled(false);
-                    pinText.setEnabled(false);
-                    pinText.setFocusable(false);
-                    newPin.setEnabled(false);
-                    newPin.setFocusable(false);
-                    newPinConfirm.setEnabled(false);
-                    newPinConfirm.setFocusable(false);
-                    logLabel.setText(PERFORM_PIN_CHANGE);
-                    logLabel.setVisibility(View.VISIBLE);
-
-                    new Thread(() -> ((PINManagementActivity) activity).changePin(pin, newPIN)).start();
-                }
+                getFragmentManager().beginTransaction().replace(R.id.fragment, new UserInfoFragment()).addToBackStack(null).commitAllowingStateLoss();
             }
         });
 
@@ -140,5 +154,21 @@ public class PINChangeFragment extends Fragment {
                 && newPinConfirm.getText().toString().length() == 6);
 
         return pinLengthCorrect && newPinLengthCorrect;
+    }
+
+    public void setAttempt(int i) {
+        this.attempt = i;
+    }
+
+    public void setConfirmPasswordOperation(ConfirmOldSetNewPasswordOperation confirmOldSetNewPasswordOperation) {
+        this.op = confirmOldSetNewPasswordOperation;
+    }
+
+    public void setNeedCan(boolean needCan) {
+        this.needCan = needCan;
+    }
+
+    public void setConfirmPinCanNewPinOperation(ConfirmPinCanNewPinOperation confirmPinCanNewPinOperation) {
+        this.confirmPinCanNewPinOperation = confirmPinCanNewPinOperation;
     }
 }

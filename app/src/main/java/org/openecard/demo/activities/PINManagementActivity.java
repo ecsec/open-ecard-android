@@ -22,120 +22,85 @@
 
 package org.openecard.demo.activities;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
-import android.widget.Button;
-
-import org.openecard.android.activation.ActivationResult;
-import org.openecard.android.activation.PinMgmtActivationHandler;
+import org.openecard.android.activation.AndroidContextManager;
+import org.openecard.android.activation.OpeneCard;
+import org.openecard.android.utils.NfcIntentHelper;
 import org.openecard.demo.R;
-import org.openecard.demo.fragments.CANInputFragment;
 import org.openecard.demo.fragments.FailureFragment;
-import org.openecard.demo.fragments.GenericInputFragment;
-import org.openecard.demo.fragments.InitFragment;
 import org.openecard.demo.fragments.PINChangeFragment;
 import org.openecard.demo.fragments.PUKInputFragment;
-import org.openecard.demo.fragments.WaitFragment;
-import org.openecard.gui.android.pinmanagement.PINManagementGui;
-import org.openecard.gui.android.pinmanagement.PinStatus;
+import org.openecard.demo.fragments.UserInfoFragment;
+import org.openecard.mobile.activation.ActivationController;
+import org.openecard.mobile.activation.ActivationResult;
+import org.openecard.mobile.activation.ActivationResultCode;
+import org.openecard.mobile.activation.ActivationSource;
+import org.openecard.mobile.activation.ConfirmOldSetNewPasswordOperation;
+import org.openecard.mobile.activation.ConfirmPasswordOperation;
+import org.openecard.mobile.activation.ConfirmPinCanNewPinOperation;
+import org.openecard.mobile.activation.ControllerCallback;
+import org.openecard.mobile.activation.NFCOverlayMessageHandler;
+import org.openecard.mobile.activation.PinManagementControllerFactory;
+import org.openecard.mobile.activation.PinManagementInteraction;
+import org.openecard.mobile.activation.ServiceErrorResponse;
+import org.openecard.mobile.activation.StartServiceHandler;
+import org.openecard.mobile.ex.ApduExtLengthNotSupported;
+import org.openecard.mobile.ex.NfcDisabled;
+import org.openecard.mobile.ex.NfcUnavailable;
+import org.openecard.mobile.ex.UnableToInitialize;
+import org.openecard.mobile.ui.PINManagementNavigator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import androidx.fragment.app.FragmentActivity;
 
-
-public class PINManagementActivity extends AppCompatActivity {
+public class PINManagementActivity extends FragmentActivity {
 
     private static final Logger LOG = LoggerFactory.getLogger(PINManagementActivity.class);
+	private View cancelBtn;
 
-    private final PinMgmtActivationHandler<PINManagementActivity> activationImpl;
-    private PINManagementGui pinMngGui;
-    private Button cancelBtn;
+	private ActivationController actController;
+	private OpeneCard oe;
+	private AndroidContextManager context;
+	private NfcIntentHelper nfcIntentHelper;
 
-    public PINManagementActivity() {
-        this.activationImpl = new ActivationImpl();
-    }
-
-
-    private class ActivationImpl extends PinMgmtActivationHandler<PINManagementActivity> {
-
-        ActivationImpl() {
-            super(PINManagementActivity.this);
-        }
-
-        @Override
-        public void onGuiIfaceSet(PINManagementGui gui) {
-            PINManagementActivity.this.pinMngGui = gui;
-            initPinChangeGui();
-        }
-
-        @Override
-        public void onAuthenticationFailure(ActivationResult result) {
-            LOG.info("Authentication failure: {}", result);
-
-            // show error
-            String errorMsg = buildErrorMsg(result);
-            showMessageFragment(errorMsg);
-        }
-
-        @Override
-        public void onAuthenticationInterrupted(ActivationResult result) {
-            LOG.info("Authentication interrupted: {}", result);
-
-            // show error message
-            String errorMsg = buildInterruptedMsg(result);
-            showMessageFragment(errorMsg);
-        }
-
-        @Nullable
-        @Override
-        public Dialog showCardRemoveDialog() {
-            return new AlertDialog.Builder(PINManagementActivity.this)
-                    .setTitle("Remove the Card")
-                    .setMessage("Please remove the identity card.")
-                    .setNeutralButton("Proceed", (dialog, which) -> dialog.dismiss())
-                    .create();
-        }
-    }
+	private PinManagementControllerFactory pinMgmtFactory;
+	private boolean shouldTriggerNfc;
+	private boolean hasTriggeredNfcDispatch;
 
 
     @Override
     public void onBackPressed() {
-        activationImpl.cancelAuthentication();
+    	finish();
     }
+	@Override
+	protected void onPause() {
+		LOG.info("Pausing.");
+		if (hasTriggeredNfcDispatch) {
+			nfcIntentHelper.disableNFCDispatch();
+			hasTriggeredNfcDispatch = false;
+		}
+		super.onPause();
+	}
 
-
-
-    ///
-    /// Callback handlers from Activity which have to be forwarded to the Activation implementation
-    ///
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        activationImpl.onStart();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        activationImpl.onStop();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        activationImpl.onPause();
-    }
+	@Override
+	protected void onResume() {
+		if (shouldTriggerNfc) {
+			nfcIntentHelper.enableNFCDispatch();
+			hasTriggeredNfcDispatch = true;
+		}
+		super.onResume();
+	}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+    	LOG.info("Creating");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_custom);
+
+        this.nfcIntentHelper = NfcIntentHelper.create(this);
 
         cancelBtn = findViewById(R.id.cancelBtn);
         cancelBtn.setOnClickListener(view -> {
@@ -143,198 +108,182 @@ public class PINManagementActivity extends AppCompatActivity {
 			cancelBtn.setEnabled(false);
 			cancelBtn.setClickable(false);
 
-			new Thread(() -> {
-				if (pinMngGui != null) {
-					pinMngGui.cancel();
-				}
-				activationImpl.cancelAuthentication();
-			}).start();
+			showUserInfoFragmentWithMessage("Cancelling authentication...", false, true);
+			showFailureFragment("The User cancelled the authentication procedure, please wait for the process to end.");
+			if(actController != null) {
+				actController.cancelAuthentication();
+			}
+
         });
-
-        if (findViewById(R.id.fragment) != null) {
-            // show InitFragment
-            Fragment fragment = new InitFragment();
-            cancelBtn.setVisibility(View.VISIBLE);
-            fragment.setArguments(getIntent().getExtras());
-            getFragmentManager().beginTransaction()
-                    .replace(R.id.fragment, fragment).addToBackStack(null).commit();
-        }
+		showUserInfoFragmentWithMessage("Please wait...", false, true);
     }
+	@Override
+	protected void onStart() {
+		LOG.info("Starting.");
+		this.oe = OpeneCard.createInstance();
+		this.context = oe.context(this);
+		try {
+			this.context.start(new StartServiceHandler() {
+				@Override
+				public void onSuccess(ActivationSource activationSource) {
+					LOG.debug("onSuccess");
+					pinMgmtFactory = activationSource.pinManagementFactory();
+					actController = pinMgmtFactory.create(new PINManagementActivity.PINMgmtControllerCallback(), new PINManagementActivity.PINMgmtInteractionImp());
+				}
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        activationImpl.onResume();
-    }
+				@Override
+				public void onFailure(ServiceErrorResponse serviceErrorResponse) {
+					LOG.error("Could not start OeC-Framework: {}", serviceErrorResponse);
+				}
+			});
+		} catch (UnableToInitialize unableToInitialize) {
+			LOG.error("Exception during start: {}", unableToInitialize);
+		} catch (NfcUnavailable nfcUnavailable) {
+			LOG.error("Exception during start: {}", nfcUnavailable);
+		} catch (NfcDisabled nfcDisabled) {
+			LOG.error("Exception during start: {}", nfcDisabled);
+		} catch (ApduExtLengthNotSupported apduExtLengthNotSupported) {
+			LOG.error("Exception during start: {}", apduExtLengthNotSupported);
+		}
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        activationImpl.onNewIntent(intent);
-        // if you receive a nfc tag, disable the cancel button until the next fragment comes in
-        //disableCancel();
-
-        if (pinMngGui == null || findViewById(R.id.fragment) != null) {
-            // show WaitFragment
-            Fragment fragment = new WaitFragment();
-            cancelBtn.setVisibility(View.VISIBLE);
-            fragment.setArguments(getIntent().getExtras());
-            getFragmentManager().beginTransaction()
-                    .replace(R.id.fragment, fragment).addToBackStack(null).commit();
-        }
-    }
-
-    public void onPINIsRequired(PinStatus status) {
-		PINChangeFragment fragment = new PINChangeFragment();
-		fragment.setStatus(status);
-
-		// show PINChangeFragment
-		getFragmentManager().beginTransaction()
-				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
+		super.onStart();
 	}
 
-	public void onCANIsRequired(boolean triedBefore) {
-        GenericInputFragment fragment = new CANInputFragment();
+	private void showFailureFragment(String errorMessage) {
+		FailureFragment fragment = new FailureFragment();
+		fragment.setErrorMessage(errorMessage);
 
-        if (triedBefore) {
-            fragment.setMessage("The entered CAN was wrong, please try again.");
-        }
+		runOnUiThread(() -> {
+			cancelBtn.setVisibility(View.INVISIBLE);
+		});
 
-        // show CANInput
-        getFragmentManager().beginTransaction()
-                .replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
-    }
+		// show ServerDataFragment
+		LOG.debug("Replace fragment with FailureFragment.");
+		getSupportFragmentManager().beginTransaction()
+				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 
-    public void onPUKIsRequired(boolean triedBefore) {
-        GenericInputFragment fragment = new PUKInputFragment();
+	}
 
-        if (triedBefore) {
-            fragment.setMessage("The entered PUK was wrong, please try again.");
-        }
+    private void showUserInfoFragmentWithMessage(String msg, boolean showConfirmBtn, boolean showSpinner){
+		if (findViewById(R.id.fragment) != null) {
+			UserInfoFragment fragment = new UserInfoFragment();
+			fragment.setWaitMessage(msg);
+			fragment.setConfirmBtn(showConfirmBtn);
+			fragment.setSpinner(showSpinner);
+			fragment.setArguments(getIntent().getExtras());
+			getSupportFragmentManager().beginTransaction()
+					.replace(R.id.fragment, fragment).addToBackStack(null).commit();
+		}
+	}
+	@Override
+	protected void onNewIntent(Intent intent) {
+		LOG.info("On new intent.");
+		super.onNewIntent(intent);
+		try {
+			this.context.onNewIntent(intent);
+		} catch (ApduExtLengthNotSupported apduExtLengthNotSupported) {
+			LOG.error("Exception during start: {}", apduExtLengthNotSupported);
+		} catch (IOException e) {
+			LOG.error("exception during start: {}", e);
+		}
 
-        // show PUKInput
-        getFragmentManager().beginTransaction()
-                .replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
-    }
+		showUserInfoFragmentWithMessage("Please wait...", false, true);
 
-    public void enterCan(String can) {
-        try {
-            boolean canCorrect = pinMngGui.enterCan(can);
-            LOG.info("CAN correct: {}", canCorrect);
+	}
+	private class PINMgmtControllerCallback implements ControllerCallback {
+		@Override
+		public void onStarted() { LOG.debug("onStarted"); }
 
-            if (canCorrect) {
-				try {
-					onPINIsRequired(pinMngGui.getPinStatus());
-				} catch (InterruptedException ex) {
-					LOG.error(ex.getMessage(), ex);
+		@Override
+		public void onAuthenticationCompletion(ActivationResult activationResult) {
+			PINManagementNavigator d;
+			LOG.debug("onAuthenticationCompletion");
+			actController = null;
+			if(activationResult != null) {
+				LOG.debug("onAuthenticationSuccess Result={}", activationResult.getResultCode());
+				LOG.debug("onAuthenticationSuccess ResultMinor={}", activationResult.getProcessResultMinor());
+
+				if(activationResult.getResultCode()== ActivationResultCode.OK) {
+					showUserInfoFragmentWithMessage("Success", true, false);
+				}else{
+					showUserInfoFragmentWithMessage("Fail - " + activationResult.getResultCode().toString(), true, false);
 				}
-            } else {
-				onCANIsRequired(true);
-            }
-        } catch (InterruptedException ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
-    }
+			}
+		}
+	}
 
-    public void enterPUK(String puk) {
-        try {
-            boolean pukCorrect = pinMngGui.unblockPin(puk);
-            LOG.info("PUK correct: {}", pukCorrect);
+	private class PINMgmtInteractionImp implements PinManagementInteraction {
 
-            if (! pukCorrect){
-				onPUKIsRequired(true);
-            } else {
-				showMessageFragment("PIN was successful unblocked.");
-            }
-        } catch (InterruptedException ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
-    }
+		@Override
+		public void onPinChangeable(int i, ConfirmOldSetNewPasswordOperation confirmOldSetNewPasswordOperation) {
+			LOG.debug("onPinChangeable, count: {}", i);
 
-    public void changePin(String oldPin, String newPin) {
-        try {
-            LOG.info("Perform PIN change...");
-            boolean changeSuccessful = pinMngGui.changePin(oldPin, newPin);
-            LOG.info("PINChange was successful: {}", changeSuccessful);
+			PINChangeFragment fragment = new PINChangeFragment();
+			fragment.setConfirmPasswordOperation(confirmOldSetNewPasswordOperation);
+			fragment.setAttempt(i);
+			// show PINInputFragment
+			getSupportFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
+		}
 
-            if (! changeSuccessful) {
-                initPinChangeGui();
-            } else {
-				showMessageFragment("Your PIN was changed successfully.");
-                pinMngGui.cancel();
-            }
-        } catch (InterruptedException ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
-    }
+		@Override
+		public void onPinCanNewPinRequired(ConfirmPinCanNewPinOperation confirmPinCanNewPinOperation) {
+			LOG.debug("eacInteractionHandler::onPinCanNewPinRequired");
 
-    private void showMessageFragment(String msg) {
-        FailureFragment fragment = new FailureFragment();
-        fragment.setErrorMessage(msg);
+			PINChangeFragment fragment = new PINChangeFragment();
+			fragment.setNeedCan(true);
+			fragment.setConfirmPinCanNewPinOperation(confirmPinCanNewPinOperation);
+			// show PINInputFragment
+			getSupportFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
+		}
 
-        runOnUiThread(() -> cancelBtn.setEnabled(false));
+		@Override
+		public void onPinBlocked(ConfirmPasswordOperation confirmPasswordOperation) {
+			LOG.debug("onPinBlocked");
+			PUKInputFragment fragment = new PUKInputFragment();
+			fragment.setConfirmPasswordOperation(confirmPasswordOperation);
+			// show PINInputFragment
+			getSupportFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
+		}
 
-        // show ServerDataFragment
-        getFragmentManager().beginTransaction()
-                .replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
-    }
+		@Override
+		public void requestCardInsertion() {
+			LOG.debug("requestCardInsertion");
+			LOG.debug("eacInteractionHandler::requestCardInsertion");
+			runOnUiThread(() -> {
+				showUserInfoFragmentWithMessage("Please provide card",false, false);
+			});
+			shouldTriggerNfc = true;
+			nfcIntentHelper.enableNFCDispatch();
+			hasTriggeredNfcDispatch = true;
+		}
 
-    private void initPinChangeGui() {
-        try {
-            final PinStatus pinStatus = pinMngGui.getPinStatus();
-            LOG.info("PIN status: {}", pinStatus);
+		@Override
+		public void requestCardInsertion(NFCOverlayMessageHandler nfcOverlayMessageHandler) {
+			//this is for ios and should not be called
+			LOG.debug("requestCardInsertion");
 
-            if (pinStatus.isNormalPinEntry()) {
-				onPINIsRequired(pinStatus);
-            } else if (pinStatus.needsCan()) {
-				onCANIsRequired(false);
-            } else if (pinStatus.needsPuk()) {
-				onPUKIsRequired(false);
-            } else if (pinStatus.isDead()) {
-                String msg = String.format("PIN Status is '%s'.", pinStatus);
-				showMessageFragment(msg);
-                LOG.error(msg);
-                pinMngGui.cancel();
-            }
-        } catch (InterruptedException ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
-    }
+		}
 
+		@Override
+		public void onCardRecognized() {
+			LOG.info("Card inserted.");
+			runOnUiThread(() -> {
+				showUserInfoFragmentWithMessage("Please don't move device or card!",false, true);
+			});
+		}
 
-    ///
-    /// methods for building error messages
-    ///
-
-    private String buildErrorMsg(ActivationResult result) {
-        String msg;
-        if (result.getErrorMessage() != null) {
-            String errorType = result.getResultCode().name();
-            String errorMsg = result.getErrorMessage();
-            msg = String.format("During PIN Management an error occurred (%s): %s.", errorType, errorMsg);
-        } else if (result.getResultCode() != null) {
-            String errorType = result.getResultCode().name();
-            msg = String.format("During PIN Management an unknown error occurred (%s).", errorType);
-        } else {
-            msg = "During PIN Management an unknown error occurred.";
-        }
-        return msg;
-    }
-
-    private String buildInterruptedMsg(ActivationResult result) {
-        String msg;
-        if (result.getErrorMessage() != null) {
-            String errorType = result.getResultCode().name();
-            String errorMsg = result.getErrorMessage();
-            msg = String.format("PIN Management was interrupted (%s): %s.", errorType, errorMsg);
-        } else if (result.getResultCode() != null) {
-            String errorType = result.getResultCode().name();
-            msg = String.format("PIN Management was interrupted by the user or implicitly by a shutdown of a " +
-                    "subsystem or the whole system (%s).", errorType);
-        } else {
-            msg = "PIN Management was interrupted by the user or implicitly by a shutdown of a subsystem or the whole system.";
-        }
-        return msg;
-    }
+		@Override
+		public void onCardRemoved() {
+			LOG.debug("onCardRemoved");
+		}
+		@Override
+		public void onCardInteractionComplete() { LOG.debug("onCardInteractionComplete"); }
+		@Override
+		public void onCardDeactivated(){
+			LOG.debug("onCardDeactivated");
+		}
+		@Override
+		public void onCardPukBlocked() { LOG.debug("onCardPUKBlocked");	}
+	}
 
 }

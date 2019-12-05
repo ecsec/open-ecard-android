@@ -23,7 +23,6 @@
 package org.openecard.demo.fragments;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -35,8 +34,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import org.openecard.demo.R;
-import org.openecard.demo.activities.CustomActivationActivity;
-import org.openecard.gui.android.eac.types.PinStatus;
+import org.openecard.mobile.activation.ConfirmPasswordOperation;
+import org.openecard.mobile.activation.ConfirmPinCanOperation;
+
+import androidx.fragment.app.Fragment;
 
 
 /**
@@ -47,18 +48,25 @@ public class PINInputFragment extends Fragment {
 	private static final String PERFORM_PIN_INPUT = "Please wait a moment...";
 	private static final String PROVIDE_PIN = "Please provide the PIN to the corresponding identity card.";
 	private static final String PROVIDE_CAN = "Please provide the CAN to the corresponding identity card.";
-	private static final String WRONG_PIN = "The entered PIN was wrong, please try again.";
-	private static final String NEED_CAN = "The entered PIN was wrong, please try again and also enter your CAN.";
 
-	private PinStatus status;
-	private boolean isOnSite;
+	private ConfirmPasswordOperation confirmPasswordOperation = null;
+	private ConfirmPinCanOperation confirmTwoPasswordsOperation = null;
+	private boolean needCan;
+	private int attempt;
 
-	public void setStatus(PinStatus status) {
-		this.status = status;
+	public void setConfirmPasswordOperation(ConfirmPasswordOperation op){
+		this.confirmPasswordOperation = op;
+	}
+	public void setConfirmTwoPasswordsOperation(ConfirmPinCanOperation op){
+		this.confirmTwoPasswordsOperation = op;
 	}
 
-	public void setOnSite(boolean onSite) {
-		this.isOnSite = onSite;
+	public void setNeedCan(boolean needed){
+		this.needCan = needed;
+	}
+
+	public void setAttempt(int attempt){
+		this.attempt = attempt;
 	}
 
 	@Override
@@ -69,39 +77,16 @@ public class PINInputFragment extends Fragment {
 		logLabel.setVisibility(View.INVISIBLE);
 
 		final TextView titleLabel = view.findViewById(R.id.pinInputTxtView);
-		if (isOnSite) {
-			titleLabel.setText("CAN Input:");
-		}
-
+		final TextView attemptsField = view.findViewById(R.id.tf_attempts);
+		attemptsField.setText(this.attempt >= 0 ? this.attempt+"" : "unknown");
+		
 		final EditText pinText = view.findViewById(R.id.pinInput);
 		pinText.setEnabled(true);
 		pinText.setFocusable(true);
-		if (isOnSite) {
-			pinText.setHint("CAN");
-		}
-		//pinText.requestFocus();
 
 		final EditText canText = view.findViewById(R.id.canInput);
-		if (status != null) {
-			if (!status.needsCan()) {
-				canText.setVisibility(View.GONE);
-
-				if (status == PinStatus.RC2) {
-					logLabel.setVisibility(View.VISIBLE);
-					logLabel.setText(WRONG_PIN);
-				} else if (status == PinStatus.RC3) {
-					logLabel.setVisibility(View.VISIBLE);
-					if (isOnSite) {
-						logLabel.setText(PROVIDE_CAN);
-					} else {
-						logLabel.setText(PROVIDE_PIN);
-					}
-				}
-
-			} else {
-				logLabel.setVisibility(View.VISIBLE);
-				logLabel.setText(NEED_CAN);
-			}
+		if (!needCan) {
+			canText.setVisibility(View.GONE);
 		}
 		canText.setEnabled(true);
 		canText.setFocusable(true);
@@ -148,31 +133,28 @@ public class PINInputFragment extends Fragment {
 
 		buttonContinue.setOnClickListener(v -> {
 			final Activity activity = getActivity();
-			if (activity instanceof CustomActivationActivity) {
-				final String pin = pinText.getText().toString();
-				final String can;
-				if (canText.getVisibility() == View.VISIBLE) {
-					can = canText.getText().toString();
-				} else {
-					can = null;
-				}
+			final String pin = pinText.getText().toString();
+			final String can;
+			if (canText.getVisibility() == View.VISIBLE) {
+				can = canText.getText().toString();
+			} else {
+				can = null;
+			}
 
-				logLabel.setVisibility(View.VISIBLE);
-				if (pin.length() == 6) {
-					buttonContinue.setEnabled(false);
-					pinText.setEnabled(false);
-					pinText.setFocusable(false);
-					canText.setEnabled(false);
-					canText.setFocusable(false);
-					logLabel.setText(PERFORM_PIN_INPUT);
-					new Thread(() -> {
-						((CustomActivationActivity) activity).enterPIN(can, pin);
-						// disable cancel after PACE is successful
-						//PINInputFragment.super.getActivity().runOnUiThread(() -> {
-							//((CustomActivationActivity) activity).disableCancel();
-						//});
-					}).start();
+			if (pin.length() == 6) {
+				buttonContinue.setEnabled(false);
+				pinText.setEnabled(false);
+				pinText.setFocusable(false);
+				canText.setEnabled(false);
+				canText.setFocusable(false);
+				logLabel.setText(PERFORM_PIN_INPUT);
+
+				if(!needCan){
+					confirmPasswordOperation.enter(pin);
+				}else{
+					confirmTwoPasswordsOperation.enter(pin, can);
 				}
+				getFragmentManager().beginTransaction().replace(R.id.fragment, new UserInfoFragment()).addToBackStack(null).commitAllowingStateLoss();
 			}
 		});
 

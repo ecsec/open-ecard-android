@@ -15,33 +15,28 @@
         app:layout_anchorGravity="center_vertical|center_horizontal">
 
         <TextView
-            android:id="@+id/pinInputTxtView"
+            android:id="@+id/canInputTxtView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|center_horizontal"
-            android:text="TCToken URL: "
+            android:text="CAN Input: "
             app:layout_anchorGravity="center_vertical|center_horizontal"/>
 
-        <AutoCompleteTextView
-            android:id="@+id/edt"
-            android:layout_height="wrap_content"
+        <EditText
+            android:id="@+id/canInput"
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:ems="15"
-            android:inputType="textWebEmailAddress"/>
+            android:hint="CAN"
+            android:gravity="center"
+            android:inputType="numberPassword"/>
 
         <Button
-            android:id="@+id/btnContinue"
+            android:id="@+id/btnCANInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:text="Activate"/>
-
-        <Button
-            android:id="@+id/btnPinManagement"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:text="PIN Management"/>
+            android:text="Continue"/>
 
         <TextView
             android:id="@+id/txtLog"

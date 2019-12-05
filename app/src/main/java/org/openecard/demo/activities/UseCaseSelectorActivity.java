@@ -25,20 +25,14 @@ package org.openecard.demo.activities;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
-import android.view.View;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 
-import org.openecard.android.activation.ActivationImplementationInterface;
-import org.openecard.android.system.OpeneCardContext;
-import org.openecard.android.system.OpeneCardServiceClientHandler;
-import org.openecard.android.system.OpeneCardServiceHandler;
-import org.openecard.android.system.ServiceErrorResponse;
-import org.openecard.android.system.ServiceWarningResponse;
+import androidx.fragment.app.FragmentActivity;
+
+
 import org.openecard.demo.R;
-import org.openecard.demo.fragments.FailureFragment;
-import org.openecard.demo.fragments.RedirectFragment;
-import org.openecard.demo.fragments.URLInputFragment;
+import org.openecard.demo.fragments.WebViewFragment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,162 +46,84 @@ import java.net.URLEncoder;
  * @author Mike Prechtl
  * @author Sebastian Schuberth
  */
-public class UseCaseSelectorActivity extends AppCompatActivity {
+public class UseCaseSelectorActivity extends FragmentActivity {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UseCaseSelectorActivity.class);
 
-	private static final String DEFAULT_TC_TOKEN_URL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_20&redirect=true";
-	//private static final String DEFAULT_TC_TOKEN_URL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_can&redirect=true";
+	private static final String DIRECT_ACTIVATION_URL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_20&redirect=true";
+	private static final String TEST_SERVICE_URL = "https://eid.mtg.de/eid-server-demo-app/index.html";
 
-	private OpeneCardServiceClientHandler serviceClient;
-	private Button stopBtn;
-
-	// indicates if activity stack is thrown away or not
-    // because activation URL from outside can only be used once
-	private static boolean clearActivityHistory = false;
-
-	@Override
-	public void onBackPressed() {
-		// stop OeC Service if it is running
-		if (serviceClient.isInitialized()) {
-			serviceClient.stopService();
-		} else {
-			goToMainActivity();
-		}
-	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_use_case_selector);
 
-		serviceClient = new OpeneCardServiceClientHandler(this, new UseCaseSelectorActivity.InitServiceHandler());
-		serviceClient.startService();
+		final AutoCompleteTextView testServerUrlInput = findViewById(R.id.testServiceURL);
+		if (TEST_SERVICE_URL!= null) {
+			testServerUrlInput.setText(TEST_SERVICE_URL);
+		}
 
-		stopBtn = findViewById(R.id.stopBtn);
-		stopBtn.setOnClickListener(v -> onBackPressed());
+		Button btnWebView = findViewById(R.id.btnWebView);
+		if(btnWebView != null){
+			btnWebView.setOnClickListener(v->{
+				String url = testServerUrlInput.getText().toString();
+				setContentView(R.layout.activity_custom);
+				WebViewFragment wvFragment = WebViewFragment.newInstance(url);
+				getSupportFragmentManager().beginTransaction().replace(R.id.fragment, wvFragment).addToBackStack(null).commitAllowingStateLoss();
 
-		if (findViewById(R.id.fragment) != null) {
-			Intent intent = getIntent();
-			Uri intentUri = intent.getData();
+				Button btn  = findViewById(R.id.cancelBtn);
+				if(btn != null) {
+					btn.setOnClickListener(__ -> {
 
-			if(intentUri != null) {
-				if((intentUri.getHost().equals("localhost") || intentUri.getHost().equals("127.0.0.1"))
-						&& intentUri.getPort() == 24727) {
-					clearActivityHistory = true;
-					activate(intentUri.toString());
-				} else {
-					showRedirectAddress(intentUri);
+						Intent intent = new Intent(this, UseCaseSelectorActivity.class);
+						int flag = Intent.FLAG_ACTIVITY_CLEAR_TOP;
+						intent.setFlags(flag);
+						startActivity(intent);
+						this.finish();
+					});
 				}
-			} else {
-				init();
-			}
+
+			});
 		}
-	}
 
-	public void onUrlSelection(String url) {
-		try {
-			String encoded = URLEncoder.encode(url, "UTF-8");
-			String actUrl = "/eID-Client?tcTokenURL=" + encoded;
 
-			clearActivityHistory = false;
-			activate(actUrl);
-		} catch (UnsupportedEncodingException ex) {
-			String msg = "The character encoding is not supported!";
-			LOG.warn(msg, ex);
-			throw new RuntimeException(msg, ex);
+		final AutoCompleteTextView directUrlInput = findViewById(R.id.directURL);
+		if (DIRECT_ACTIVATION_URL!= null) {
+			directUrlInput.setText(DIRECT_ACTIVATION_URL);
 		}
+
+		Button directEAC = findViewById(R.id.directEAC);
+		if(directEAC!= null){
+			directEAC.setOnClickListener(v->{
+				try {
+					String url = "http://localhost/eID-Client?tcTokenURL="+ URLEncoder.encode(directUrlInput.getText().toString(), "UTF-8");
+					performEACWithURL(url);
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
+			});
+		}
+
+		Button btnPinMgmt = findViewById(R.id.btnPinManagement);
+		if(btnPinMgmt!=null) {
+			btnPinMgmt.setOnClickListener(v -> {
+				Intent i = new Intent(Intent.ACTION_VIEW);
+				i.setClass(UseCaseSelectorActivity.this, PINManagementActivity.class);
+				i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				startActivity(i);
+			});
+		}
+
 	}
+	public void performEACWithURL(String url) {
+		LOG.debug("Activation URL: {}", url);
 
-	private void activate(String url) {
-        LOG.debug("Activation URL: {}", url);
-
-		// perform explicit URL Intent to the Activation Activity
 		Intent i = new Intent(Intent.ACTION_VIEW);
-		i.setClass(UseCaseSelectorActivity.this, CustomActivationActivity.class);
+		i.setClass(this, EACActivity.class);
 		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		i.setData(Uri.parse(url));
 
-		// add class name for explicit redirect Intent
-		i.putExtra(ActivationImplementationInterface.RETURN_CLASS, UseCaseSelectorActivity.class.getName());
 		startActivity(i);
-
-		enableCancel();
-	}
-
-	private void showRedirectAddress(Uri address) {
-		RedirectFragment fragment = new RedirectFragment();
-		fragment.setRedirectUrl(address.toString());
-		fragment.clearHistory(clearActivityHistory);
-
-		stopBtn.setVisibility(View.INVISIBLE);
-
-		getFragmentManager().beginTransaction()
-				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
-	}
-
-	public void init() {
-		URLInputFragment fragment = new URLInputFragment();
-		fragment.setDefaultUrl(DEFAULT_TC_TOKEN_URL);
-
-		getFragmentManager().beginTransaction()
-				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
-
-		enableCancel();
-	}
-
-	public void enableCancel() {
-		stopBtn.setEnabled(true);
-	}
-
-	public void goToMainActivity() {
-		Intent intent = new Intent(UseCaseSelectorActivity.this, MainActivity.class);
-		startActivity(intent);
-		finish();
-	}
-
-	private void showFailureFragment(String errorMessage) {
-		FailureFragment fragment = new FailureFragment();
-		fragment.setErrorMessage(errorMessage);
-		getFragmentManager().beginTransaction()
-				.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
-	}
-
-
-	///
-	/// Handler functions for the initialization or termination of the Open eCard Stack management Android Service
-	///
-
-	private class InitServiceHandler implements OpeneCardServiceHandler {
-
-		@Override
-		public void onConnectionSuccess(OpeneCardContext ctx) { }
-
-		@Override
-		public void onConnectionFailure(ServiceErrorResponse serviceErrorResponse) { }
-
-		@Override
-		public void onConnectionFailure(ServiceWarningResponse serviceWarningResponse) { }
-
-		@Override
-		public void onDisconnectionSuccess() {
-			goToMainActivity();
-		}
-
-		@Override
-		public void onDisconnectionFailure(ServiceErrorResponse serviceErrorResponse) {
-			// should not occur
-			String errorMsg = serviceErrorResponse.getMessage();
-			LOG.error("Disconnecting from Oec Service failed: {}", errorMsg);
-			showFailureFragment(errorMsg);
-		}
-
-		@Override
-		public void onDisconnectionFailure(ServiceWarningResponse serviceWarningResponse) {
-			String warnMsg = serviceWarningResponse.getMessage();
-			LOG.warn("Disconnecting from Oec Service failed: {}", warnMsg);
-			goToMainActivity();
-		}
-
 	}
 }

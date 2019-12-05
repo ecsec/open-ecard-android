@@ -22,8 +22,6 @@
 
 package org.openecard.demo.fragments;
 
-import android.app.Activity;
-import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,25 +31,34 @@ import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import org.openecard.demo.R;
-import org.openecard.demo.activities.CustomActivationActivity;
-import org.openecard.gui.android.eac.types.BoxItem;
-import org.openecard.gui.android.eac.types.ServerData;
+import org.openecard.demo.activities.EACActivity;
+import org.openecard.mobile.activation.ConfirmAttributeSelectionOperation;
+import org.openecard.mobile.activation.SelectableItem;
+import org.openecard.mobile.activation.ServerData;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import androidx.fragment.app.Fragment;
 
 
 /**
  * @author Mike Prechtl
  */
 public class ServerDataFragment extends Fragment {
+	private ConfirmAttributeSelectionOperation op;
+
+	public void setServerDataFragment(ConfirmAttributeSelectionOperation op){
+		this.op = op;
+	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		final View view = inflater.inflate(R.layout.fragment_server_data, container, false);
 
-		final ServerData serverData = (ServerData) getArguments().getSerializable(CustomActivationActivity.BUNDLE_SERVER_DATA);
-		final String transactionInfo = getArguments().getString(CustomActivationActivity.BUNDLE_TRANSACTION_INFO);
+		final ServerData serverData = (ServerData) getArguments().getSerializable(EACActivity.BUNDLE_SERVER_DATA);
+		final String transactionInfo = getArguments().getString(EACActivity.BUNDLE_TRANSACTION_INFO);
 
 		final LinearLayout layout = view.findViewById(R.id.linearLayout);
 
@@ -73,36 +80,33 @@ public class ServerDataFragment extends Fragment {
 		TextView txInfoTxtView = view.findViewById(R.id.transactionInfo);
 		txInfoTxtView.setText(transactionInfo);
 
-		final Map<BoxItem, CheckBox> readAccessAttributes = new HashMap<>();
-		for (BoxItem boxItem : serverData.getReadAccessAttributes()) {
-			String readableValue = mapBoxItemNameToReadableValue(boxItem.getName());
+		final Map<SelectableItem, CheckBox> readAccessAttributes = new HashMap<>();
+		for (SelectableItem selItem : serverData.getReadAccessAttributes()) {
+			String readableValue = mapBoxItemNameToReadableValue( selItem.getName());
 			if (readableValue != null) {
 				CheckBox checkBox = new CheckBox(getActivity().getApplicationContext());
 				checkBox.setText(readableValue);
-				checkBox.setChecked(boxItem.isSelected());
-				checkBox.setEnabled(! boxItem.isDisabled());
-				readAccessAttributes.put(boxItem, checkBox);
+				checkBox.setChecked( selItem.isChecked());
+				checkBox.setEnabled(!  selItem.isRequired());
+				readAccessAttributes.put( selItem, checkBox);
 				layout.addView(checkBox);
 			}
 		}
 
 		Button button = view.findViewById(R.id.btnContinue);
 		button.setOnClickListener(view2 -> {
-			List<BoxItem> readBoxes = serverData.getReadAccessAttributes();
-			for (BoxItem boxItem : readBoxes) {
-				CheckBox next = readAccessAttributes.get(boxItem);
+			List<SelectableItem> readBoxes = serverData.getReadAccessAttributes();
+			for (SelectableItem selItem : readBoxes) {
+				CheckBox next = readAccessAttributes.get(selItem);
 				if (next != null) {
-					boxItem.setSelected(next.isChecked());
+					selItem.setChecked(next.isChecked());
 				}
 			}
 
-			Activity activity = getActivity();
-			if (activity instanceof CustomActivationActivity) {
-				// disable cancel if service is working
-				//((CustomActivationActivity) activity).disableCancel();
-				((CustomActivationActivity) activity).enterAttributes(readBoxes,
-						serverData.getWriteAccessAttributes());
-			}
+			UserInfoFragment f = new UserInfoFragment();
+			f.setSpinner(true);
+			getFragmentManager().beginTransaction().replace(R.id.fragment, f).addToBackStack(null).commitAllowingStateLoss();
+			op.enter(readBoxes, serverData.getWriteAccessAttributes());
 		});
 
 		return view;

@@ -20,41 +20,52 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|center_horizontal"
             android:text="Change PIN: "
-            app:layout_anchorGravity="center_vertical|center_horizontal"/>
+            app:layout_anchorGravity="center_vertical|center_horizontal" />
+
+        <TextView
+            android:id="@+id/txtView_attempt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|center_horizontal"
+            android:text="Attempts:"
+            app:layout_anchorGravity="center_vertical|center_horizontal" />
 
         <EditText
             android:id="@+id/pinInput"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ems="15"
-            android:hint="Old PIN"
             android:gravity="center"
-            android:inputType="numberPassword"/>
+            android:hint="Old PIN"
+            android:inputType="numberPassword" />
 
         <EditText
             android:id="@+id/newPinInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="15"
-            android:hint="New PIN"
             android:gravity="center"
-            android:inputType="numberPassword"/>
+            android:hint="New PIN"
+            android:inputType="numberPassword" />
 
         <EditText
             android:id="@+id/newPinInputConfirm"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="15"
-            android:hint="Confirm new PIN"
             android:gravity="center"
-            android:inputType="numberPassword"/>
+            android:hint="Confirm new PIN"
+            android:inputType="numberPassword" />
 
-        <Button
-            android:id="@+id/btnPINInput"
+        <EditText
+            android:id="@+id/canInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:text="Continue"/>
+            android:layout_gravity="center_horizontal"
+            android:ems="10"
+            android:gravity="center|center_vertical"
+            android:hint="CAN"
+            android:inputType="numberPassword" />
 
         <TextView
             android:id="@+id/txtLog"
@@ -62,7 +73,14 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|center_horizontal"
             android:layout_marginTop="15dp"
-            app:layout_anchorGravity="center_vertical|center_horizontal"/>
+            app:layout_anchorGravity="center_vertical|center_horizontal" />
+
+        <Button
+            android:id="@+id/btnPINInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="Continue" />
 
     </LinearLayout>
 

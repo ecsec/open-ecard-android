@@ -23,67 +23,75 @@
 package org.openecard.demo.fragments;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import org.openecard.demo.R;
-import org.openecard.demo.activities.MainActivity;
+import org.openecard.demo.activities.UseCaseSelectorActivity;
+
+import androidx.fragment.app.Fragment;
 
 
 /**
  * @author Mike Prechtl
  */
-public class RedirectFragment extends Fragment {
+public class UserInfoFragment extends Fragment {
 
-	private String url;
-
-	private boolean clearHistory = false;
+	private String txtMsg;
+	private boolean confirmActive = false;
+	private boolean spinnerVisible = false;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		final View view = inflater.inflate(R.layout.fragment_redirect, container, false);
 
-		final TextView textView = view.findViewById(R.id.txtMsg1);
-		if (url != null) {
-			textView.setText(String.format("You would be redirected to: %s", url));
-		}
-
-		final Button backBtn = view.findViewById(R.id.btnStartOpeneCardService1);
-
-		backBtn.setOnClickListener(v -> {
+		final View view = inflater.inflate(R.layout.fragment_wait, container, false);
+		final Button confirm = view.findViewById(R.id.btnWaitConfirm);
+		confirm.setOnClickListener((v -> {
 			Activity activity = getActivity();
 
-			Intent intent = new Intent(activity, MainActivity.class);
-			int flag = clearHistory ? Intent.FLAG_ACTIVITY_CLEAR_TOP : Intent.FLAG_ACTIVITY_REORDER_TO_FRONT;
+			Intent intent = new Intent(activity, UseCaseSelectorActivity.class);
+			int flag = Intent.FLAG_ACTIVITY_CLEAR_TOP;
 			intent.setFlags(flag);
 
 			startActivity(intent);
 			activity.finish();
-		});
+		}));
+		if(confirmActive) {
+			confirm.setVisibility(View.VISIBLE);
+		}else{
+			confirm.setVisibility(View.INVISIBLE);
+		}
 
-		final Button redirectBrowserBtn = view.findViewById(R.id.btnOpenBrowser);
-		redirectBrowserBtn.setOnClickListener(v -> {
-			Intent i = new Intent(Intent.ACTION_VIEW);
-			i.setData(Uri.parse(url));
-			startActivity(i);
-		});
+		final ProgressBar progressBar = view.findViewById(R.id.progressBar);
+		progressBar.setVisibility(spinnerVisible ? View.VISIBLE : View.INVISIBLE);
+
+
+
+		final TextView textView = view.findViewById(R.id.txtMsg);
+		if (txtMsg != null) {
+			textView.setText(txtMsg);
+		}
 
 		return view;
 	}
 
-	public void setRedirectUrl(String redirectUrl) {
-		this.url = redirectUrl;
+	public void setSpinner(boolean active){
+		this.spinnerVisible = active;
 	}
 
-	public void clearHistory(boolean clearHistory) {
-		this.clearHistory = clearHistory;
-	}
 
+	public void setConfirmBtn(boolean active){
+		this.confirmActive = active;
+
+	}
+	public void setWaitMessage(String msg) {
+		txtMsg = msg;
+	}
 }
