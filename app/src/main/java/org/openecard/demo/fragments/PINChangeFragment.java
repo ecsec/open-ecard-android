@@ -73,6 +73,9 @@ public class PINChangeFragment extends Fragment {
         final Button buttonContinue = view.findViewById(R.id.btnPINInput);
         buttonContinue.setEnabled(false);
 
+        TextView tv_attempts = view.findViewById(R.id.txtView_attempt);
+        tv_attempts.append(String.valueOf(attempt));
+
         pinText = view.findViewById(R.id.pinInput);
         canText = view.findViewById(R.id.canInput);
         if (!needCan) {
