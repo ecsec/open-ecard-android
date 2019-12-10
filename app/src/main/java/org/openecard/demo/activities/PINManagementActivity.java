@@ -23,6 +23,8 @@
 package org.openecard.demo.activities;
 
 import android.content.Intent;
+import android.nfc.NfcAdapter;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.view.View;
 import org.openecard.android.activation.AndroidContextManager;
@@ -179,16 +181,19 @@ public class PINManagementActivity extends FragmentActivity {
 	protected void onNewIntent(Intent intent) {
 		LOG.info("On new intent.");
 		super.onNewIntent(intent);
+
 		try {
-			this.context.onNewIntent(intent);
+			Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+			if (tagFromIntent != null) {
+				this.shouldTriggerNfc = false;
+				context.onNewIntent(intent);
+				showUserInfoFragmentWithMessage("Please wait...", false, true);
+			}
 		} catch (ApduExtLengthNotSupported apduExtLengthNotSupported) {
 			LOG.error("Exception during start: {}", apduExtLengthNotSupported);
 		} catch (IOException e) {
 			LOG.error("exception during start: {}", e);
 		}
-
-		showUserInfoFragmentWithMessage("Please wait...", false, true);
-
 	}
 	private class PINMgmtControllerCallback implements ControllerCallback {
 		@Override

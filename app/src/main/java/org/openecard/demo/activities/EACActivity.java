@@ -24,6 +24,8 @@ package org.openecard.demo.activities;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.nfc.NfcAdapter;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -87,6 +89,7 @@ public class EACActivity extends FragmentActivity {
 	private AndroidContextManager context;
 	private EacControllerFactory eacFactory;
 	private boolean shouldTriggerNfc = false;
+	private boolean shouldDisableNfcTrigger = false;
 	private boolean hasTriggeredNfcDispatch = false;
 
 	class EACControllerCallback implements ControllerCallback {
@@ -343,14 +346,20 @@ public class EACActivity extends FragmentActivity {
 			fragment.setConfirmBtn(showConfirmBtn);
 			fragment.setSpinner(showSpinner);
 			fragment.setArguments(getIntent().getExtras());
+			/*
+			 NOTE: deliberately use commitAllowingStateLoss
+			 This method may be displaying cancel information after onStop
+			 */
 			getSupportFragmentManager().beginTransaction()
-					.replace(R.id.fragment, fragment).addToBackStack(null).commit();
+					.replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 		}
 	}
 
 	@Override
 	protected void onResume() {
+		LOG.info("Resuming");
 		if (shouldTriggerNfc) {
+			LOG.info("Preparing to receive further NFC tags");
 			intentHelper.enableNFCDispatch();
 			hasTriggeredNfcDispatch = true;
 		}
@@ -362,14 +371,18 @@ public class EACActivity extends FragmentActivity {
 		LOG.info("On new intent.");
 		super.onNewIntent(intent);
 		try {
-			context.onNewIntent(intent);
+			Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+			if (tagFromIntent != null) {
+				this.shouldTriggerNfc = false;
+				context.onNewIntent(intent);
+				showUserInfoFragmentWithMessage("Please wait...", false, true);
+			}
 		} catch (ApduExtLengthNotSupported apduExtLengthNotSupported) {
 			LOG.error("Exception during start: {}", apduExtLengthNotSupported);
 		} catch (IOException e) {
 			LOG.error("exception during start: {}", e);
 		}
 
-		showUserInfoFragmentWithMessage("Please wait...", false, true);
 
 	}
 
