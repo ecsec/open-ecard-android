@@ -49,6 +49,7 @@ import org.openecard.mobile.activation.PinManagementInteraction;
 import org.openecard.mobile.activation.ServiceErrorResponse;
 import org.openecard.mobile.activation.StartServiceHandler;
 import org.openecard.mobile.ex.ApduExtLengthNotSupported;
+import org.openecard.mobile.ex.NFCTagNotSupported;
 import org.openecard.mobile.ex.NfcDisabled;
 import org.openecard.mobile.ex.NfcUnavailable;
 import org.openecard.mobile.ex.UnableToInitialize;
@@ -185,13 +186,15 @@ public class PINManagementActivity extends FragmentActivity {
 		try {
 			Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
 			if (tagFromIntent != null) {
-				this.shouldTriggerNfc = false;
 				context.onNewIntent(intent);
+				this.shouldTriggerNfc = false;
 				showUserInfoFragmentWithMessage("Please wait...", false, true);
 			}
 		} catch (ApduExtLengthNotSupported apduExtLengthNotSupported) {
 			LOG.error("Exception during start: {}", apduExtLengthNotSupported);
 		} catch (IOException e) {
+			LOG.error("exception during start: {}", e);
+		} catch (NFCTagNotSupported e) {
 			LOG.error("exception during start: {}", e);
 		}
 	}
