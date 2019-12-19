@@ -72,12 +72,15 @@ public class PINManagementActivity extends FragmentActivity {
 	private PinManagementControllerFactory pinMgmtFactory;
 	private boolean shouldTriggerNfc;
 	private boolean hasTriggeredNfcDispatch;
+	private volatile boolean isDestroying = false;
 
 
     @Override
     public void onBackPressed() {
+    	LOG.info("onBackPressed.");
     	finish();
     }
+
 	@Override
 	protected void onPause() {
 		LOG.info("Pausing.");
@@ -116,10 +119,29 @@ public class PINManagementActivity extends FragmentActivity {
 			if(actController != null) {
 				actController.cancelAuthentication();
 			}
-
         });
 		showUserInfoFragmentWithMessage("Please wait...", false, true);
     }
+
+	@Override
+	protected void onDestroy() {
+		LOG.info("Destroying");
+		isDestroying = true;
+		cleanUpActivation();
+		super.onDestroy();
+	}
+
+	private void cleanUpActivation() {
+		if (actController != null) {
+			LOG.info("Cleaning up pin management resources");
+			actController.cancelAuthentication();
+			pinMgmtFactory.destroy(actController);
+			actController = null;
+		} else {
+			LOG.info("No pin management resources to clean up!");
+		}
+	}
+
 	@Override
 	protected void onStart() {
 		LOG.info("Starting.");
@@ -168,7 +190,7 @@ public class PINManagementActivity extends FragmentActivity {
 	}
 
     private void showUserInfoFragmentWithMessage(String msg, boolean showConfirmBtn, boolean showSpinner){
-		if (findViewById(R.id.fragment) != null) {
+		if (findViewById(R.id.fragment) != null && !isDestroying) {
 			UserInfoFragment fragment = new UserInfoFragment();
 			fragment.setWaitMessage(msg);
 			fragment.setConfirmBtn(showConfirmBtn);
