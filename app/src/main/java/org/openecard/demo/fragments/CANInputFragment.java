@@ -59,8 +59,10 @@ public class CANInputFragment extends Fragment {
                     buttonContinue.setEnabled(false);
                     canText.setEnabled(false);
                     canText.setFocusable(false);
-                    op.enter(can);
+
                     getFragmentManager().beginTransaction().replace(R.id.fragment, new UserInfoFragment()).addToBackStack(null).commitAllowingStateLoss();
+
+                    op.enter(can);
                 }
             }
         });

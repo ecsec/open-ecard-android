@@ -130,6 +130,8 @@ public class PINChangeFragment extends Fragment {
                 logLabel.setText(PERFORM_PIN_CHANGE);
                 logLabel.setVisibility(View.VISIBLE);
 
+                getFragmentManager().beginTransaction().replace(R.id.fragment, new UserInfoFragment()).addToBackStack(null).commitAllowingStateLoss();
+
                 if (needCan) {
                     confirmPinCanNewPinOperation.enter(
                             pinText.getText().toString(),
@@ -138,8 +140,6 @@ public class PINChangeFragment extends Fragment {
                 } else {
                     op.enter(pinText.getText().toString(), newPIN);
                 }
-
-                getFragmentManager().beginTransaction().replace(R.id.fragment, new UserInfoFragment()).addToBackStack(null).commitAllowingStateLoss();
             }
         });
 

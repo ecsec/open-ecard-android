@@ -79,7 +79,7 @@ public class PINInputFragment extends Fragment {
 		final TextView titleLabel = view.findViewById(R.id.pinInputTxtView);
 		final TextView attemptsField = view.findViewById(R.id.tf_attempts);
 		attemptsField.setText(this.attempt >= 0 ? this.attempt+"" : "unknown");
-		
+
 		final EditText pinText = view.findViewById(R.id.pinInput);
 		pinText.setEnabled(true);
 		pinText.setFocusable(true);
@@ -149,12 +149,13 @@ public class PINInputFragment extends Fragment {
 				canText.setFocusable(false);
 				logLabel.setText(PERFORM_PIN_INPUT);
 
+				getFragmentManager().beginTransaction().replace(R.id.fragment, new UserInfoFragment()).addToBackStack(null).commitAllowingStateLoss();
+
 				if(!needCan){
 					confirmPasswordOperation.enter(pin);
 				}else{
 					confirmTwoPasswordsOperation.enter(pin, can);
 				}
-				getFragmentManager().beginTransaction().replace(R.id.fragment, new UserInfoFragment()).addToBackStack(null).commitAllowingStateLoss();
 			}
 		});
 

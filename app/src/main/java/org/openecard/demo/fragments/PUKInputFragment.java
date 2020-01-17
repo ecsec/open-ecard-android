@@ -81,8 +81,9 @@ public class PUKInputFragment extends Fragment {
 				pukText.setEnabled(false);
 				pukText.setFocusable(false);
 
-				op.enter(puk);
 				getFragmentManager().beginTransaction().replace(R.id.fragment, new UserInfoFragment()).addToBackStack(null).commitAllowingStateLoss();
+
+				op.enter(puk);
 			}
 		});
 
