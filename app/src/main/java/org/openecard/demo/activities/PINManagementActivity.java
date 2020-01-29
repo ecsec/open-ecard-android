@@ -48,6 +48,7 @@ import org.openecard.mobile.activation.PinManagementControllerFactory;
 import org.openecard.mobile.activation.PinManagementInteraction;
 import org.openecard.mobile.activation.ServiceErrorResponse;
 import org.openecard.mobile.activation.StartServiceHandler;
+import org.openecard.mobile.activation.StopServiceHandler;
 import org.openecard.mobile.ex.ApduExtLengthNotSupported;
 import org.openecard.mobile.ex.NFCTagNotSupported;
 import org.openecard.mobile.ex.NfcDisabled;
@@ -136,7 +137,20 @@ public class PINManagementActivity extends FragmentActivity {
 			LOG.info("Cleaning up pin management resources");
 			actController.cancelAuthentication();
 			pinMgmtFactory.destroy(actController);
+			this.context.stop(new StopServiceHandler() {
+				@Override
+				public void onSuccess() {
+					LOG.debug("stop::onSuccess");
+				}
+
+				@Override
+				public void onFailure(ServiceErrorResponse serviceErrorResponse) {
+					LOG.error("stop::onFailure: {}", serviceErrorResponse);
+
+				}
+			});
 			actController = null;
+			this.context = null;
 		} else {
 			LOG.info("No pin management resources to clean up!");
 		}
@@ -251,6 +265,17 @@ public class PINManagementActivity extends FragmentActivity {
 			PINChangeFragment fragment = new PINChangeFragment();
 			fragment.setConfirmPasswordOperation(confirmOldSetNewPasswordOperation);
 			fragment.setAttempt(i);
+			// show PINInputFragment
+			getSupportFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
+		}
+
+		// @Override
+		public void onPinChangeable(ConfirmOldSetNewPasswordOperation confirmOldSetNewPasswordOperation) {
+			LOG.debug("onPinChangeable");
+
+			PINChangeFragment fragment = new PINChangeFragment();
+			fragment.setConfirmPasswordOperation(confirmOldSetNewPasswordOperation);
+			fragment.setAttempt("??");
 			// show PINInputFragment
 			getSupportFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 		}

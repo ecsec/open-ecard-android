@@ -51,7 +51,7 @@ public class PINChangeFragment extends Fragment {
     private EditText newPin;
     private EditText canText;
     private EditText newPinConfirm;
-    private int attempt;
+    private String attempt = "";
     private ConfirmOldSetNewPasswordOperation op;
     private ConfirmPinCanNewPinOperation confirmPinCanNewPinOperation;
 
@@ -74,7 +74,7 @@ public class PINChangeFragment extends Fragment {
         buttonContinue.setEnabled(false);
 
         TextView tv_attempts = view.findViewById(R.id.txtView_attempt);
-        tv_attempts.append(String.valueOf(attempt));
+        tv_attempts.append(attempt);
 
         pinText = view.findViewById(R.id.pinInput);
         canText = view.findViewById(R.id.canInput);
@@ -157,6 +157,10 @@ public class PINChangeFragment extends Fragment {
     }
 
     public void setAttempt(int i) {
+        this.attempt = String.valueOf(i);
+    }
+
+    public void setAttempt(String i) {
         this.attempt = i;
     }
 
