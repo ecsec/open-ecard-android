@@ -152,9 +152,9 @@ public class PINInputFragment extends Fragment {
 				getFragmentManager().beginTransaction().replace(R.id.fragment, new UserInfoFragment()).addToBackStack(null).commitAllowingStateLoss();
 
 				if(!needCan){
-					confirmPasswordOperation.enter(pin);
+					confirmPasswordOperation.confirmPassword(pin);
 				}else{
-					confirmTwoPasswordsOperation.enter(pin, can);
+					confirmTwoPasswordsOperation.confirmPassword(pin, can);
 				}
 			}
 		});

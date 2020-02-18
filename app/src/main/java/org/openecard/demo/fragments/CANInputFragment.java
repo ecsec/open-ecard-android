@@ -62,7 +62,7 @@ public class CANInputFragment extends Fragment {
 
                     getFragmentManager().beginTransaction().replace(R.id.fragment, new UserInfoFragment()).addToBackStack(null).commitAllowingStateLoss();
 
-                    op.enter(can);
+                    op.confirmPassword(can);
                 }
             }
         });

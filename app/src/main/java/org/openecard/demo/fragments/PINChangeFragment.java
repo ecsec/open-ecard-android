@@ -133,12 +133,12 @@ public class PINChangeFragment extends Fragment {
                 getFragmentManager().beginTransaction().replace(R.id.fragment, new UserInfoFragment()).addToBackStack(null).commitAllowingStateLoss();
 
                 if (needCan) {
-                    confirmPinCanNewPinOperation.enter(
+                    confirmPinCanNewPinOperation.confirmChangePassword(
                             pinText.getText().toString(),
                             canText.getText().toString(),
                             newPIN);
                 } else {
-                    op.enter(pinText.getText().toString(), newPIN);
+                    op.confirmPassword(pinText.getText().toString(), newPIN);
                 }
             }
         });

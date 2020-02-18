@@ -241,7 +241,7 @@ public class EACActivity extends FragmentActivity {
 		this.oe = OpeneCard.createInstance();
 		this.context = oe.context(this);
 		try {
-			this.context.start(new StartServiceHandler() {
+			this.context.initializeContext(new StartServiceHandler() {
 				@Override
 				public void onSuccess(ActivationSource activationSource) {
 					eacFactory = activationSource.eacFactory();
@@ -286,9 +286,9 @@ public class EACActivity extends FragmentActivity {
 	public void stopCancelOeC(){
 		if (context != null) {
 			if (actController != null) {
-				actController.cancelAuthentication();
+				actController.cancelOngoingAuthentication();
 			}
-			context.stop(new StopServiceHandler() {
+			context.terminateContext(new StopServiceHandler() {
 				@Override
 				public void onSuccess() {
 					LOG.debug("OpenECard framework stopped successfully");
@@ -298,7 +298,7 @@ public class EACActivity extends FragmentActivity {
 				public void onFailure(ServiceErrorResponse serviceErrorResponse) {
 					LOG.debug("OpenECard framework stopped with error: {}", serviceErrorResponse);
 					if (actController != null) {
-						actController.cancelAuthentication();
+						actController.cancelOngoingAuthentication();
 					}
 					//		showUserInfoFragmentWithMessage(serviceErrorResponse.getMessage(), true, false);
 				}
@@ -333,7 +333,7 @@ public class EACActivity extends FragmentActivity {
 			showUserInfoFragmentWithMessage("Cancelling authentication...", false, true);
 			showFailureFragment("The User cancelled the authentication procedure, please wait for the process to end.");
 			if(actController != null) {
-				actController.cancelAuthentication();
+				actController.cancelOngoingAuthentication();
 			}
 
 		});

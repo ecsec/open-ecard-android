@@ -118,7 +118,8 @@ public class PINManagementActivity extends FragmentActivity {
 			showUserInfoFragmentWithMessage("Cancelling authentication...", false, true);
 			showFailureFragment("The User cancelled the authentication procedure, please wait for the process to end.");
 			if(actController != null) {
-				actController.cancelAuthentication();
+				actController.cancelOngoingAuthentication();
+
 			}
         });
 		showUserInfoFragmentWithMessage("Please wait...", false, true);
@@ -135,9 +136,9 @@ public class PINManagementActivity extends FragmentActivity {
 	private void cleanUpActivation() {
 		if (actController != null) {
 			LOG.info("Cleaning up pin management resources");
-			actController.cancelAuthentication();
+			actController.cancelOngoingAuthentication();
 			pinMgmtFactory.destroy(actController);
-			this.context.stop(new StopServiceHandler() {
+			this.context.terminateContext(new StopServiceHandler() {
 				@Override
 				public void onSuccess() {
 					LOG.debug("stop::onSuccess");
@@ -162,7 +163,7 @@ public class PINManagementActivity extends FragmentActivity {
 		this.oe = OpeneCard.createInstance();
 		this.context = oe.context(this);
 		try {
-			this.context.start(new StartServiceHandler() {
+			this.context.initializeContext(new StartServiceHandler() {
 				@Override
 				public void onSuccess(ActivationSource activationSource) {
 					LOG.debug("onSuccess");
@@ -260,7 +261,7 @@ public class PINManagementActivity extends FragmentActivity {
 
 		@Override
 		public void onPinChangeable(int i, ConfirmOldSetNewPasswordOperation confirmOldSetNewPasswordOperation) {
-			LOG.debug("onPinChangeable, count: {}", i);
+			LOG.debug("UI: onPinChangeable, count: {}", i);
 
 			PINChangeFragment fragment = new PINChangeFragment();
 			fragment.setConfirmPasswordOperation(confirmOldSetNewPasswordOperation);
@@ -271,7 +272,7 @@ public class PINManagementActivity extends FragmentActivity {
 
 		// @Override
 		public void onPinChangeable(ConfirmOldSetNewPasswordOperation confirmOldSetNewPasswordOperation) {
-			LOG.debug("onPinChangeable");
+			LOG.debug("UI: onPinChangeable");
 
 			PINChangeFragment fragment = new PINChangeFragment();
 			fragment.setConfirmPasswordOperation(confirmOldSetNewPasswordOperation);
@@ -282,7 +283,7 @@ public class PINManagementActivity extends FragmentActivity {
 
 		@Override
 		public void onPinCanNewPinRequired(ConfirmPinCanNewPinOperation confirmPinCanNewPinOperation) {
-			LOG.debug("eacInteractionHandler::onPinCanNewPinRequired");
+			LOG.debug("UI: eacInteractionHandler::onPinCanNewPinRequired");
 
 			PINChangeFragment fragment = new PINChangeFragment();
 			fragment.setNeedCan(true);
@@ -293,7 +294,7 @@ public class PINManagementActivity extends FragmentActivity {
 
 		@Override
 		public void onPinBlocked(ConfirmPasswordOperation confirmPasswordOperation) {
-			LOG.debug("onPinBlocked");
+			LOG.debug("UI: onPinBlocked");
 			PUKInputFragment fragment = new PUKInputFragment();
 			fragment.setConfirmPasswordOperation(confirmPasswordOperation);
 			// show PINInputFragment
@@ -302,7 +303,7 @@ public class PINManagementActivity extends FragmentActivity {
 
 		@Override
 		public void requestCardInsertion() {
-			LOG.debug("requestCardInsertion");
+			LOG.debug("UI: requestCardInsertion");
 			LOG.debug("eacInteractionHandler::requestCardInsertion");
 			runOnUiThread(() -> {
 				showUserInfoFragmentWithMessage("Please provide card",false, false);
@@ -315,13 +316,13 @@ public class PINManagementActivity extends FragmentActivity {
 		@Override
 		public void requestCardInsertion(NFCOverlayMessageHandler nfcOverlayMessageHandler) {
 			//this is for ios and should not be called
-			LOG.debug("requestCardInsertion");
+			LOG.debug("UI: requestCardInsertion");
 
 		}
 
 		@Override
 		public void onCardRecognized() {
-			LOG.info("Card inserted.");
+			LOG.info("UI: Card inserted.");
 			runOnUiThread(() -> {
 				showUserInfoFragmentWithMessage("Please don't move device or card!",false, true);
 			});
@@ -329,16 +330,16 @@ public class PINManagementActivity extends FragmentActivity {
 
 		@Override
 		public void onCardRemoved() {
-			LOG.debug("onCardRemoved");
+			LOG.debug("UI: onCardRemoved");
 		}
 		@Override
-		public void onCardInteractionComplete() { LOG.debug("onCardInteractionComplete"); }
+		public void onCardInteractionComplete() { LOG.debug("UI: onCardInteractionComplete"); }
 		@Override
 		public void onCardDeactivated(){
-			LOG.debug("onCardDeactivated");
+			LOG.debug("UI: onCardDeactivated");
 		}
 		@Override
-		public void onCardPukBlocked() { LOG.debug("onCardPUKBlocked");	}
+		public void onCardPukBlocked() { LOG.debug("UI: onCardPUKBlocked");	}
 	}
 
 }
