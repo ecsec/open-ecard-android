@@ -38,7 +38,7 @@ repositories {
     }
 }
 
-def OecVersion = "2.0.7"
+def OecVersion = "2.0.8-SNAPSHOT"
 
 dependencies {
     androidTestImplementation('androidx.test.espresso:espresso-core:3.2.0', {
@@ -51,12 +51,10 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
 
     // the actual Open eCard library
-    implementation (group: 'org.openecard.clients', name: 'android-lib', version: "${OecVersion}") {
-        transitive = true
-    }
-    // set transitive to false and include these dependencies explicitly, or leave it to the oec artifact to pull them in
-//    implementation 'xerces:xercesImpl:2.12.0'
-//    implementation 'org.slf4j:slf4j-api:1.7.25'
+    implementation (group: 'org.openecard.clients', name: 'android-lib', version: "${OecVersion}")
+    // these dependencies are missing in the android-lib package, so it does not conflict in case the app already contains these
+    implementation 'xerces:xercesImpl:2.12.0'
+    implementation 'org.slf4j:slf4j-api:1.7.26'
 
     // logging library, use whatever you like to output the slf4j log statements
     implementation 'com.github.tony19:logback-android:1.3.0-2'
