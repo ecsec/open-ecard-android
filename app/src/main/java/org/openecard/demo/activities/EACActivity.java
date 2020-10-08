@@ -34,6 +34,7 @@ import org.openecard.android.activation.AndroidContextManager;
 import org.openecard.android.activation.OpeneCard;
 import org.openecard.android.utils.NfcIntentHelper;
 import org.openecard.demo.R;
+import org.openecard.demo.fragments.CANInputFragment;
 import org.openecard.demo.fragments.FailureFragment;
 import org.openecard.demo.fragments.PINInputFragment;
 import org.openecard.demo.fragments.ServerDataFragment;
@@ -217,6 +218,9 @@ public class EACActivity extends FragmentActivity {
 		@Override
 		public void onCanRequest(ConfirmPasswordOperation confirmPasswordOperation) {
 			LOG.debug("eacInteractionHandler::onCanRequest");
+			CANInputFragment fragment = new CANInputFragment();
+			fragment.setConfirmPasswordOperation(confirmPasswordOperation);
+			getSupportFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commitAllowingStateLoss();
 		}
 		@Override
 		public void onCardInteractionComplete() {
