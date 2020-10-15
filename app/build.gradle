@@ -48,7 +48,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.2'
 
     // the actual Open eCard library
-    implementation (group: 'org.openecard.clients', name: 'android-lib', version: "${OecVersion}")
+    implementation "org.openecard.clients:android-lib:${OecVersion}"
     // these dependencies are missing in the android-lib package, so it does not conflict in case the app already contains these
     implementation 'xerces:xercesImpl:2.12.0'
     implementation 'org.slf4j:slf4j-api:1.7.26'
