@@ -12,9 +12,6 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
-    packagingOptions {
-       merge 'cif-repo/repo-config.properties'
-    }
     buildTypes {
         release {
             //shrinkResources true
