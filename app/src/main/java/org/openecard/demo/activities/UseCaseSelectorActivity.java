@@ -50,6 +50,9 @@ public class UseCaseSelectorActivity extends FragmentActivity {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UseCaseSelectorActivity.class);
 
+	//can
+	//private static final String DIRECT_ACTIVATION_URL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_can&redirect=true";
+	//eac
 	private static final String DIRECT_ACTIVATION_URL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_20&redirect=true";
 	private static final String TEST_SERVICE_URL = "https://eid.mtg.de/eid-server-demo-app/index.html";
 
