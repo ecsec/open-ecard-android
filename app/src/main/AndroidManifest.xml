@@ -13,13 +13,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".activities.EACActivity"
-            android:clearTaskOnLaunch="true"
-            android:configChanges="orientation|screenSize"></activity>
-        <activity
+            android:configChanges="orientation|screenSize"
             android:name=".activities.UseCaseSelectorActivity"
             android:clearTaskOnLaunch="true"
-            android:configChanges="orientation|screenSize">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
