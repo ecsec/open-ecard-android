@@ -25,19 +25,17 @@ package org.openecard.demo.activities;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-
 import androidx.fragment.app.FragmentActivity;
-
-
 import org.openecard.demo.R;
 import org.openecard.demo.fragments.WebViewFragment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 
 /**
@@ -50,16 +48,19 @@ public class UseCaseSelectorActivity extends FragmentActivity {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UseCaseSelectorActivity.class);
 
-	//can
-	//private static final String DIRECT_ACTIVATION_URL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_can&redirect=true";
-	//eac
-	private static final String DIRECT_ACTIVATION_URL = "https://test.governikus-eid.de:443/Autent-DemoApplication/RequestServlet;?provider=demo_epa_20&redirect=true";
+	private static final String DIRECT_ACTIVATION_URL = "https://test.governikus-eid.de/Autent-DemoApplication/samlstationary";
 	private static final String TEST_SERVICE_URL = "https://eid.mtg.de/eid-server-demo-app/index.html";
 
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		//THIS IS BAD PRACTICE - this apps purpose is however showcasing the usage of the sdk and this makes things easier to read
+		//it is needed for extracting the tcTokenURL in the function below
+		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+		StrictMode.setThreadPolicy(policy);
+
 		setContentView(R.layout.activity_use_case_selector);
 
 		final AutoCompleteTextView testServerUrlInput = findViewById(R.id.testServiceURL);
@@ -99,12 +100,7 @@ public class UseCaseSelectorActivity extends FragmentActivity {
 		Button directEAC = findViewById(R.id.directEAC);
 		if(directEAC!= null){
 			directEAC.setOnClickListener(v->{
-				try {
-					String url = "http://localhost/eID-Client?tcTokenURL="+ URLEncoder.encode(directUrlInput.getText().toString(), "UTF-8");
-					performEACWithURL(url);
-				} catch (UnsupportedEncodingException e) {
-					e.printStackTrace();
-				}
+				performEACWithURL(directUrlInput.getText().toString());
 			});
 		}
 
@@ -119,13 +115,49 @@ public class UseCaseSelectorActivity extends FragmentActivity {
 		}
 
 	}
-	public void performEACWithURL(String url) {
-		LOG.debug("Activation URL: {}", url);
+
+	private String getTCTokenUrl(String direcUrl) {
+		try {
+			URL obj = new URL(direcUrl);
+			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+			con.setRequestMethod("POST");
+			con.setInstanceFollowRedirects(false);
+
+			// For POST only - START
+			con.setDoOutput(true);
+			OutputStream os = con.getOutputStream();
+			String postParams = "changeAllNatural=ALLOWED&requestedAttributesEidForm.documentType=ALLOWED&requestedAttributesEidForm.issuingState=ALLOWED&requestedAttributesEidForm.dateOfExpiry=ALLOWED&requestedAttributesEidForm.givenNames=ALLOWED&requestedAttributesEidForm.familyNames=ALLOWED&requestedAttributesEidForm.artisticName=ALLOWED&requestedAttributesEidForm.academicTitle=ALLOWED&requestedAttributesEidForm.dateOfBirth=ALLOWED&requestedAttributesEidForm.placeOfBirth=ALLOWED&requestedAttributesEidForm.nationality=ALLOWED&requestedAttributesEidForm.birthName=ALLOWED&requestedAttributesEidForm.placeOfResidence=ALLOWED&requestedAttributesEidForm.communityID=ALLOWED&requestedAttributesEidForm.residencePermitI=ALLOWED&requestedAttributesEidForm.restrictedId=ALLOWED&ageVerificationForm.ageToVerify=0&ageVerificationForm.ageVerification=PROHIBITED&placeVerificationForm.placeToVerify=02760401100000&placeVerificationForm.placeVerification=PROHIBITED&eidTypesForm.cardCertified=ALLOWED&eidTypesForm.seCertified=ALLOWED&eidTypesForm.seEndorsed=ALLOWED&eidTypesForm.hwKeyStore=ALLOWED&transactionInfo=&levelOfAssurance=BUND_HOCH";
+			os.write(postParams.getBytes());
+			os.flush();
+			os.close();
+			// For POST only - END
+
+			int responseCode = con.getResponseCode();
+
+			if (responseCode > 300 && responseCode < 400) {
+				String locUrl = con.getHeaderField("Location");
+				if (locUrl != null) {
+					return locUrl;
+				} else {
+					throw new RuntimeException("No location received from server.");
+				}
+			} else {
+				throw new RuntimeException("Wrong Status code received from server.");
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException(("Failed to fetch localhost link"));
+		}
+	}
+
+	public void performEACWithURL(String directUrl) {
+		LOG.debug("Activation URL: {}", directUrl);
+		String tcTokenUrl = getTCTokenUrl(directUrl);
 
 		Intent i = new Intent(Intent.ACTION_VIEW);
 		i.setClass(this, EACActivity.class);
 		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		i.setData(Uri.parse(url));
+		i.setData(Uri.parse(tcTokenUrl));
 
 		startActivity(i);
 	}
