@@ -41,7 +41,13 @@
         <activity
             android:name=".activities.PINManagementActivity"
             android:clearTaskOnLaunch="true"
-            android:configChanges="orientation|screenSize"></activity>
+            android:configChanges="orientation|screenSize"
+        ></activity>
+        <activity
+            android:name=".activities.EACActivity"
+            android:clearTaskOnLaunch="true"
+            android:configChanges="orientation|screenSize"
+            ></activity>
     </application>
 
 </manifest>
