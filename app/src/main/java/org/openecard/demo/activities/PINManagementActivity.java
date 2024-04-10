@@ -119,7 +119,6 @@ public class PINManagementActivity extends FragmentActivity {
 			showFailureFragment("The User cancelled the authentication procedure, please wait for the process to end.");
 			if(actController != null) {
 				actController.cancelOngoingAuthentication();
-
 			}
         });
 		showUserInfoFragmentWithMessage("Please wait...", false, true);
@@ -162,7 +161,6 @@ public class PINManagementActivity extends FragmentActivity {
 		LOG.info("Starting.");
 		this.oe = OpeneCard.createInstance();
 		this.context = oe.context(this);
-		try {
 			this.context.initializeContext(new StartServiceHandler() {
 				@Override
 				public void onSuccess(ActivationSource activationSource) {
@@ -174,17 +172,13 @@ public class PINManagementActivity extends FragmentActivity {
 				@Override
 				public void onFailure(ServiceErrorResponse serviceErrorResponse) {
 					LOG.error("Could not start OeC-Framework: {}", serviceErrorResponse);
+					showUserInfoFragmentWithMessage("Aborting...", false, true);
+					showFailureFragment("Initialization of Open Ecard Library failed: " + serviceErrorResponse);
+					if(actController != null) {
+						actController.cancelOngoingAuthentication();
+					}
 				}
 			});
-		} catch (UnableToInitialize unableToInitialize) {
-			LOG.error("Exception during start: {}", unableToInitialize);
-		} catch (NfcUnavailable nfcUnavailable) {
-			LOG.error("Exception during start: {}", nfcUnavailable);
-		} catch (NfcDisabled nfcDisabled) {
-			LOG.error("Exception during start: {}", nfcDisabled);
-		} catch (ApduExtLengthNotSupported apduExtLengthNotSupported) {
-			LOG.error("Exception during start: {}", apduExtLengthNotSupported);
-		}
 
 		super.onStart();
 	}
