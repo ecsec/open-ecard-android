@@ -4,12 +4,18 @@ android {
     compileSdkVersion 32
     defaultConfig {
         applicationId "org.openecard.demo"
-        minSdkVersion 17
+        minSdkVersion 21
         targetSdkVersion 31
         versionCode 12
         versionName "1.0.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
+    }
+    packagingOptions {
+        exclude 'META-INF/AL2.0'
+        exclude 'META-INF/LGPL2.1'
+        exclude 'META-INF/LICENSE.md'
+        exclude 'META-INF/NOTICE.md'
     }
     buildTypes {
         release {
@@ -35,7 +41,7 @@ repositories {
     }
 }
 
-def OecVersion = "2.1.11"
+def OecVersion = "2.1.12-SNAPSHOT"
 
 
 dependencies {
@@ -43,8 +49,6 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     testImplementation 'junit:junit:4.12'
-
-
 
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.2.1'
