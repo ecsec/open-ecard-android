@@ -315,6 +315,11 @@ public class PINManagementActivity extends FragmentActivity {
 		}
 
 		@Override
+		public void onCardInserted() {
+			LOG.debug("eacInteractionHandler::onCardInserted");
+		}
+
+		@Override
 		public void onCardRecognized() {
 			LOG.info("UI: Card inserted.");
 			runOnUiThread(() -> {

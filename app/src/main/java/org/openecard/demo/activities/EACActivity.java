@@ -186,6 +186,10 @@ public class EACActivity extends FragmentActivity {
 			intentHelper.enableNFCDispatch();
 			hasTriggeredNfcDispatch = true;
 		}
+		@Override
+		public void onCardInserted() {
+			LOG.debug("eacInteractionHandler::onCardInserted");
+		}
 
 		@Override
 		public void onCardRecognized() {
@@ -226,6 +230,7 @@ public class EACActivity extends FragmentActivity {
 		public void onCardInteractionComplete() {
 			LOG.debug("eacInteractionHandler::onInteractionComplete");
 		}
+
 
 		@Override
 		public void onCardAuthenticationSuccessful() {

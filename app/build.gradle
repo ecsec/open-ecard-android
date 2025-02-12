@@ -41,7 +41,7 @@ repositories {
     }
 }
 
-def OecVersion = "2.3.1"
+def OecVersion = "2.3.10-SNAPSHOT"
 
 
 dependencies {
